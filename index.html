@@ -655,65 +655,72 @@ function parseResp(txt){
 // Kuncinya: gunakan fetch TANPA mode:'cors' (biarkan browser handle)
 let _cbSeq = 0;
 
+// ── GET: JSONP dulu (bypass CORS), fetch sebagai fallback ──
+
+function jsonpGet(url, action) {
+  return new Promise(function(res, rej) {
+    var seq = ++_cbSeq;
+    var name = 'GS_CB_' + seq;
+    var done = false;
+
+    var timer = setTimeout(function() {
+      if (done) return;
+      done = true;
+      try { delete window[name]; } catch(e) {}
+      var s = document.getElementById('_sc_' + seq);
+      if (s) s.remove();
+      rej(new Error('timeout'));
+    }, 12000);
+
+    window[name] = function(d) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      try { delete window[name]; } catch(e) {}
+      var s = document.getElementById('_sc_' + seq);
+      if (s) s.remove();
+      if (d && d.error) rej(new Error(d.error));
+      else { console.log('[GET]', action, 'OK via JSONP', d.data ? d.data.length : ''); res(d); }
+    };
+
+    var s = document.createElement('script');
+    s.id = '_sc_' + seq;
+    s.onerror = function() {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      try { delete window[name]; } catch(e) {}
+      s.remove();
+      rej(new Error('script error'));
+    };
+    s.src = url + '&callback=' + name;
+    document.head.appendChild(s);
+  });
+}
+
+async function fetchGet(url, action) {
+  const r = await fetch(url, {method:'GET', redirect:'follow'});
+  const txt = await r.text();
+  if (!txt || !txt.trim()) throw new Error('empty response');
+  const j = parseResp(txt);
+  if (j && j.error) throw new Error(j.error);
+  console.log('[GET]', action, 'OK via fetch', j.data ? j.data.length : '');
+  return j;
+}
+
 async function GET(action, data={}) {
   const url = GAS + '?' + new URLSearchParams({action, ...data});
-
-  // Coba fetch langsung — Apps Script v10 sudah return JSON proper
+  
+  // Jalankan JSONP dan fetch BERSAMAAN — pakai yang berhasil duluan
+  // JSONP bypass CORS, fetch untuk browser yang support
   try {
-    const r = await fetch(url, {
-      method: 'GET',
-      redirect: 'follow'
-    });
-    const txt = await r.text();
-    if (!txt || !txt.trim()) throw new Error('Empty');
-    const j = parseResp(txt);
-    if (j && j.error) throw new Error(j.error);
-    console.log('[GET]', action, 'OK via fetch', j.data ? j.data.length : '');
-    return j;
-  } catch(e1) {
-    console.warn('[GET] fetch gagal:', e1.message);
-    // Fallback: JSONP via script dengan nama STABIL (tidak pakai Date.now)
-    return new Promise((res, rej) => {
-      const seq = ++_cbSeq;
-      const name = 'GS_CB_' + seq; // nama stabil, mudah di-debug
-      const TIMEOUT = 15000;
-      let done = false;
-
-      const timer = setTimeout(() => {
-        if (done) return;
-        done = true;
-        try { delete window[name]; } catch(e) {}
-        const s = document.getElementById('_sc_' + seq);
-        if (s) s.remove();
-        rej(new Error('JSONP timeout'));
-      }, TIMEOUT);
-
-      // Definisikan callback GLOBAL sebelum inject script
-      window[name] = function(d) {
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
-        try { delete window[name]; } catch(e) {}
-        const s = document.getElementById('_sc_' + seq);
-        if (s) s.remove();
-        if (d && d.error) rej(new Error(d.error));
-        else { console.log('[GET]', action, 'OK via JSONP'); res(d); }
-      };
-
-      const s = document.createElement('script');
-      s.id = '_sc_' + seq;
-      s.onerror = () => {
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
-        try { delete window[name]; } catch(e) {}
-        s.remove();
-        rej(new Error('JSONP load error'));
-      };
-      // Tambahkan callback ke URL SETELAH window[name] sudah terdefinisi
-      s.src = url + '&callback=' + name;
-      document.head.appendChild(s);
-    });
+    const result = await Promise.any([
+      jsonpGet(url, action),
+      fetchGet(url, action)
+    ]);
+    return result;
+  } catch(e) {
+    throw new Error('GET ' + action + ' gagal: ' + e.message);
   }
 }
 
