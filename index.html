@@ -1493,13 +1493,17 @@ function resetManual(){
 function renderDash(){
   const list=todayList();
   const total=gurus.length;
-  const masukList=list.filter(a=>(a.tipe||'masuk')==='masuk');
-  const hadir=masukList.filter(a=>a.status==='hadir').length;
-  const tlt=masukList.filter(a=>a.status==='terlambat').length;
-  const izin=masukList.filter(a=>a.status==='izin').length;
-  const sakit=masukList.filter(a=>a.status==='sakit').length;
-  const alp=masukList.filter(a=>a.status==='alpha').length;
-  const blm=Math.max(0,total-masukList.length);
+  // Gabungkan masuk + tidak masuk untuk statistik kehadiran
+  const semua=list.filter(a=>{
+    const t=a.tipe||'masuk';
+    return t==='masuk'||t==='tidak masuk';
+  });
+  const hadir =semua.filter(a=>a.status==='hadir').length;
+  const tlt   =semua.filter(a=>a.status==='terlambat').length;
+  const izin  =semua.filter(a=>a.status==='izin').length;
+  const sakit =semua.filter(a=>a.status==='sakit').length;
+  const alp   =semua.filter(a=>a.status==='alpha').length;
+  const blm   =Math.max(0,total-semua.length);
 
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   sv('s-tot',total);sv('s-hdr',hadir+tlt);sv('s-tlt',tlt);
@@ -1705,34 +1709,48 @@ function setPeriod(p,btn){
 async function loadHarian(){
   const tgl=document.getElementById('r-tgl')?.value||today();
   let data=[];
-  if(tgl===today()){
-    // Hari ini: gabungkan lokal + Sheets
-    try{
-      const r=await GET('getAbsensi',{tanggal:tgl});
-      if(r.success && r.data){
-        const sheets=(r.data||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
-        const lokal=(absenDB[today()]||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
+
+  // Cek cache lokal dulu (termasuk tanggal lampau)
+  const cached=absenDB[tgl];
+  if(cached&&cached.length>0){
+    data=cached.map(a=>({...a,tipe:a.tipe||'masuk'}));
+    window._lastHarianData=data;
+    renderHarian(data,tgl);
+    // Tetap fetch dari Sheets di background untuk update
+  }
+
+  // Fetch dari Sheets
+  try{
+    setInfoBar('🔄 Mengambil data '+tgl+'...','info');
+    const r=await GET('getAbsensi',{tanggal:tgl});
+    if(r&&r.success){
+      const sheets=(r.data||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
+      if(tgl===today()){
+        // Hari ini: merge dengan lokal
+        const lokal=(absenDB[tgl]||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
         const ids=new Set(sheets.map(a=>a.id+'|'+a.tipe));
         const extra=lokal.filter(a=>!ids.has(a.id+'|'+a.tipe));
         data=[...sheets,...extra];
       } else {
-        data=todayList();
+        // Lampau: pakai Sheets, simpan ke cache
+        data=sheets;
       }
-    }catch(e){
-      data=todayList(); // fallback ke lokal
+      // Simpan ke cache
+      if(data.length>0){
+        absenDB[tgl]=data;
+        try{ls('ac_'+tgl,JSON.stringify(data));}catch(e){}
+      }
+    } else if(!cached||cached.length===0){
+      toast('Tidak ada data: '+(r&&r.error||''),'warn');
     }
-  } else {
-    // Tanggal lampau: ambil dari Sheets
-    try{
-      const r=await GET('getAbsensi',{tanggal:tgl});
-      if(r.success){
-        data=(r.data||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
-      } else {
-        toast('Gagal: '+r.error,'err');return;
-      }
-    }catch(e){toast('Gagal ambil data: '+e.message,'err');return;}
+    setInfoBar('','ok');
+  }catch(e){
+    if(!cached||cached.length===0){
+      toast('Gagal: '+e.message,'err');
+    }
+    setInfoBar('','ok');
   }
-  window._lastHarianData = data;
+  window._lastHarianData=data;
   renderHarian(data,tgl);
 }
 
