@@ -273,11 +273,12 @@ tbody tr:hover{background:var(--bg);}
   text-transform:uppercase;letter-spacing:.6px;font-weight:600;
 }
 .idc-qr-wrap{
-  width:72px;height:72px;border-radius:10px;
-  background:#0F172A;
+  width:88px;height:88px;border-radius:10px;
+  background:#fff;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 14px rgba(21,101,192,.3),0 0 0 3px #fff;
+  box-shadow:0 4px 14px rgba(21,101,192,.3),0 0 0 3px #1565C0;
   overflow:hidden;
+  padding:4px;
 }
 .idc-qr-wrap img,.idc-qr-wrap canvas{border-radius:4px;}
 .idc-year{display:none;}
@@ -2180,10 +2181,10 @@ function genQR(){
   // Ambil warna tema dari CSS variable
   new QRCode(document.getElementById('qrcode-out'),{
     text:'SDIT_QK_'+g.id+'_'+g.nama,
-    width:64,height:64,
-    colorDark:'#1565C0',
+    width:80,height:80,
+    colorDark:'#000000',
     colorLight:'#ffffff',
-    correctLevel:QRCode.CorrectLevel.H
+    correctLevel:QRCode.CorrectLevel.M
   });
 
   // Scroll ke ID card
@@ -2247,7 +2248,7 @@ function printQR(){
   w.document.write('.hr{height:1px;background:linear-gradient(90deg,transparent,rgba(255,107,53,.5),rgba(8,151,167,.4),transparent);margin-bottom:8px;width:100%;}');
   w.document.write('.qr-row{display:flex;flex-direction:column;align-items:center;gap:4px;}');
   w.document.write('.ql{font-size:6.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;text-align:center;}');
-  w.document.write('.qb{width:78px;height:78px;border-radius:9px;background:#0F172A;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(21,101,192,.2),0 0 0 2.5px #fff;overflow:hidden;}');
+  w.document.write('.qb{width:100px;height:100px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(21,101,192,.2),0 0 0 3px #1565C0;overflow:hidden;padding:4px;}');
   // Footer
   w.document.write('.footer{background:linear-gradient(90deg,#1565C0 0%,#0897A7 50%,#06B89A 100%);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;}');
   w.document.write('.ft{font-size:8px;font-weight:600;color:rgba(255,255,255,.85);text-transform:uppercase;letter-spacing:.6px;}');
@@ -2268,7 +2269,7 @@ function printQR(){
   w.document.write('<div class="hr"></div>');
   w.document.write('<div class="qr-row">');
   w.document.write('<div class="ql">Scan untuk absensi</div>');
-  w.document.write('<div class="qb"><img src="'+qrImg.src+'" width="70" height="70" style="border-radius:3px"></div>');
+  w.document.write('<div class="qb"><img src="'+qrImg.src+'" width="90" height="90" style="border-radius:3px"></div>');
   w.document.write('</div></div></div>');
   w.document.write('<div class="footer"><span class="ft">'+sNama+'</span><div class="fd"></div><span class="ft">Absensi Guru</span></div>');
   w.document.write('</div>');
@@ -2679,11 +2680,18 @@ async function exportExcel(type){
   const now=new Date();
   const wb=XLSX.utils.book_new();
 
-  // Warna header
-  const hdrFill={fgColor:{rgb:'1565C0'}};
-  const hdrFont={bold:true,color:{rgb:'FFFFFF'},sz:10};
-  const borderAll={top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
-  const centerAlign={horizontal:'center',vertical:'center',wrapText:true};
+  // Style helpers
+  function cellStyle(fill,font,border,align){
+    const s={};
+    if(fill)s.fill={patternType:'solid',fgColor:{rgb:fill}};
+    if(font)s.font=font;
+    if(border){const b={style:'thin',color:{rgb:'999999'}};s.border={top:b,bottom:b,left:b,right:b};}
+    if(align)s.alignment=align;
+    return s;
+  }
+  const PINK='FF00FF', CYAN='00FFFF', BLUE='1565C0', WHITE='FFFFFF';
+  const ctrBold={horizontal:'center',vertical:'center',wrapText:true};
+  const ctrNorm={horizontal:'center',vertical:'center'};
 
   if(type==='harian'){
     const tgl=document.getElementById('r-tgl')?.value||today();
@@ -2735,78 +2743,160 @@ async function exportExcel(type){
     const bln=document.getElementById('r-bln')?.value||String(now.getMonth()+1);
     const thn=document.getElementById('r-thn-b')?.value||String(now.getFullYear());
     const blnNm=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const blnStr=blnNm[parseInt(bln)];
+    const daysInMonth=new Date(parseInt(thn),parseInt(bln),0).getDate();
 
-    // Ambil semua data bulan ini dari Firebase
+    // Ambil data Firebase
     const prefix=thn+'-'+String(bln).padStart(2,'0');
     const snap=await db.ref('absensi').once('value');
     const all=snap.val()||{};
 
-    // Kumpulkan semua tanggal di bulan ini
-    const daysInMonth=new Date(parseInt(thn),parseInt(bln),0).getDate();
-    const tanggalList=[];
-    for(let d=1;d<=daysInMonth;d++)tanggalList.push(d);
-
-    // Map per guru per tanggal
+    // Map: guruId → { hari: { d: {status,masuk,pulang} } }
     const guruMap={};
+    gurus.forEach(g=>{
+      guruMap[g.id]={id:g.id,nama:g.nama,mapel:g.mapel,hari:{}};
+    });
     Object.entries(all).forEach(([tgl,entries])=>{
       if(!tgl.startsWith(prefix))return;
       const d=parseInt(tgl.split('-')[2]);
       Object.values(entries).forEach(a=>{
-        if(a.tipe==='pulang')return; // skip pulang untuk rekap bulanan
-        if(!guruMap[a.id])guruMap[a.id]={nama:a.nama,mapel:a.mapel,hari:{}};
-        guruMap[a.id].hari[d]={status:a.status,masuk:a.tipe==='masuk'?a.waktu:'',pulang:'',ket:a.ket||''};
+        if(!guruMap[a.id])guruMap[a.id]={id:a.id,nama:a.nama,mapel:a.mapel,hari:{}};
+        const gd=guruMap[a.id];
+        if(!gd.hari[d])gd.hari[d]={status:'',masuk:'',pulang:''};
+        if(a.tipe==='masuk'||a.tipe==='tidak masuk'){
+          gd.hari[d].status={hadir:'H',terlambat:'T',izin:'I',sakit:'S',alpha:'A'}[a.status]||'-';
+          gd.hari[d].masuk=a.tipe==='masuk'?a.waktu:'';
+        }
+        if(a.tipe==='pulang') gd.hari[d].pulang=a.waktu;
       });
-      // Tambah jam pulang
-      Object.values(entries).forEach(a=>{
-        if(a.tipe!=='pulang')return;
-        if(guruMap[a.id]&&guruMap[a.id].hari[d]){
-          guruMap[a.id].hari[d].pulang=a.waktu;
+    });
+
+    // Bangun array data
+    // Baris 1: [Nama Guru, bulan, MEI, MEI, MEI, ...]  → merge B1:end dengan nama bulan
+    // Baris 2: [         , tanggal, 1, 2, 3, ...]
+    // Per guru: 4 baris (status, jam masuk, jam pulang, TTD)
+    //   col A = nama guru (merge 4 baris), col B = label, col C+ = data per tanggal
+
+    const ws_data = [];
+    const merges = [];
+    const cellStyles = {}; // key: "R,C" → style
+
+    // Helper set cell
+    function setCell(r,c,v,style){
+      while(ws_data.length<=r)ws_data.push([]);
+      while(ws_data[r].length<=c)ws_data[r].push('');
+      ws_data[r][c]=v;
+      if(style)cellStyles[r+','+c]=style;
+    }
+
+    // ── HEADER BARIS 1 ──
+    // A1: "Nama Guru"
+    setCell(0,0,'Nama Guru',{fill:{patternType:'solid',fgColor:{rgb:PINK}},font:{bold:true,sz:10},alignment:ctrBold,border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}});
+    // B1: "bulan"
+    setCell(0,1,'bulan',{fill:{patternType:'solid',fgColor:{rgb:CYAN}},font:{bold:true,sz:10},alignment:ctrBold,border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}});
+    // C1: nama bulan (merge dari C1 sampai akhir)
+    const totalCols=2+daysInMonth; // A,B + 1 per hari
+    setCell(0,2,blnStr.toUpperCase(),{fill:{patternType:'solid',fgColor:{rgb:CYAN}},font:{bold:true,sz:11},alignment:ctrBold,border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}});
+    merges.push({s:{r:0,c:2},e:{r:0,c:totalCols-1}});
+    // Merge A1:A2
+    merges.push({s:{r:0,c:0},e:{r:1,c:0}});
+
+    // ── HEADER BARIS 2 ──
+    setCell(1,1,'tanggal',{fill:{patternType:'solid',fgColor:{rgb:BLUE}},font:{bold:true,color:{rgb:WHITE},sz:10},alignment:ctrBold,border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}});
+    for(let d=1;d<=daysInMonth;d++){
+      setCell(1,1+d,String(d),{fill:{patternType:'solid',fgColor:{rgb:BLUE}},font:{bold:true,color:{rgb:WHITE},sz:9},alignment:ctrBold,border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}});
+    }
+
+    // ── DATA PER GURU ──
+    const guruList=Object.values(guruMap).filter(g=>g.nama);
+    const labels=['status','jam masuk','jam pulang','TTD'];
+    const labelFill=['FFB3B3','FFD9B3','B3FFD9','E0E0E0'];
+
+    guruList.forEach((g,gi)=>{
+      const baseRow=2+gi*4;
+      // Kolom A: nama guru (merge 4 baris)
+      setCell(baseRow,0,g.nama,{
+        fill:{patternType:'solid',fgColor:{rgb:PINK}},
+        font:{bold:true,sz:9},
+        alignment:{horizontal:'center',vertical:'center',wrapText:true},
+        border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}
+      });
+      merges.push({s:{r:baseRow,c:0},e:{r:baseRow+3,c:0}});
+
+      // 4 baris: status, jam masuk, jam pulang, TTD
+      labels.forEach((lbl,li)=>{
+        const row=baseRow+li;
+        // Kolom B: label
+        setCell(row,1,lbl,{
+          fill:{patternType:'solid',fgColor:{rgb:labelFill[li]}},
+          font:{sz:8},
+          alignment:{horizontal:'left',vertical:'center'},
+          border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}
+        });
+        // Kolom C+: data per tanggal
+        for(let d=1;d<=daysInMonth;d++){
+          const hd=g.hari[d];
+          let val='';
+          if(hd){
+            if(li===0)val=hd.status||'';
+            else if(li===1)val=hd.masuk||'';
+            else if(li===2)val=hd.pulang||'';
+            else val=''; // TTD kosong
+          }
+          setCell(row,1+d,val,{
+            font:{sz:8},
+            alignment:ctrNorm,
+            border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}
+          });
         }
       });
     });
 
-    // Buat spreadsheet format: nama|bulan|tanggal 1..30|dst
-    // Setiap tanggal punya 4 baris: status, jam masuk, jam pulang, TTD
-    const rows=[];
-    rows.push([sNama]);
-    rows.push(['LAPORAN ABSENSI BULANAN - '+blnNm[parseInt(bln)]+' '+thn]);
-    rows.push([]);
+    // Buat worksheet
+    const ws=XLSX.utils.aoa_to_sheet(ws_data);
+    ws['!merges']=merges;
 
-    // Header row 1: Nama Guru | Bulan | 1 | 1 | 1 | 1 | 2 | 2 | ...
-    const h1=['Nama Guru',blnNm[parseInt(bln)]];
-    tanggalList.forEach(d=>{h1.push(d,'','','');});
-    rows.push(h1);
-
-    // Header row 2: | Tanggal | status | jam masuk | jam pulang | TTD | ...
-    const h2=['','Tanggal'];
-    tanggalList.forEach(()=>{h2.push('Status','Jam Masuk','Jam Pulang','TTD');});
-    rows.push(h2);
-
-    // Data per guru
-    const guruList=gurus.length>0?gurus:Object.values(guruMap);
-    guruList.forEach((g,idx)=>{
-      const gd=guruMap[g.id]||{hari:{}};
-      const row=[g.nama||gd.nama||'',blnNm[parseInt(bln)]];
-      tanggalList.forEach(d=>{
-        const h=gd.hari[d];
-        const stLabel=h?({hadir:'H',terlambat:'T',izin:'I',sakit:'S',alpha:'A'}[h.status]||'-'):'-';
-        row.push(stLabel,h?h.masuk||'-':'-',h?h.pulang||'-':'-','');
-      });
-      rows.push(row);
+    // Terapkan style
+    Object.entries(cellStyles).forEach(([key,style])=>{
+      const [r,c]=key.split(',').map(Number);
+      const addr=XLSX.utils.encode_cell({r,c});
+      if(!ws[addr])ws[addr]={t:'s',v:''};
+      ws[addr].s=style;
     });
 
-    rows.push([]);
-    rows.push(['Keterangan: H=Hadir, T=Terlambat, I=Izin, S=Sakit, A=Alpha']);
-
-    const ws=XLSX.utils.aoa_to_sheet(rows);
-    const colW=[{wch:28},{wch:10}];
-    tanggalList.forEach(()=>{colW.push({wch:6},{wch:8},{wch:8},{wch:6});});
+    // Lebar kolom: A lebar, B medium, C+ sempit
+    const colW=[{wch:24},{wch:11}];
+    for(let d=0;d<daysInMonth;d++)colW.push({wch:6});
     ws['!cols']=colW;
-    XLSX.utils.book_append_sheet(wb,ws,blnNm[parseInt(bln)]+' '+thn);
-    XLSX.writeFile(wb,'Absensi_Bulanan_'+blnNm[parseInt(bln)]+'_'+thn+'.xlsx');
+
+    // Tinggi baris header
+    ws['!rows']=[{hpt:18},{hpt:18}];
+    guruList.forEach(()=>{
+      ws['!rows'].push({hpt:16},{hpt:16},{hpt:16},{hpt:20});
+    });
+
+    XLSX.utils.book_append_sheet(wb,ws,blnStr+' '+thn);
+
+    // Sheet keterangan
+    const wsKet=XLSX.utils.aoa_to_sheet([
+      [sNama],
+      ['Keterangan Status Kehadiran'],
+      [],
+      ['Kode','Keterangan'],
+      ['H','Hadir Tepat Waktu'],
+      ['T','Terlambat'],
+      ['I','Izin'],
+      ['S','Sakit'],
+      ['A','Alpha (Tidak Hadir Tanpa Keterangan)'],
+      ['-','Belum Ada Data'],
+    ]);
+    wsKet['!cols']=[{wch:8},{wch:35}];
+    XLSX.utils.book_append_sheet(wb,wsKet,'Keterangan');
+
+    XLSX.writeFile(wb,'Absensi_Bulanan_'+blnStr+'_'+thn+'.xlsx');
     toast('📊 Excel bulanan diunduh','ok');
 
-  } else if(type==='semester'){
+    } else if(type==='semester'){
     const sem=document.getElementById('r-sem')?.value||'1';
     const thn=document.getElementById('r-thn-s')?.value||String(now.getFullYear());
     const blnList=sem==='1'?[7,8,9,10,11,12]:[1,2,3,4,5,6];
