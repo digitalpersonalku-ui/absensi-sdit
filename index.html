@@ -166,23 +166,102 @@ tbody tr:hover{background:var(--bg);}
 .gcsb{font-size:10px;color:var(--tx2);margin-bottom:7px;}
 
 /* ── QR DISP ── */
-/* ID CARD */
-.qrdisp{display:flex;flex-direction:column;align-items:center;padding:0;background:transparent;border-radius:0;margin-top:12px;}
-.idcard{width:100%;max-width:340px;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.15);position:relative;}
-.idc-top{background:linear-gradient(135deg,var(--or),#FF8C00);padding:20px 20px 60px;text-align:center;position:relative;}
-.idc-top::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:40px;background:var(--card);border-radius:50% 50% 0 0/40px 40px 0 0;}
-.idc-school{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
-.idc-title{font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.5px;}
-.idc-logo-school{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 8px;overflow:hidden;}
-.idc-body{background:var(--card);padding:0 20px 20px;text-align:center;}
-.idc-foto-wrap{margin-top:-40px;margin-bottom:10px;position:relative;z-index:2;}
-.idc-foto{width:80px;height:80px;border-radius:50%;border:4px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.15);overflow:hidden;margin:0 auto;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;}
+/* ── ID CARD PROFESSIONAL ── */
+.qrdisp{display:flex;flex-direction:column;align-items:center;padding:0;background:transparent;margin-top:12px;}
+.idcard{
+  width:100%;max-width:340px;
+  border-radius:16px;overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,.2);
+  position:relative;
+  background:linear-gradient(145deg,#1a237e 0%,#283593 30%,#4a148c 60%,#6a1b9a 100%);
+}
+/* Pattern dots overlay */
+.idcard::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.08) 1px,transparent 1px);
+  background-size:18px 18px;pointer-events:none;z-index:0;
+}
+/* Glow circles */
+.idcard::after{
+  content:'';position:absolute;
+  width:200px;height:200px;
+  background:radial-gradient(circle,rgba(255,165,0,.15),transparent 70%);
+  top:-40px;right:-40px;pointer-events:none;z-index:0;
+}
+.idc-content{position:relative;z-index:1;}
+
+/* Header */
+.idc-top{padding:16px 16px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.12);}
+.idc-logo-school{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.15);
+  border:1.5px solid rgba(255,255,255,.3);
+  display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 7px;overflow:hidden;}
+.idc-school{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:900;
+  color:#fff;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px;}
+.idc-title{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:.6px;text-transform:uppercase;}
+
+/* Body — foto kiri, info kanan */
+.idc-body{display:flex;gap:12px;padding:14px 16px;align-items:flex-start;}
+.idc-foto-col{flex-shrink:0;}
+.idc-foto{
+  width:88px;height:108px;
+  border-radius:8px;
+  border:2.5px solid rgba(255,165,0,.7);
+  box-shadow:0 4px 16px rgba(0,0,0,.3),0 0 0 1px rgba(255,165,0,.3);
+  overflow:hidden;
+  background:rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;font-weight:900;color:rgba(255,255,255,.8);
+}
 .idc-foto img{width:100%;height:100%;object-fit:cover;}
-.idc-nama{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:900;color:var(--tx);margin-bottom:3px;line-height:1.3;}
-.idc-jabatan{font-size:11px;color:var(--or);font-weight:700;margin-bottom:14px;background:var(--or2);display:inline-block;padding:3px 12px;border-radius:20px;}
-.idc-qr-wrap{background:var(--bg);border-radius:16px;padding:14px;margin-bottom:12px;display:inline-block;}
-.idc-scan-txt{font-size:9px;color:var(--tx3);letter-spacing:.5px;text-transform:uppercase;margin-top:4px;}
-.idc-footer{background:linear-gradient(135deg,var(--or),#FF8C00);padding:8px 16px;text-align:center;font-size:9px;color:rgba(255,255,255,.8);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.idc-info-col{flex:1;padding-top:4px;}
+.idc-badge{
+  display:inline-block;
+  font-size:8px;font-weight:800;
+  color:rgba(255,255,255,.7);
+  text-transform:uppercase;letter-spacing:1px;
+  border:1px solid rgba(255,255,255,.25);
+  padding:2px 8px;border-radius:4px;
+  margin-bottom:6px;
+}
+.idc-nama{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:14px;font-weight:900;
+  color:#fff;line-height:1.25;
+  margin-bottom:5px;
+  text-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+.idc-jabatan{
+  font-size:10px;font-weight:600;
+  color:rgba(255,200,50,.9);
+  letter-spacing:.3px;margin-bottom:10px;
+}
+.idc-divider{height:1px;background:rgba(255,255,255,.15);margin:8px 0;}
+
+
+/* QR Section */
+.idc-qr-section{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;
+  border-top:1px solid rgba(255,255,255,.1);
+  background:rgba(0,0,0,.15);
+}
+.idc-qr-wrap{
+  background:#fff;border-radius:8px;padding:6px;
+  flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.idc-qr-info{flex:1;}
+.idc-qr-title{font-size:10px;font-weight:800;color:#fff;margin-bottom:3px;}
+.idc-qr-sub{font-size:8px;color:rgba(255,255,255,.5);line-height:1.4;}
+
+/* Footer */
+.idc-footer{
+  padding:8px 16px;text-align:center;
+  background:rgba(0,0,0,.2);
+  border-top:1px solid rgba(255,165,0,.3);
+  font-size:8px;color:rgba(255,200,50,.8);
+  font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+}
 
 /* ── ALERT ── */
 .alert{padding:10px 12px;border-radius:var(--rs);font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:flex-start;gap:7px;}
@@ -364,29 +443,42 @@ tbody tr:hover{background:var(--bg);}
     </div>
   </div>
 
+
   <!-- ID CARD -->
   <div class="qrdisp" id="qr-disp" style="display:none">
     <div class="idcard" id="idcard-el">
-      <!-- Header -->
-      <div class="idc-top">
-        <div class="idc-logo-school" id="idc-logo-school">🏫</div>
-        <div class="idc-school" id="idc-school-name">SDIT Qudwatun Hasanah</div>
-        <div class="idc-title" id="idc-school-tagline">Sistem Absensi Digital</div>
-      </div>
-      <!-- Body -->
-      <div class="idc-body">
-        <div class="idc-foto-wrap">
-          <div class="idc-foto" id="idc-foto">👤</div>
+      <div class="idc-content">
+        <!-- Header -->
+        <div class="idc-top">
+          <div class="idc-logo-school" id="idc-logo-school">🏫</div>
+          <div class="idc-school" id="idc-school-name">SDIT Qudwatun Hasanah</div>
+          <div class="idc-title" id="idc-school-tagline">Sistem Absensi Digital</div>
         </div>
-        <div class="idc-nama" id="idc-nama">Nama Guru</div>
-        <div class="idc-jabatan" id="idc-jabatan">Jabatan</div>
-        <div class="idc-qr-wrap">
-          <div id="qrcode-out"></div>
-          <div class="idc-scan-txt">Scan untuk absensi</div>
+        <!-- Body: foto kiri + info kanan -->
+        <div class="idc-body">
+          <div class="idc-foto-col">
+            <div class="idc-foto" id="idc-foto">👤</div>
+          </div>
+          <div class="idc-info-col">
+            <div class="idc-badge">Tenaga Pendidik</div>
+            <div class="idc-nama" id="idc-nama">Nama Guru</div>
+            <div class="idc-jabatan" id="idc-jabatan">Jabatan</div>
+            <div class="idc-divider"></div>
+          </div>
         </div>
+        <!-- QR Section -->
+        <div class="idc-qr-section">
+          <div class="idc-qr-wrap">
+            <div id="qrcode-out"></div>
+          </div>
+          <div class="idc-qr-info">
+            <div class="idc-qr-title">Scan QR Code</div>
+            <div class="idc-qr-sub">Arahkan kamera untuk absensi otomatis</div>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div class="idc-footer" id="idc-footer-school">SDIT Qudwatun Hasanah · Kartu Absensi Guru</div>
       </div>
-      <!-- Footer -->
-      <div class="idc-footer" id="idc-footer-school">SDIT Qudwatun Hasanah · Sistem Absensi Digital</div>
     </div>
     <!-- Tombol aksi -->
     <div style="display:flex;gap:10px;margin-top:14px;width:100%;max-width:340px">
@@ -2004,13 +2096,13 @@ function genQR(){
   // Foto guru
   const fotoEl=document.getElementById('idc-foto');
   if(fotoEl){
-    const idx=gurus.indexOf(g)%4;
+    const idx=Math.max(0,gurus.indexOf(g))%4;
     if(g.foto){
       fotoEl.innerHTML='<img src="'+g.foto+'" style="width:100%;height:100%;object-fit:cover">';
-      fotoEl.style.background='';
+      fotoEl.style.color='';
+      fotoEl.style.fontSize='';
     } else {
-      fotoEl.innerHTML='<span style="font-size:28px;font-weight:800;color:'+CFG[idx]+'">'+inits(g.nama)+'</span>';
-      fotoEl.style.background=CBG[idx];
+      fotoEl.innerHTML='<span style="font-size:30px;font-weight:900;color:rgba(255,255,255,.8)">'+inits(g.nama)+'</span>';
     }
   }
 
@@ -2040,8 +2132,8 @@ function genQR(){
   document.getElementById('qrcode-out').innerHTML='';
   new QRCode(document.getElementById('qrcode-out'),{
     text:'SDIT_QK_'+g.id+'_'+g.nama,
-    width:160,height:160,
-    colorDark:'#0F172A',
+    width:100,height:100,
+    colorDark:'#1a237e',
     colorLight:'#ffffff',
     correctLevel:QRCode.CorrectLevel.H
   });
@@ -2086,38 +2178,57 @@ function printQR(){
   w.document.write('*{margin:0;padding:0;box-sizing:border-box;}');
   w.document.write('body{font-family:"Plus Jakarta Sans",Arial,sans-serif;background:#f0f4f8;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}');
   w.document.write('.card{width:300px;border-radius:20px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.2);}');
-  w.document.write('.top{background:linear-gradient(135deg,'+or+','+or2+');padding:20px 20px 56px;text-align:center;position:relative;}');
-  w.document.write('.top::after{content:"";position:absolute;bottom:0;left:0;right:0;height:36px;background:#fff;border-radius:50% 50% 0 0/36px 36px 0 0;}');
-  w.document.write('.logo-wrap{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;}');
-  w.document.write('.sn{font-size:11px;font-weight:800;color:rgba(255,255,255,.95);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}');
-  w.document.write('.st{font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.3px;}');
-  w.document.write('.body{background:#fff;padding:0 20px 20px;text-align:center;}');
-  w.document.write('.foto-wrap{margin-top:-44px;margin-bottom:10px;}');
-  w.document.write('.foto{width:84px;height:84px;border-radius:50%;border:4px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.15);overflow:hidden;margin:0 auto;background:#f0f4f8;display:flex;align-items:center;justify-content:center;}');
-  w.document.write('.nama{font-size:15px;font-weight:900;color:#0f172a;margin-bottom:5px;line-height:1.3;}');
-  w.document.write('.jabatan{display:inline-block;background:'+or+'18;color:'+or+';font-size:10px;font-weight:700;padding:3px 14px;border-radius:20px;margin-bottom:14px;}');
-  w.document.write('.divider{height:1px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);margin-bottom:14px;}');
-  w.document.write('.qr-wrap{background:#f8fafc;border-radius:14px;padding:12px;display:inline-block;margin-bottom:8px;}');
-  w.document.write('.scan{font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}');
-  w.document.write('.footer{background:linear-gradient(135deg,'+or+','+or2+');padding:9px;text-align:center;font-size:8px;color:rgba(255,255,255,.8);font-weight:600;letter-spacing:.4px;text-transform:uppercase;}');
-  w.document.write('@media print{body{background:white;padding:0;}@page{margin:.5cm;size:A6;}}');
+  w.document.write('*{margin:0;padding:0;box-sizing:border-box;}');
+  w.document.write('body{font-family:"Plus Jakarta Sans",Arial,sans-serif;background:#e8eaf6;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}');
+  w.document.write('.card{width:280px;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25);background:linear-gradient(145deg,#1a237e 0%,#283593 30%,#4a148c 60%,#6a1b9a 100%);position:relative;}');
+  w.document.write('.card::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.06) 1px,transparent 1px);background-size:16px 16px;pointer-events:none;}');
+  w.document.write('.inner{position:relative;z-index:1;}');
+  w.document.write('.top{padding:14px 14px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,.12);}');
+  w.document.write('.lw{width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:18px;overflow:hidden;}');
+  w.document.write('.sn{font-size:11px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:1px;}');
+  w.document.write('.st{font-size:8px;color:rgba(255,255,255,.6);letter-spacing:.5px;text-transform:uppercase;}');
+  w.document.write('.body{display:flex;gap:10px;padding:12px 14px;align-items:flex-start;}');
+  w.document.write('.foto{width:80px;height:100px;border-radius:7px;border:2px solid rgba(255,165,0,.7);overflow:hidden;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:28px;color:rgba(255,255,255,.8);font-weight:900;}');
+  w.document.write('.foto img{width:100%;height:100%;object-fit:cover;}');
+  w.document.write('.info{flex:1;padding-top:2px;}');
+  w.document.write('.badge{display:inline-block;font-size:7px;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;border:1px solid rgba(255,255,255,.2);padding:2px 6px;border-radius:3px;margin-bottom:5px;}');
+  w.document.write('.nama{font-size:13px;font-weight:900;color:#fff;line-height:1.25;margin-bottom:4px;}');
+  w.document.write('.jabatan{font-size:9px;font-weight:700;color:rgba(255,200,50,.9);}');
+  w.document.write('.hr{height:1px;background:rgba(255,255,255,.15);margin:6px 0;}');
+  w.document.write('.albl{font-size:7px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;}');
+  w.document.write('.qr-sec{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.15);}');
+  w.document.write('.qrb{background:#fff;border-radius:7px;padding:5px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3);}');
+  w.document.write('.qi{flex:1;}');
+  w.document.write('.qt{font-size:9px;font-weight:800;color:#fff;margin-bottom:2px;}');
+  w.document.write('.qs{font-size:7px;color:rgba(255,255,255,.45);line-height:1.4;}');
+  w.document.write('.footer{padding:7px;text-align:center;background:rgba(0,0,0,.2);border-top:1px solid rgba(255,165,0,.3);font-size:7px;color:rgba(255,200,50,.8);font-weight:700;letter-spacing:.6px;text-transform:uppercase;}');
+  w.document.write('@media print{body{background:white;padding:0;}@page{margin:.3cm;size:A6 portrait;}}');
   w.document.write('</style></head><body>');
-  w.document.write('<div class="card">');
+  w.document.write('<div class="card"><div class="inner">');
+  // Header
   w.document.write('<div class="top">');
-  w.document.write('<div class="logo-wrap">'+logoHtml+'</div>');
+  w.document.write('<div class="lw">'+logoHtml+'</div>');
   w.document.write('<div class="sn">'+sNama+'</div>');
   w.document.write('<div class="st">'+sTag+'</div>');
   w.document.write('</div>');
+  // Body: foto kiri + info kanan
   w.document.write('<div class="body">');
-  w.document.write('<div class="foto-wrap"><div class="foto">'+fotoHtml+'</div></div>');
+  w.document.write('<div class="foto">'+fotoHtml+'</div>');
+  w.document.write('<div class="info">');
+  w.document.write('<div class="badge">Tenaga Pendidik</div>');
   w.document.write('<div class="nama">'+g.nama+'</div>');
   w.document.write('<div class="jabatan">'+g.mapel+'</div>');
-  w.document.write('<div class="divider"></div>');
-  w.document.write('<div class="qr-wrap"><img src="'+qrImg.src+'" width="140" height="140"></div>');
-  w.document.write('<div class="scan">Scan untuk absensi</div>');
+  w.document.write('<div class="hr"></div>');
+
+  w.document.write('</div></div>');
+  // QR
+  w.document.write('<div class="qr-sec">');
+  w.document.write('<div class="qrb"><img src="'+qrImg.src+'" width="80" height="80"></div>');
+  w.document.write('<div class="qi"><div class="qt">Scan QR Code</div><div class="qs">Arahkan kamera untuk absensi otomatis</div></div>');
   w.document.write('</div>');
+  // Footer
   w.document.write('<div class="footer">'+sNama+' &nbsp;·&nbsp; Kartu Absensi Guru</div>');
-  w.document.write('</div>');
+  w.document.write('</div></div>');
   w.document.write('<scri'+'pt>window.onload=function(){window.print();}</scri'+'pt>');
   w.document.write('</body></html>');
   w.document.close();
