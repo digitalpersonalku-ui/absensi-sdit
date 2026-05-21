@@ -2502,6 +2502,71 @@ function defaultGurus(){
     {id:'G008',nama:'Ustadz Ridwan Hakim',nip:'19830827008',mapel:'Bahasa Inggris',hp:'',foto:''},
   ];
 }
+ 
+// ═══════════════════════════════════════
+// INIT — window.onload
+// ═══════════════════════════════════════
+window.onload = function(){
+  // Set nilai jam dari config
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
+  sv('cfg-mulai',JAM.mulai);sv('cfg-batas',JAM.batas);
+  sv('cfg-maxmasuk',JAM.maxmasuk);sv('cfg-pulang',JAM.pulang);sv('cfg-maxpulang',JAM.maxpulang);
+ 
+  // Set tanggal default
+  const rTgl=document.getElementById('r-tgl');if(rTgl)rTgl.value=today();
+  const mgTgl=document.getElementById('mg-tgl');if(mgTgl)mgTgl.value=today();
+  const now=new Date();
+  const rBln=document.getElementById('r-bln');if(rBln)rBln.value=now.getMonth()+1;
+  const rThnB=document.getElementById('r-thn-b');if(rThnB)rThnB.value=now.getFullYear();
+  const rThnS=document.getElementById('r-thn-s');if(rThnS)rThnS.value=now.getFullYear();
+ 
+  // Load identitas sekolah
+  loadIdentitas();
+ 
+  // Start jam
+  updateClock();
+  setInterval(updateClock,1000);
+ 
+  // Load cache guru sementara (sebelum Firebase load)
+  try{
+    const gc=localStorage.getItem('guru_cache');
+    if(gc){
+      const parsed=JSON.parse(gc);
+      if(parsed&&parsed.length>0)gurus=parsed;
+    }
+  }catch(e){}
+ 
+  // Load cache absensi hari ini
+  try{
+    const ac=localStorage.getItem('ac_'+today());
+    if(ac)absenDB[today()]=JSON.parse(ac);
+    else absenDB[today()]=[];
+  }catch(e){absenDB[today()]=[];}
+ 
+  // Build UI
+  role='guru';
+  buildNav();
+  renderAll();
+ 
+  // Firebase realtime listeners
+  listenGuru();
+  listenTodayAbsensi();
+ 
+  // Firebase connection monitor
+  db.ref('.info/connected').on('value',snap=>{
+    setSyncDot(snap.val()?'ok':'err');
+    const cs=document.getElementById('fb-conn-status');
+    if(cs){
+      cs.className='alert '+(snap.val()?'a-ok':'a-err');
+      cs.innerHTML=snap.val()?
+        '✅ Firebase terhubung — data realtime aktif':
+        '⚠️ Offline — menggunakan data lokal';
+    }
+  });
+ 
+  // Alpha checker (hanya admin/kepsek, setelah jam 10:30)
+  startAlphaChecker();
+};
 </script>
 </body>
 </html>
