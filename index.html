@@ -356,11 +356,18 @@ tbody tr:hover{background:var(--bg);}
  
 <!-- ─── TAB: REKAP ─── -->
 <div class="tab" id="tab-rekap">
-  <div class="ptabs" id="ptabs">
-    <button class="ptab active" onclick="setPeriod('harian',this)">📅 Harian</button>
-    <button class="ptab" onclick="setPeriod('bulanan',this)">📆 Bulanan</button>
-    <button class="ptab" onclick="setPeriod('semester',this)">📚 Semester</button>
-    <button class="ptab" id="ptab-tahunan" style="display:none" onclick="setPeriod('tahunan',this)">📊 Tahunan</button>
+  <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+    <div class="ptabs" id="ptabs" style="margin-bottom:0;flex:1">
+      <button class="ptab active" onclick="setPeriod('harian',this)">📅 Harian</button>
+      <button class="ptab" onclick="setPeriod('bulanan',this)">📆 Bulanan</button>
+      <button class="ptab" onclick="setPeriod('semester',this)">📚 Semester</button>
+      <button class="ptab" id="ptab-tahunan" style="display:none" onclick="setPeriod('tahunan',this)">📊 Tahunan</button>
+    </div>
+  </div>
+  <!-- Pencarian nama guru di rekap -->
+  <div style="margin-bottom:10px;position:relative">
+    <input type="text" class="fc" id="rekap-cari" placeholder="🔍 Cari nama guru..." 
+      oninput="filterRekap()" style="padding-left:14px">
   </div>
  
   <!-- HARIAN -->
@@ -378,6 +385,7 @@ tbody tr:hover{background:var(--bg);}
         <thead><tr><th>No</th><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Ket</th></tr></thead>
         <tbody id="tbl-harian"></tbody>
       </table></div>
+      <div id="rekap-filter-info" style="padding:6px 14px;font-size:10px;color:var(--tx3);text-align:right"></div>
     </div>
   </div>
  
@@ -904,6 +912,28 @@ async function syncAbsensiOnly(){
   flushQueue().catch(()=>{});
 }
  
+// ─── Alpha Checker ───────────────────────────────────
+function startAlphaChecker(){
+  // Cek sekarang
+  checkAndMarkAlpha();
+  // Ulangi setiap menit
+  setInterval(checkAndMarkAlpha, 60000);
+}
+ 
+async function checkAndMarkAlpha(){
+  // Hanya admin/kepsek yang bisa tandai alpha
+  if(role!=='admin'&&role!=='kepsek') return;
+  const n=nowMin();
+  // Alpha berlaku setelah jam 10:30
+  if(n<t2m('10:30')) return;
+  // Cek flag hari ini
+  const flagKey='alpha_done_'+today();
+  if(ls(flagKey)==='1') return;
+  // Tandai flag
+  ls(flagKey,'1');
+  await autoMarkAlpha();
+}
+ 
 // Antrian untuk data yang gagal kirim
 async function saveAbsensi(entry){
   const payload={tanggal:entry.tanggal,id:entry.id,nama:entry.nama,mapel:entry.mapel,
@@ -971,36 +1001,32 @@ function sudahAbsenMasuk(guruId){
 // Tandai guru yang belum absen masuk setelah jam maxmasuk sebagai Alpha
 // Dipanggil otomatis setelah jam 11:00
 async function autoMarkAlpha(){
-  const n=nowMin();
-  if(n<=t2m(JAM.maxmasuk)) return; // belum lewat batas
-  if(role!=='admin'&&role!=='kepsek') return; // hanya admin/kepsek
-  
+  if(role!=='admin'&&role!=='kepsek') return;
+  // Ambil data terbaru dari Sheets dulu
+  await syncAbsensi();
   const m=absenMapToday();
-  const belumAbsen=gurus.filter(g=>!m[g.id+'|masuk']);
-  if(!belumAbsen.length) return;
- 
-  // Tandai lokal dulu
-  let ada=false;
-  for(const g of belumAbsen){
-    // Cek apakah sudah pernah di-mark alpha hari ini
-    if(m[g.id+'|masuk']) continue;
+  // Cari guru yang belum punya record masuk/tidak masuk
+  const belum=gurus.filter(g=>{
+    return !m[g.id+'|masuk'] && !m[g.id+'|tidak masuk'];
+  });
+  if(!belum.length){
+    console.log('[Alpha] Semua guru sudah absen');
+    return;
+  }
+  console.log('[Alpha] Tandai',belum.length,'guru sebagai Alpha');
+  for(const g of belum){
     const entry={tanggal:today(),id:g.id,nama:g.nama,mapel:g.mapel,
       status:'alpha',tipe:'tidak masuk',waktu:'--:--',ket:'Tidak hadir tanpa keterangan'};
-    todayList().push(entry);
-    ada=true;
+    // Simpan lokal
+    if(!absenDB[today()])absenDB[today()]=[];
+    absenDB[today()].push(entry);
+    // Kirim ke Sheets
+    saveAbsensi(entry).catch(()=>{});
+    await new Promise(r=>setTimeout(r,500));
   }
-  if(!ada) return;
   saveLocal();
   renderDash();renderManualLog();
-  toast('📋 '+belumAbsen.length+' guru ditandai Alpha (tidak hadir)','info');
-  
-  // Simpan ke Sheets
-  for(const g of belumAbsen){
-    const entry={tanggal:today(),id:g.id,nama:g.nama,mapel:g.mapel,
-      status:'alpha',tipe:'tidak masuk',waktu:'--:--',ket:'Tidak hadir tanpa keterangan'};
-    saveAbsensi(entry).catch(()=>{});
-    await new Promise(r=>setTimeout(r,300)); // jeda antar request
-  }
+  if(belum.length>0) toast('📋 '+belum.length+' guru ditandai Alpha otomatis','info');
 }
  
 function updateJamBar(){
@@ -1050,15 +1076,7 @@ function updateAbsenBtns(){
     if(ip)ip.textContent='Silakan absen pulang';
   }
   
-  // Panggil autoMarkAlpha setelah jam maxmasuk
-  // Alpha otomatis pada jam 10:30
-  if(nowMin()>=t2m('10:30')){
-    const flagKey='alpha_marked_'+today();
-    if(!sessionStorage.getItem(flagKey)){
-      sessionStorage.setItem(flagKey,'1');
-      setTimeout(autoMarkAlpha, 2000); // delay 2 detik
-    }
-  }
+  // Alpha trigger — ditangani oleh startAlphaChecker()
 }
  
 // ═══════════════════════════════════════════════
@@ -1506,9 +1524,18 @@ async function simpanManual(){
     toast(g.nama+' belum absen masuk - tidak bisa absen pulang','err');return;
   }
  
+  // Validasi jam untuk GURU (admin/kepsek bebas koreksi kapan saja)
+  if(role==='guru'&&tgl===today()){
+    if(tipeVal==='masuk'&&!bisaMasuk()){
+      toast('Waktu absen masuk sudah berakhir ('+JAM.mulai+'-'+JAM.maxmasuk+')','err');return;
+    }
+    if(tipeVal==='pulang'&&!bisaPulang()){
+      toast('Waktu absen pulang belum/sudah berakhir ('+JAM.pulang+'-'+JAM.maxpulang+')','err');return;
+    }
+  }
+ 
   const waktu=tgl===today()?nowTime():'--:--';
   document.getElementById('mg-waktu').value=waktu;
- 
   const entry={tanggal:tgl,id:g.id,nama:g.nama,mapel:g.mapel,status,tipe,waktu,ket:ket||''};
  
   // Cek duplikat hanya untuk hari ini
@@ -1747,6 +1774,23 @@ function dlQR(){
 // REKAP
 // ═══════════════════════════════════════════════
 let currentPeriod='harian';
+ 
+function filterRekap(){
+  const q=(document.getElementById('rekap-cari')?.value||'').toLowerCase().trim();
+  // Filter tabel yang sedang aktif
+  const tbodyId='tbl-'+currentPeriod;
+  const tbody=document.getElementById(tbodyId);
+  if(!tbody)return;
+  [...tbody.querySelectorAll('tr')].forEach(tr=>{
+    const nama=tr.querySelector('td:nth-child(2)')?.innerText?.toLowerCase()||'';
+    tr.style.display=(!q||nama.includes(q))?'':'none';
+  });
+  // Update total yang ditampilkan
+  const visible=[...tbody.querySelectorAll('tr')].filter(tr=>tr.style.display!=='none').length;
+  const info=document.getElementById('rekap-filter-info');
+  if(info)info.textContent=q?'Menampilkan '+visible+' guru':'';
+}
+ 
 function setPeriod(p,btn){
   currentPeriod=p;
   ['harian','bulanan','semester','tahunan'].forEach(id=>{
@@ -1755,6 +1799,10 @@ function setPeriod(p,btn){
   const el=document.getElementById('r-'+p);if(el)el.style.display='block';
   document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
   if(btn)btn.classList.add('active');
+  // Reset pencarian
+  const cari=document.getElementById('rekap-cari');
+  if(cari)cari.value='';
+  filterRekap();
 }
  
 // REKAP HARIAN - selalu ambil dari Sheets untuk akurasi
@@ -1771,35 +1819,34 @@ async function loadHarian(){
     // Tetap fetch dari Sheets di background untuk update
   }
  
-  // Fetch dari Sheets
+  // Fetch dari Sheets (pakai JSONP+fetch race untuk bypass CORS)
   try{
     setInfoBar('🔄 Mengambil data '+tgl+'...','info');
     const r=await GET('getAbsensi',{tanggal:tgl});
     if(r&&r.success){
       const sheets=(r.data||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
       if(tgl===today()){
-        // Hari ini: merge dengan lokal
         const lokal=(absenDB[tgl]||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
         const ids=new Set(sheets.map(a=>a.id+'|'+a.tipe));
         const extra=lokal.filter(a=>!ids.has(a.id+'|'+a.tipe));
         data=[...sheets,...extra];
       } else {
-        // Lampau: pakai Sheets, simpan ke cache
-        data=sheets;
+        data=sheets; // tanggal lampau: pakai Sheets
       }
-      // Simpan ke cache
+      // Simpan ke cache lokal untuk akses offline
       if(data.length>0){
         absenDB[tgl]=data;
         try{ls('ac_'+tgl,JSON.stringify(data));}catch(e){}
+        console.log('[harian]',tgl,'→',data.length,'records dari Sheets');
+      } else {
+        console.log('[harian]',tgl,'→ kosong di Sheets');
       }
-    } else if(!cached||cached.length===0){
-      toast('Tidak ada data: '+(r&&r.error||''),'warn');
+    } else {
+      console.warn('[harian] gagal:',r&&r.error);
     }
     setInfoBar('','ok');
   }catch(e){
-    if(!cached||cached.length===0){
-      toast('Gagal: '+e.message,'err');
-    }
+    console.warn('[harian] error:',e.message);
     setInfoBar('','ok');
   }
   window._lastHarianData=data;
@@ -2327,7 +2374,12 @@ window.onload=function(){
   syncAll();
  
   // Auto sync setiap 30 detik
-  syncTimer=setInterval(syncAbsensiOnly,30000);
+  syncTimer=setInterval(async()=>{
+    await syncAbsensiOnly();
+    renderDash();renderManualLog();
+  },15000);
+  // Cek alpha otomatis setiap menit
+  startAlphaChecker();
 };
  
 function defaultGurus(){
