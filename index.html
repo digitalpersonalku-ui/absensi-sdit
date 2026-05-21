@@ -7,6 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 :root{
   --or:#FF6B35;--or2:#FFF0E8;--tl:#0ABAB5;--tl2:#E0FAFA;
@@ -569,13 +572,19 @@ tbody tr:hover{background:var(--bg);}
     <div class="alert a-ok" id="conn-status">⚡ Mengecek koneksi...</div>
     <div class="fg"><label class="fl">URL Apps Script</label><input class="fc" id="cfg-url" readonly style="font-size:10px;word-break:break-all"></div>
     <div class="brow">
-      <button class="btn bs" onclick="testConn()">🧪 Test</button>
+      <button class="btn bs" onclick="testConn()">🧪 Test GAS</button>
       <button class="btn btl" onclick="window.open('https://docs.google.com/spreadsheets/d/'+SID+'/edit','_blank')">📊 Buka Sheets</button>
     </div>
-    <div class="divider"></div>
-    <div class="ct" style="margin-top:10px">🗑️ Reset Data Lokal</div>
-    <p style="font-size:11px;color:var(--tx2);margin-bottom:10px">Hapus cache lokal dan ambil ulang semua data dari Google Sheets. Gunakan jika data tidak sinkron.</p>
-    <button class="btn bd" onclick="resetCacheLokal()" style="background:var(--rd);color:#fff;width:auto">🔄 Reset Cache & Sync Ulang</button>
+  </div>
+  <!-- Firebase Status -->
+  <div class="card cp">
+    <div class="ct">🔥 Firebase Realtime Database</div>
+    <div id="fb-conn-status" class="alert a-info">⏳ Menghubungkan ke Firebase...</div>
+    <p style="font-size:11px;color:var(--tx2);margin-bottom:10px">Database realtime — data tersinkron otomatis ke semua device tanpa CORS.</p>
+    <div class="brow">
+      <button class="btn bs" onclick="testFirebase()">🧪 Test Firebase</button>
+      <button class="btn bd" onclick="resetCacheLokal()" style="background:var(--rd);color:#fff">🗑️ Reset Cache</button>
+    </div>
   </div>
 </div>
 
@@ -635,6 +644,10 @@ tbody tr:hover{background:var(--bg);}
 // ═══════════════════════════════════════════════
 // KONFIGURASI - HARDCODE
 // ═══════════════════════════════════════════════
+// Firebase
+const firebaseConfig={apiKey:"AIzaSyD9dljqCBwnntZCGooUd5gVrC7miiY2bd0",authDomain:"absensi-sdit.firebaseapp.com",databaseURL:"https://absensi-sdit-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"absensi-sdit",storageBucket:"absensi-sdit.firebasestorage.app",messagingSenderId:"179050530066",appId:"1:179050530066:web:b35c07d59c435365bb5fcb"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
 const GAS = 'https://script.google.com/macros/s/AKfycbyutZju4ejgeerbBEuwjpkcBNyKjbf0ISYqcL6HAjgTIBndrXAJOZzF18-VDEi7Zl4hkg/exec';
 const SID = '1ZJTqWfWbeTQamaO0cLAF2KlymUUzoqVlSIyQ6276uN4';
 const DEFAULTS = {admin:{u:'admin',p:'sdit2025'},kepsek:{u:'kepsek',p:'kepsek2025'},yayasan:{u:'yayasan',p:'yayasan2025'}};
@@ -665,6 +678,96 @@ let scanOn = false, scanner = null;
 let syncTimer = null;
 
 const CBG = ['#FFF0E8','#E0FAFA','#EEE9FF','#E6FAF0'];
+
+// ═══════════════════════════════════════════════
+// FIREBASE HELPERS
+// ═══════════════════════════════════════════════
+function fbKey(s){return String(s).replace(/[.#$\[\]]/g,'_');}
+
+// GURU
+async function fbSaveGuru(g){
+  await db.ref('guru/'+fbKey(g.id)).set({id:g.id,nama:g.nama,nip:g.nip||g.id,mapel:g.mapel,hp:g.hp||'',foto:g.foto||''});
+}
+async function fbDeleteGuru(id){await db.ref('guru/'+fbKey(id)).remove();}
+
+// ABSENSI — key unik per guru+tipe, tidak bisa duplikat
+async function fbSaveAbsensi(e){
+  const key=fbKey(e.id)+'_'+(e.tipe||'masuk').replace(/ /g,'_');
+  await db.ref('absensi/'+fbKey(e.tanggal)+'/'+key).set({
+    tanggal:e.tanggal,id:e.id,nama:e.nama,mapel:e.mapel,
+    status:e.status,tipe:e.tipe||'masuk',waktu:e.waktu,ket:e.ket||''
+  });
+}
+async function fbGetAbsensi(tanggal){
+  const snap=await db.ref('absensi/'+fbKey(tanggal)).once('value');
+  return Object.values(snap.val()||{}).map(a=>({...a,tipe:a.tipe||'masuk'}));
+}
+async function fbGetRekapBulan(bulan,tahun){
+  const prefix=String(tahun)+'-'+String(bulan).padStart(2,'0');
+  const snap=await db.ref('absensi').once('value');
+  const all=snap.val()||{},map={};
+  Object.entries(all).forEach(([tgl,entries])=>{
+    if(!tgl.startsWith(prefix))return;
+    Object.values(entries).forEach(a=>{
+      if(!map[a.id])map[a.id]={id:a.id,nama:a.nama,mapel:a.mapel,hadir:0,terlambat:0,izin:0,sakit:0,alpha:0};
+      if(map[a.id][a.status]!==undefined)map[a.id][a.status]++;
+    });
+  });
+  return Object.values(map);
+}
+async function fbGetRekapSemester(semester,tahun){
+  const sem=parseInt(semester)||1,thn=parseInt(tahun)||new Date().getFullYear();
+  const bln=sem===1?[7,8,9,10,11,12]:[1,2,3,4,5,6];
+  const snap=await db.ref('absensi').once('value');
+  const all=snap.val()||{},map={};
+  Object.entries(all).forEach(([tgl,entries])=>{
+    const p=tgl.split('-');
+    if(parseInt(p[0])!==thn||!bln.includes(parseInt(p[1])))return;
+    Object.values(entries).forEach(a=>{
+      if(!map[a.id])map[a.id]={id:a.id,nama:a.nama,mapel:a.mapel,hadir:0,terlambat:0,izin:0,sakit:0,alpha:0};
+      if(map[a.id][a.status]!==undefined)map[a.id][a.status]++;
+    });
+  });
+  return Object.values(map);
+}
+
+// REALTIME LISTENERS
+let _guruL=false,_absTgl=null;
+function listenGuru(){
+  if(_guruL)return;_guruL=true;
+  db.ref('guru').on('value',snap=>{
+    const list=Object.values(snap.val()||{});
+    if(list.length>0){
+      gurus=list;
+      try{localStorage.setItem('guru_cache',JSON.stringify(gurus));}catch(e){}
+      renderAll();
+      console.log('[Firebase] Guru updated:',gurus.length);
+    }
+  });
+}
+function listenTodayAbsensi(){
+  const tgl=today();
+  if(_absTgl)db.ref('absensi/'+fbKey(_absTgl)).off();
+  _absTgl=tgl;
+  db.ref('absensi/'+fbKey(tgl)).on('value',snap=>{
+    const list=Object.values(snap.val()||{}).map(a=>({...a,tipe:a.tipe||'masuk'}));
+    absenDB[tgl]=list;
+    try{localStorage.setItem('ac_'+tgl,JSON.stringify(list));}catch(e){}
+    renderDash();renderManualLog();
+    console.log('[Firebase] Absensi:',list.length);
+  });
+}
+async function testFirebase(){
+  const cs=document.getElementById('fb-conn-status');
+  try{
+    await db.ref('.info/connected').once('value');
+    if(cs){cs.className='alert a-ok';cs.innerHTML='✅ Firebase terhubung — realtime aktif!';}
+    toast('✅ Firebase OK','ok');
+  }catch(e){
+    if(cs){cs.className='alert a-err';cs.innerHTML='❌ Gagal: '+e.message;}
+    toast('❌ Gagal','err');
+  }
+}
 const CFG = ['#FF6B35','#0ABAB5','#6C47FF','#06C270'];
 
 // ═══════════════════════════════════════════════
@@ -1026,60 +1129,25 @@ function sudahAbsenMasuk(guruId){
 let _alphaRunning = false;
 
 async function autoMarkAlpha(){
-  if(role!=='admin'&&role!=='kepsek') return;
-  if(_alphaRunning){console.log('[Alpha] Sedang berjalan, skip');return;}
-  _alphaRunning = true;
-
+  if(role!=='admin'&&role!=='kepsek')return;
+  if(_alphaRunning)return;
+  _alphaRunning=true;
   try{
-    // Ambil data TERBARU dari Sheets sebelum cek
-    await syncAbsensi();
-    const m = absenMapToday();
-
-    // Guru yang benar-benar belum ada record sama sekali hari ini
-    const belum = gurus.filter(g =>
-      !m[g.id+'|masuk'] && !m[g.id+'|tidak masuk']
-    );
-
-    if(!belum.length){
-      console.log('[Alpha] Semua guru sudah tercatat, tidak perlu tandai alpha');
-      return;
-    }
-    console.log('[Alpha] Tandai',belum.length,'guru alpha');
-
-    let berhasil = 0;
+    // Ambil data terbaru dari Firebase
+    const snap=await db.ref('absensi/'+fbKey(today())).once('value');
+    const data=snap.val()||{};
+    const sudahAbsen=new Set(Object.values(data).map(a=>a.id));
+    const belum=gurus.filter(g=>!sudahAbsen.has(g.id));
+    if(!belum.length){console.log('[Alpha] Semua sudah absen');return;}
+    console.log('[Alpha] Tandai',belum.length,'guru');
     for(const g of belum){
-      // Triple-check lokal sebelum setiap kirim
-      const mNow = absenMapToday();
-      if(mNow[g.id+'|masuk'] || mNow[g.id+'|tidak masuk']){
-        console.log('[Alpha] Skip',g.nama,'sudah ada record');
-        continue;
-      }
-      const entry = {
-        tanggal:today(), id:g.id, nama:g.nama, mapel:g.mapel,
-        status:'alpha', tipe:'tidak masuk',
-        waktu:'--:--', ket:'Tidak hadir tanpa keterangan'
-      };
-      // Simpan lokal dulu
-      if(!absenDB[today()]) absenDB[today()]=[];
-      absenDB[today()].push(entry);
-      saveLocal();
-      // Kirim ke Sheets dengan jeda
-      const r = await saveAbsensi(entry).catch(e=>{
-        console.warn('[Alpha] Gagal simpan',g.nama,e.message);
-        return null;
-      });
-      if(r&&r.success) berhasil++;
-      // Jeda 1 detik antar request mencegah duplikat concurrent
-      await new Promise(res=>setTimeout(res,1000));
+      const entry={tanggal:today(),id:g.id,nama:g.nama,mapel:g.mapel,
+        status:'alpha',tipe:'tidak masuk',waktu:'--:--',ket:'Tidak hadir tanpa keterangan'};
+      await fbSaveAbsensi(entry).catch(e=>console.warn('[Alpha]',e.message));
+      await new Promise(r=>setTimeout(r,500));
     }
-
-    if(berhasil>0){
-      renderDash(); renderManualLog();
-      toast('📋 '+berhasil+' guru ditandai Alpha otomatis','info');
-    }
-  } finally {
-    _alphaRunning = false;
-  }
+    toast('📋 '+belum.length+' guru ditandai Alpha','info');
+  }finally{_alphaRunning=false;}
 }
 
 function updateJamBar(){
@@ -1489,14 +1557,17 @@ async function doAbsen(guruId,tipe,status,ket){
 
   const waktu=nowTime();
   const entry={tanggal:today(),id:g.id,nama:g.nama,mapel:g.mapel,status,tipe,waktu,ket:ket||''};
-  // Simpan lokal DULU
-  todayList().push(entry);
-  saveLocal();
-  renderDash();renderManualLog();
-  toast('✅ '+g.nama+' absen '+tipe+' pukul '+waktu+(status==='terlambat'?' (Terlambat)':''),'ok');
-  // Kirim Sheets (async, tidak block)
-  saveAbsensi(entry).catch(()=>{});
-  return true;
+  // Simpan ke Firebase (realtime listener akan update UI otomatis)
+  try{
+    await fbSaveAbsensi(entry);
+    toast('✅ '+g.nama+' absen '+tipe+' pukul '+waktu+(status==='terlambat'?' (Terlambat)':''),'ok');
+    return true;
+  }catch(e){
+    // Fallback lokal
+    todayList().push(entry);saveLocal();renderDash();renderManualLog();
+    toast('⚠️ Tersimpan lokal: '+e.message,'warn');
+    return false;
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1606,9 +1677,14 @@ async function simpanManual(){
 
   const btn=document.getElementById('btn-manual');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
-  const ok=await saveAbsensi(entry);
+  try{
+    await fbSaveAbsensi(entry);
+    toast('✅ Absensi tersimpan','ok');
+  }catch(e){
+    if(tgl===today()){todayList().push(entry);saveLocal();renderDash();renderManualLog();}
+    toast('⚠️ Tersimpan lokal','warn');
+  }
   btn.disabled=false;btn.textContent='✅ Simpan';
-  if(ok)toast('✅ Absensi tersimpan ke Sheets','ok');
   resetManual();
 }
 
@@ -1775,10 +1851,10 @@ async function simpanGuru(){
 async function hapusGuru(id){
   if(role!=='admin'){toast('Hanya Admin yang dapat menghapus data guru','err');return;}
   if(!confirm('Hapus guru ini?'))return;
-  gurus=gurus.filter(g=>g.id!==id);
-  ls('guru_cache',JSON.stringify(gurus));
-  renderGuru();renderDash();
-  try{await POST('deleteGuru',{id});toast('Guru dihapus','ok');}catch(e){toast('Dihapus lokal','warn');}
+  try{
+    await fbDeleteGuru(id);
+    toast('Guru dihapus','ok');
+  }catch(e){toast('Gagal hapus: '+e.message,'err');}
 }
 
 // ═══════════════════════════════════════════════
@@ -1865,49 +1941,19 @@ function setPeriod(p,btn){
 // REKAP HARIAN - selalu ambil dari Sheets untuk akurasi
 async function loadHarian(){
   const tgl=document.getElementById('r-tgl')?.value||today();
-  let data=[];
-
-  // Cek cache lokal dulu (termasuk tanggal lampau)
-  const cached=absenDB[tgl];
-  if(cached&&cached.length>0){
-    data=cached.map(a=>({...a,tipe:a.tipe||'masuk'}));
+  setInfoBar('🔄 Mengambil data '+tgl+'...','info');
+  try{
+    const data=await fbGetAbsensi(tgl);
     window._lastHarianData=data;
     renderHarian(data,tgl);
-    // Tetap fetch dari Sheets di background untuk update
-  }
-
-  // Fetch dari Sheets (pakai JSONP+fetch race untuk bypass CORS)
-  try{
-    setInfoBar('🔄 Mengambil data '+tgl+'...','info');
-    const r=await GET('getAbsensi',{tanggal:tgl});
-    if(r&&r.success){
-      const sheets=(r.data||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
-      if(tgl===today()){
-        const lokal=(absenDB[tgl]||[]).map(a=>({...a,tipe:a.tipe||'masuk'}));
-        const ids=new Set(sheets.map(a=>a.id+'|'+a.tipe));
-        const extra=lokal.filter(a=>!ids.has(a.id+'|'+a.tipe));
-        data=[...sheets,...extra];
-      } else {
-        data=sheets; // tanggal lampau: pakai Sheets
-      }
-      // Simpan ke cache lokal untuk akses offline
-      if(data.length>0){
-        absenDB[tgl]=data;
-        try{ls('ac_'+tgl,JSON.stringify(data));}catch(e){}
-        console.log('[harian]',tgl,'→',data.length,'records dari Sheets');
-      } else {
-        console.log('[harian]',tgl,'→ kosong di Sheets');
-      }
-    } else {
-      console.warn('[harian] gagal:',r&&r.error);
-    }
     setInfoBar('','ok');
   }catch(e){
-    console.warn('[harian] error:',e.message);
-    setInfoBar('','ok');
+    setInfoBar('Gagal: '+e.message,'err');
+    // Fallback lokal
+    const cached=absenDB[tgl]||[];
+    window._lastHarianData=cached;
+    renderHarian(cached,tgl);
   }
-  window._lastHarianData=data;
-  renderHarian(data,tgl);
 }
 
 function renderHarian(data,tgl){
@@ -1949,11 +1995,13 @@ function renderHarian(data,tgl){
 async function loadBulanan(){
   const bln=document.getElementById('r-bln')?.value;
   const thn=document.getElementById('r-thn-b')?.value;
+  setInfoBar('🔄 Mengambil rekap bulanan...','info');
   try{
-    const r=await GET('getRekapBulan',{bulan:bln,tahun:thn});
-    window._lastBulananData=r.success?r.data:[];
-    renderRekapTable('tbl-bulanan',window._lastBulananData);
-  }catch(e){toast('Gagal: '+e.message,'err');}
+    const data=await fbGetRekapBulan(bln,thn);
+    window._lastBulananData=data;
+    renderRekapTable('tbl-bulanan',data);
+    setInfoBar('','ok');
+  }catch(e){toast('Gagal: '+e.message,'err');setInfoBar('','ok');}
 }
 async function loadSemester(){
   const sem=document.getElementById('r-sem')?.value;
@@ -2395,77 +2443,7 @@ function cetakPDF(type){
   w.document.close();
 }
 
-window.onload=function(){
-  // Isi config
-  const cfgUrl=document.getElementById('cfg-url');if(cfgUrl)cfgUrl.value=GAS;
-  document.getElementById('cfg-mulai').value=JAM.mulai;
-  document.getElementById('cfg-batas').value=JAM.batas;
-  document.getElementById('cfg-maxmasuk').value=JAM.maxmasuk;
-  document.getElementById('cfg-pulang').value=JAM.pulang;
-  document.getElementById('cfg-maxpulang').value=JAM.maxpulang;
 
-  // Set tanggal hari ini di form
-  const rTgl=document.getElementById('r-tgl');if(rTgl)rTgl.value=today();
-  const mgTgl=document.getElementById('mg-tgl');if(mgTgl)mgTgl.value=today();
-
-  // Set bulan & tahun sekarang di rekap bulanan
-  const now=new Date();
-  const rbln=document.getElementById('r-bln');if(rbln)rbln.value=now.getMonth()+1;
-  const rthn=document.getElementById('r-thn-b');if(rthn)rthn.value=now.getFullYear();
-
-  // Load identitas sekolah
-  loadIdentitas();
-
-  // Load cache guru — selalu ada data awal
-  try{
-    const gc=ls('guru_cache');
-    gurus=gc?JSON.parse(gc):defaultGurus();
-    if(!gurus||!gurus.length)gurus=defaultGurus();
-  }catch(e){gurus=defaultGurus();}
-
-  // Load cache absensi — muat semua tanggal yang tersimpan di localStorage
-  try{
-    for(let i=0;i<localStorage.length;i++){
-      const key=localStorage.key(i);
-      if(key&&key.startsWith('ac_')){
-        const tgl=key.slice(3);
-        try{
-          const raw=ls(key);
-          if(raw){
-            const parsed=JSON.parse(raw);
-            absenDB[tgl]=parsed.map(a=>({...a,tipe:a.tipe||'masuk'}));
-          }
-        }catch(e){}
-      }
-    }
-    if(!absenDB[today()])absenDB[today()]=[];
-    console.log('[init] Cache dimuat untuk:',Object.keys(absenDB).join(', '));
-  }catch(e){absenDB[today()]=[];}
-
-  // Jam bar
-  updateClock();setInterval(updateClock,1000);
-
-  // Build UI dengan data yang ada (cache/default)
-  role='guru';buildNav();renderAll();
-
-  // Tampilkan status loading
-  const hasCache=!!(ls('guru_cache'));
-  if(!hasCache){
-    setInfoBar('⏳ Memuat data pertama kali, harap tunggu...');
-    setSyncDot('sync');
-  }
-
-  // Sync dari Sheets langsung saat load
-  syncAll();
-
-  // Auto sync setiap 30 detik
-  syncTimer=setInterval(async()=>{
-    await syncAbsensiOnly();
-    renderDash();renderManualLog();
-  },15000);
-  // Cek alpha otomatis setiap menit
-  startAlphaChecker();
-};
 
 function defaultGurus(){
   return [
