@@ -577,14 +577,17 @@ tbody tr:hover{background:var(--bg);}
     </div>
   </div>
   <!-- Firebase Status -->
+  <!-- Firebase Status -->
   <div class="card cp">
     <div class="ct">🔥 Firebase Realtime Database</div>
     <div id="fb-conn-status" class="alert a-info">⏳ Menghubungkan ke Firebase...</div>
     <p style="font-size:11px;color:var(--tx2);margin-bottom:10px">Database realtime — data tersinkron otomatis ke semua device tanpa CORS.</p>
-    <div class="brow">
-      <button class="btn bs" onclick="testFirebase()">🧪 Test Firebase</button>
-      <button class="btn bd" onclick="resetCacheLokal()" style="background:var(--rd);color:#fff">🗑️ Reset Cache</button>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+      <button class="btn bs" onclick="testFirebase()" style="width:auto">🧪 Test</button>
+      <button class="btn btl" onclick="importGuruDariSheets()" style="width:auto;background:var(--tl);color:#fff">📥 Import Guru dari Sheets</button>
+      <button class="btn bd" onclick="resetCacheLokal()" style="width:auto;background:var(--rd);color:#fff">🗑️ Reset Cache</button>
     </div>
+    <div id="import-progress" style="display:none" class="alert a-info"></div>
   </div>
 </div>
  
