@@ -19,7 +19,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
- 
+
 /* ── DROPDOWN USER ── */
 .ud-wrap{position:relative;}
 .ud-btn{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 5px;border-radius:30px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s;font-family:"DM Sans",sans-serif;}
@@ -40,7 +40,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
 .ud-it.active::after{content:"✓";margin-left:auto;font-weight:900;}
 .ud-it.danger{color:var(--rd);}
 .ud-ic{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
- 
+
 /* ── TOPBAR ── */
 .topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:linear-gradient(135deg,var(--or),#FF8C00);box-shadow:0 2px 12px rgba(255,107,53,.3);position:sticky;top:0;z-index:100;}
 .tb-left{display:flex;align-items:center;gap:9px;}
@@ -51,27 +51,27 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
 .tb-time{text-align:right;}
 .tb-clk{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:800;color:#fff;line-height:1;}
 .tb-dt{font-size:9px;color:rgba(255,255,255,.8);}
- 
+
 /* ── BOTTOMNAV ── */
 .bnav{position:fixed;bottom:0;left:0;right:0;height:58px;background:rgba(255,255,255,.97);border-top:1px solid var(--border);display:flex;z-index:99;box-shadow:0 -2px 12px rgba(0,0,0,.06);}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:9px;font-weight:600;color:var(--tx3);transition:color .2s;padding:6px 2px;}
 .bn .bi{font-size:19px;line-height:1;transition:transform .2s;}
 .bn.active{color:var(--or);}
 .bn.active .bi{transform:scale(1.1);}
- 
+
 /* ── CONTENT ── */
 .content{padding:14px 14px 70px;}
 .tab{display:none;}.tab.on{display:block;}
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;}
 .cp{padding:14px 16px;}
 .ct{font-family:"Plus Jakarta Sans",sans-serif;font-size:14px;font-weight:800;margin-bottom:12px;}
- 
+
 /* ── STATS ── */
 .sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;}
 .scard{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--sh);border:1px solid var(--border);border-left:4px solid transparent;}
 .slbl{font-size:10px;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
 .snum{font-family:"Plus Jakarta Sans",sans-serif;font-size:30px;font-weight:900;line-height:1;}
- 
+
 /* ── JAM BAR ── */
 .jambar{background:var(--card);border-radius:var(--r);padding:13px 14px;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:10px;}
 .jambar-head{display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:7px;}
@@ -79,7 +79,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
 .jambar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gn),var(--yl),var(--rd));transition:width .5s;}
 .jambar-ptr{position:absolute;top:-4px;width:16px;height:16px;background:#fff;border:2px solid var(--or);border-radius:50%;transform:translateX(-50%);box-shadow:0 1px 4px rgba(0,0,0,.2);transition:left .5s;}
 .jambar-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:5px;}
- 
+
 /* ── ABSEN BUTTONS ── */
 .absen-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
 .absen-btn{border:none;border-radius:var(--r);padding:18px 14px;cursor:pointer;font-family:"Plus Jakarta Sans",sans-serif;font-size:13px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:all .25s;width:100%;min-height:90px;}
@@ -91,7 +91,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
 .ab-locked{background:#f1f5f9;color:#94a3b8;cursor:not-allowed;box-shadow:none;border:2px dashed #e2e8f0;}
 .absen-btn:not(.ab-locked):active{transform:scale(.97);}
 .absen-btn:not(.ab-locked):hover{transform:translateY(-2px);filter:brightness(1.05);}
- 
+
 /* ── LIST ── */
 .litem{display:flex;align-items:center;gap:9px;padding:10px 14px;border-bottom:1px solid var(--border);}
 .litem:last-child{border-bottom:none;}
@@ -108,7 +108,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
 .b-iz{background:var(--bl2);color:#1E40AF;}
 .b-sk{background:var(--pi2);color:#9D174D;}
 .b-al{background:var(--rd2);color:#9F1239;}
- 
+
 /* ── FORM ── */
 .fg{margin-bottom:12px;}
 .fl{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
@@ -125,19 +125,19 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
 .bd{background:var(--rd);color:#fff;}
 .bpu{background:var(--pu);color:#fff;}
 .btl{background:var(--tl);color:#fff;}
- 
+
 /* ── FOTO UPLOAD ── */
 .fotorow{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
 .fotoprev{width:64px;height:64px;border-radius:14px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--bg);overflow:hidden;flex-shrink:0;cursor:pointer;transition:all .2s;}
 .fotoprev:hover{border-color:var(--or);}
 .fotoprev img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
- 
+
 /* ── SCAN ── */
 .scan-hdr{padding:14px;text-align:center;}
 .scan-hdr h2{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:800;margin-bottom:2px;}
 .scan-hdr p{font-size:11px;color:var(--tx2);}
 .scan-res{padding:10px 14px;border-top:1px solid var(--border);}
- 
+
 /* ── TABLE ── */
 .tbl-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;}
@@ -147,13 +147,13 @@ tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:var(--bg);}
 .pbar{height:4px;border-radius:2px;background:var(--border);margin-top:3px;overflow:hidden;}
 .pfill{height:100%;border-radius:2px;transition:width .5s;}
- 
+
 /* ── PERIOD TABS ── */
 .ptabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
 .ptabs::-webkit-scrollbar{display:none;}
 .ptab{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);font-size:11px;font-weight:600;color:var(--tx2);cursor:pointer;white-space:nowrap;transition:all .2s;font-family:"DM Sans",sans-serif;}
 .ptab.active{background:var(--or);color:#fff;border-color:var(--or);}
- 
+
 /* ── GURU GRID ── */
 .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px;}
 .gc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);padding:14px;text-align:center;transition:all .2s;cursor:default;}
@@ -161,34 +161,34 @@ tbody tr:hover{background:var(--bg);}
 .gcav{width:52px;height:52px;border-radius:14px;margin:0 auto 9px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;}
 .gcnm{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:12px;margin-bottom:2px;}
 .gcsb{font-size:10px;color:var(--tx2);margin-bottom:7px;}
- 
+
 /* ── QR DISP ── */
 .qrdisp{display:flex;flex-direction:column;align-items:center;padding:14px;background:var(--bg);border-radius:var(--rs);margin-top:10px;}
- 
+
 /* ── ALERT ── */
 .alert{padding:10px 12px;border-radius:var(--rs);font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:flex-start;gap:7px;}
 .a-ok{background:var(--gn2);color:#065F46;}
 .a-warn{background:var(--yl2);color:#92400E;}
 .a-info{background:var(--bl2);color:#1E40AF;}
 .a-err{background:var(--rd2);color:#9F1239;}
- 
+
 /* ── MODAL ── */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center;}
 .modal-ov.open{display:flex;}
 .modal{background:#fff;border-radius:18px 18px 0 0;padding:20px 16px 28px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;}
 .mdrag{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px;}
 .mtitle{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:800;margin-bottom:12px;}
- 
+
 /* ── LOGIN MODAL ── */
 .login-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
 .login-modal-ov.open{display:flex;}
 .login-box{background:#fff;border-radius:18px;padding:24px 20px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.25);}
- 
+
 /* ── TOAST ── */
 .toast{position:fixed;bottom:66px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--tx);color:#fff;padding:9px 18px;border-radius:30px;font-size:12px;font-weight:600;z-index:500;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 .t-ok{background:var(--gn);}.t-err{background:var(--rd);}.t-warn{background:var(--yl);color:var(--tx);}.t-info{background:var(--pu);}
- 
+
 .spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
 .color-sw{border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;color:#fff;font-size:16px;font-weight:700;transition:transform .2s;box-shadow:0 3px 10px rgba(0,0,0,.2);}
 .color-sw span{display:block;font-size:10px;margin-top:3px;font-family:"DM Sans",sans-serif;}
@@ -201,7 +201,7 @@ tbody tr:hover{background:var(--bg);}
 </style>
 </head>
 <body>
- 
+
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="tb-left">
@@ -233,11 +233,11 @@ tbody tr:hover{background:var(--bg);}
     </div>
   </div>
 </div>
- 
+
 <!-- CONTENT -->
 <div id="info-bar" style="display:none;background:#1E40AF;color:#fff;font-size:11px;font-weight:600;padding:7px 16px;text-align:center;"></div>
 <div class="content" id="content">
- 
+
 <!-- ─── TAB: DASHBOARD ─── -->
 <div class="tab on" id="tab-dash">
   <div class="jambar" id="jambar">
@@ -268,7 +268,7 @@ tbody tr:hover{background:var(--bg);}
   <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px">⏱ Terbaru</div>
   <div class="card" id="list-recent"><div class="empty"><div class="empty-ic">📋</div><p>Belum ada absensi</p></div></div>
 </div>
- 
+
 <!-- ─── TAB: SCAN ─── -->
 <div class="tab" id="tab-scan">
   <div style="max-width:440px;margin:0 auto">
@@ -287,7 +287,7 @@ tbody tr:hover{background:var(--bg);}
     </div>
   </div>
 </div>
- 
+
 <!-- ─── TAB: MANUAL / IZIN / ALPHA ─── -->
 <div class="tab" id="tab-manual">
   <div class="card cp">
@@ -333,7 +333,7 @@ tbody tr:hover{background:var(--bg);}
   <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px">📋 Log Hari Ini</div>
   <div class="card" id="list-manual"><div class="empty"><div class="empty-ic">📋</div><p>Belum ada absensi</p></div></div>
 </div>
- 
+
 <!-- ─── TAB: QR ─── -->
 <div class="tab" id="tab-qr">
   <div class="card cp">
@@ -353,7 +353,7 @@ tbody tr:hover{background:var(--bg);}
   <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px">👥 Pilih Guru</div>
   <div class="ggrid" id="qr-grid"></div>
 </div>
- 
+
 <!-- ─── TAB: REKAP ─── -->
 <div class="tab" id="tab-rekap">
   <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
@@ -369,7 +369,7 @@ tbody tr:hover{background:var(--bg);}
     <input type="text" class="fc" id="rekap-cari" placeholder="🔍 Cari nama guru..." 
       oninput="filterRekap()" style="padding-left:14px">
   </div>
- 
+
   <!-- HARIAN -->
   <div id="r-harian">
     <div class="card cp" style="padding-bottom:10px">
@@ -388,7 +388,7 @@ tbody tr:hover{background:var(--bg);}
       <div id="rekap-filter-info" style="padding:6px 14px;font-size:10px;color:var(--tx3);text-align:right"></div>
     </div>
   </div>
- 
+
   <!-- BULANAN -->
   <div id="r-bulanan" style="display:none">
     <div class="card cp" style="padding-bottom:10px">
@@ -412,7 +412,7 @@ tbody tr:hover{background:var(--bg);}
       <tbody id="tbl-bulanan"></tbody>
     </table></div></div>
   </div>
- 
+
   <!-- SEMESTER -->
   <div id="r-semester" style="display:none">
     <div class="card cp" style="padding-bottom:10px">
@@ -433,7 +433,7 @@ tbody tr:hover{background:var(--bg);}
       <tbody id="tbl-semester"></tbody>
     </table></div></div>
   </div>
- 
+
   <!-- TAHUNAN -->
   <div id="r-tahunan" style="display:none">
     <div class="card cp" style="padding-bottom:10px">
@@ -451,7 +451,7 @@ tbody tr:hover{background:var(--bg);}
     </table></div></div>
   </div>
 </div>
- 
+
 <!-- ─── TAB: GURU ─── -->
 <div class="tab" id="tab-guru">
   <div style="display:flex;gap:8px;margin-bottom:10px">
@@ -484,7 +484,7 @@ tbody tr:hover{background:var(--bg);}
     </div>
   </div>
 </div>
- 
+
 <!-- ─── TAB: SETTING ─── -->
 <div class="tab" id="tab-setting">
   <div class="card cp">
@@ -511,7 +511,7 @@ tbody tr:hover{background:var(--bg);}
       <input type="text" class="fc" id="cfg-sekolah" placeholder="Nama sekolah" oninput="updateLogoPreview()"></div>
     <div class="fg"><label class="fl">Sub Judul / Tagline</label>
       <input type="text" class="fc" id="cfg-tagline" placeholder="Sistem Absensi Digital" oninput="updateLogoPreview()"></div>
- 
+
     <!-- Upload Logo -->
     <div class="fg"><label class="fl">Logo Sekolah</label>
       <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
@@ -525,7 +525,7 @@ tbody tr:hover{background:var(--bg);}
         </div>
       </div>
     </div>
- 
+
     <!-- Preview topbar -->
     <div class="fg">
       <label class="fl">Preview</label>
@@ -539,7 +539,7 @@ tbody tr:hover{background:var(--bg);}
     </div>
     <button class="btn bp" style="width:auto" onclick="saveIdentitas()">💾 Simpan Identitas</button>
   </div>
- 
+
   <!-- Ganti Warna Tema -->
   <div class="card cp">
     <div class="ct">🎨 Tema Warna Aplikasi</div>
@@ -563,7 +563,7 @@ tbody tr:hover{background:var(--bg);}
     </div>
     <button class="btn bs" style="width:auto;margin-top:8px" onclick="applyTheme('#FF6B35','#FF8C00')">↩ Reset ke Default</button>
   </div>
- 
+
   <div class="card cp">
     <div class="ct">🔗 Google Sheets</div>
     <div class="alert a-ok" id="conn-status">⚡ Mengecek koneksi...</div>
@@ -574,12 +574,12 @@ tbody tr:hover{background:var(--bg);}
     </div>
   </div>
 </div>
- 
+
 </div><!-- end content -->
- 
+
 <!-- BOTTOM NAV -->
 <nav class="bnav" id="bnav"></nav>
- 
+
 <!-- MODAL PILIH ABSEN -->
 <div class="modal-ov" id="modal-absen">
   <div class="modal">
@@ -592,7 +592,7 @@ tbody tr:hover{background:var(--bg);}
     <button class="btn bs" style="width:100%;margin-top:8px" onclick="closeModal('modal-absen')">Batal</button>
   </div>
 </div>
- 
+
 <!-- MODAL TERLAMBAT -->
 <div class="modal-ov" id="modal-terlambat">
   <div class="modal">
@@ -607,7 +607,7 @@ tbody tr:hover{background:var(--bg);}
     </div>
   </div>
 </div>
- 
+
 <!-- LOGIN MODAL -->
 <div class="login-modal-ov" id="login-modal">
   <div class="login-box">
@@ -624,17 +624,17 @@ tbody tr:hover{background:var(--bg);}
     <p style="text-align:center;font-size:10px;color:var(--tx3);margin-top:10px">Klik ✕ untuk tetap sebagai Guru</p>
   </div>
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <script>
 // ═══════════════════════════════════════════════
 // KONFIGURASI - HARDCODE
 // ═══════════════════════════════════════════════
-const GAS = 'https://script.google.com/macros/s/AKfycbzfQwQ4tAYmJuV8Uo9DIC9Mu9zwDpqQniuqpziy1XYSqSI8XQjiawq6hMtB8oodObsn_g/exec';
+const GAS = 'https://script.google.com/macros/s/AKfycbyutZju4ejgeerbBEuwjpkcBNyKjbf0ISYqcL6HAjgTIBndrXAJOZzF18-VDEi7Zl4hkg/exec';
 const SID = '1ZJTqWfWbeTQamaO0cLAF2KlymUUzoqVlSIyQ6276uN4';
 const DEFAULTS = {admin:{u:'admin',p:'sdit2025'},kepsek:{u:'kepsek',p:'kepsek2025'},yayasan:{u:'yayasan',p:'yayasan2025'}};
- 
+
 // ═══════════════════════════════════════════════
 // JAM CONFIG
 // ═══════════════════════════════════════════════
@@ -645,7 +645,7 @@ let JAM = {
   pulang:   localStorage.getItem('j_pulang')   || '14:00',
   maxpulang:localStorage.getItem('j_maxpulang')|| '15:30'
 };
- 
+
 // ═══════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════
@@ -659,10 +659,10 @@ let absenMode = 'masuk';
 let pendingGuruId = null;
 let scanOn = false, scanner = null;
 let syncTimer = null;
- 
+
 const CBG = ['#FFF0E8','#E0FAFA','#EEE9FF','#E6FAF0'];
 const CFG = ['#FF6B35','#0ABAB5','#6C47FF','#06C270'];
- 
+
 // ═══════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════
@@ -685,11 +685,11 @@ function absenMapToday(){
   });
   return m;
 }
- 
+
 // ═══════════════════════════════════════════════
 // API — Fetch murni (JSONP diblokir browser modern)
 // ═══════════════════════════════════════════════
- 
+
 function parseResp(txt){
   let s=txt.trim();
   // Strip JSONP wrapper jika ada
@@ -699,20 +699,20 @@ function parseResp(txt){
   }
   return JSON.parse(s);
 }
- 
+
 // ── API: fetch dengan fallback ──
 // Google Apps Script dengan ContentService.JSON sudah support CORS
 // Kuncinya: gunakan fetch TANPA mode:'cors' (biarkan browser handle)
 let _cbSeq = 0;
- 
+
 // ── GET: JSONP dulu (bypass CORS), fetch sebagai fallback ──
- 
+
 function jsonpGet(url, action) {
   return new Promise(function(res, rej) {
     var seq = ++_cbSeq;
     var name = 'GS_CB_' + seq;
     var done = false;
- 
+
     var timer = setTimeout(function() {
       if (done) return;
       done = true;
@@ -721,7 +721,7 @@ function jsonpGet(url, action) {
       if (s) s.remove();
       rej(new Error('timeout'));
     }, 12000);
- 
+
     window[name] = function(d) {
       if (done) return;
       done = true;
@@ -732,7 +732,7 @@ function jsonpGet(url, action) {
       if (d && d.error) rej(new Error(d.error));
       else { console.log('[GET]', action, 'OK via JSONP', d.data ? d.data.length : ''); res(d); }
     };
- 
+
     var s = document.createElement('script');
     s.id = '_sc_' + seq;
     s.onerror = function() {
@@ -747,7 +747,7 @@ function jsonpGet(url, action) {
     document.head.appendChild(s);
   });
 }
- 
+
 async function fetchGet(url, action) {
   const r = await fetch(url, {method:'GET', redirect:'follow'});
   const txt = await r.text();
@@ -757,7 +757,7 @@ async function fetchGet(url, action) {
   console.log('[GET]', action, 'OK via fetch', j.data ? j.data.length : '');
   return j;
 }
- 
+
 async function GET(action, data={}) {
   const url = GAS + '?' + new URLSearchParams({action, ...data});
   
@@ -773,7 +773,7 @@ async function GET(action, data={}) {
     throw new Error('GET ' + action + ' gagal: ' + e.message);
   }
 }
- 
+
 // POST: untuk simpan data (absensi, guru tanpa foto)
 async function POST(action,data={}){
   const {foto,...noFoto}=data;
@@ -781,7 +781,7 @@ async function POST(action,data={}){
   for(const k in noFoto)flat[k]=typeof noFoto[k]==='object'?JSON.stringify(noFoto[k]):String(noFoto[k]??'');
   return GET(action,flat);
 }
- 
+
 // POSTwithBody: untuk guru dengan foto (POST JSON body)
 async function POSTwithBody(action,data={}){
   // Coba POST JSON body dulu (untuk foto)
@@ -798,7 +798,7 @@ async function POSTwithBody(action,data={}){
   const {foto,...noFoto}=data;
   return POST(action,noFoto);
 }
- 
+
 // ═══════════════════════════════════════════════
 // SYNC
 // ═══════════════════════════════════════════════
@@ -808,7 +808,7 @@ function setSyncDot(state){
   el.style.color=state==='ok'?'var(--gn)':state==='sync'?'var(--yl)':'var(--rd)';
   el.textContent=state==='sync'?'◌':'●';
 }
- 
+
 // ── SYNC — robust dengan multiple method ──
 function setInfoBar(msg,type='info'){
   const bar=document.getElementById('info-bar');
@@ -818,9 +818,9 @@ function setInfoBar(msg,type='info'){
   bar.textContent=msg;
   bar.style.display=msg?'block':'none';
 }
- 
- 
- 
+
+
+
 async function syncGuru(){
   try{
     console.log('[syncGuru] Mulai...');
@@ -837,7 +837,7 @@ async function syncGuru(){
   }catch(e){console.warn('[syncGuru] Error:',e.message);}
   return false;
 }
- 
+
 async function syncAbsensi(){
   const tgl=today();
   try{
@@ -868,17 +868,17 @@ async function syncAbsensi(){
   }catch(e){console.warn('[syncAbsensi]',e.message);}
   return false;
 }
- 
+
 async function syncAll(){
   setSyncDot('sync');
   setInfoBar('🔄 Menghubungkan ke Google Sheets...','info');
- 
+
   let guruOk=false, absenOk=false;
   // Coba guru dulu
   guruOk=await syncGuru();
   // Lalu absensi
   absenOk=await syncAbsensi();
- 
+
   // Jika gagal, retry sekali lagi setelah 3 detik
   if(!guruOk||!absenOk){
     setInfoBar('⏳ Mencoba ulang...','warn');
@@ -886,14 +886,14 @@ async function syncAll(){
     if(!guruOk) guruOk=await syncGuru();
     if(!absenOk) absenOk=await syncAbsensi();
   }
- 
+
   // Jika masih gagal, retry lagi setelah 8 detik
   if(!guruOk||!absenOk){
     await new Promise(r=>setTimeout(r,8000));
     if(!guruOk) guruOk=await syncGuru();
     if(!absenOk) absenOk=await syncAbsensi();
   }
- 
+
   if(guruOk||absenOk){
     setSyncDot('ok');
     setInfoBar('','ok');
@@ -905,35 +905,29 @@ async function syncAll(){
   flushQueue().catch(()=>{});
   return guruOk||absenOk;
 }
- 
+
 async function syncAbsensiOnly(){
   const ok=await syncAbsensi();
   if(ok){renderDash();renderManualLog();}
   flushQueue().catch(()=>{});
 }
- 
+
 // ─── Alpha Checker ───────────────────────────────────
 function startAlphaChecker(){
-  // Cek sekarang
   checkAndMarkAlpha();
-  // Ulangi setiap menit
   setInterval(checkAndMarkAlpha, 60000);
 }
- 
+
 async function checkAndMarkAlpha(){
-  // Hanya admin/kepsek yang bisa tandai alpha
   if(role!=='admin'&&role!=='kepsek') return;
-  const n=nowMin();
-  // Alpha berlaku setelah jam 10:30
-  if(n<t2m('10:30')) return;
-  // Cek flag hari ini
+  if(nowMin()<t2m('10:30')) return;
+  // Flag per hari — cukup sekali per device
   const flagKey='alpha_done_'+today();
   if(ls(flagKey)==='1') return;
-  // Tandai flag
   ls(flagKey,'1');
   await autoMarkAlpha();
 }
- 
+
 // Antrian untuk data yang gagal kirim
 async function saveAbsensi(entry){
   const payload={tanggal:entry.tanggal,id:entry.id,nama:entry.nama,mapel:entry.mapel,
@@ -956,7 +950,7 @@ async function saveAbsensi(entry){
   toast('⚠ Offline - akan sync otomatis','warn');
   return false;
 }
- 
+
 async function flushQueue(){
   let q;try{q=JSON.parse(ls('queue')||'[]');}catch(e){return;}
   if(!q.length)return;
@@ -972,7 +966,7 @@ async function flushQueue(){
     syncAbsensiOnly();
   }
 }
- 
+
 // ═══════════════════════════════════════════════
 // JAM LOGIC
 // ═══════════════════════════════════════════════
@@ -987,7 +981,7 @@ function bisaPulang(){
   // (cek dari absenMapToday - untuk scan QR, guruId belum diketahui di sini)
   return true; // validasi per-guru dilakukan di prosesAbsenScan
 }
- 
+
 // Cek apakah guru tertentu sudah absen masuk
 function sudahAbsenMasuk(guruId){
   const m=absenMapToday();
@@ -997,38 +991,42 @@ function sudahAbsenMasuk(guruId){
   if(!absen) return false;
   return absen.status==='hadir'||absen.status==='terlambat';
 }
- 
+
 // Tandai guru yang belum absen masuk setelah jam maxmasuk sebagai Alpha
 // Dipanggil otomatis setelah jam 11:00
 async function autoMarkAlpha(){
   if(role!=='admin'&&role!=='kepsek') return;
-  // Ambil data terbaru dari Sheets dulu
+  // Ambil data terbaru Sheets
   await syncAbsensi();
   const m=absenMapToday();
-  // Cari guru yang belum punya record masuk/tidak masuk
+  // Hanya guru yang BENAR-BENAR belum ada record apapun hari ini
   const belum=gurus.filter(g=>{
-    return !m[g.id+'|masuk'] && !m[g.id+'|tidak masuk'];
+    const sudahMasuk    = !!m[g.id+'|masuk'];
+    const sudahTdkMasuk = !!m[g.id+'|tidak masuk'];
+    return !sudahMasuk && !sudahTdkMasuk;
   });
-  if(!belum.length){
-    console.log('[Alpha] Semua guru sudah absen');
-    return;
-  }
-  console.log('[Alpha] Tandai',belum.length,'guru sebagai Alpha');
+  if(!belum.length){console.log('[Alpha] Semua guru sudah tercatat');return;}
+  console.log('[Alpha] Akan tandai',belum.length,'guru');
+  let berhasil=0;
   for(const g of belum){
+    // Double-check lokal agar tidak duplikat
+    const mCek=absenMapToday();
+    if(mCek[g.id+'|tidak masuk']){continue;}
     const entry={tanggal:today(),id:g.id,nama:g.nama,mapel:g.mapel,
       status:'alpha',tipe:'tidak masuk',waktu:'--:--',ket:'Tidak hadir tanpa keterangan'};
-    // Simpan lokal
     if(!absenDB[today()])absenDB[today()]=[];
     absenDB[today()].push(entry);
-    // Kirim ke Sheets
-    saveAbsensi(entry).catch(()=>{});
-    await new Promise(r=>setTimeout(r,500));
+    saveLocal();
+    await saveAbsensi(entry).catch(()=>{});
+    berhasil++;
+    await new Promise(r=>setTimeout(r,600));
   }
-  saveLocal();
-  renderDash();renderManualLog();
-  if(belum.length>0) toast('📋 '+belum.length+' guru ditandai Alpha otomatis','info');
+  if(berhasil>0){
+    renderDash();renderManualLog();
+    toast('📋 '+berhasil+' guru ditandai Alpha','info');
+  }
 }
- 
+
 function updateJamBar(){
   const n=nowMin();
   const start=t2m('06:00'),end=t2m('16:00'),total=end-start;
@@ -1044,14 +1042,14 @@ function updateJamBar(){
   else txt='🏠 Selesai';
   const jt=document.getElementById('jam-txt');if(jt)jt.textContent=txt;
 }
- 
+
 function updateAbsenBtns(){
   const bm=document.getElementById('btn-masuk');
   const bp=document.getElementById('btn-pulang');
   const im=document.getElementById('info-masuk');
   const ip=document.getElementById('info-pulang');
   if(!bm||!bp)return;
- 
+
   // Tombol masuk - hanya kunci berdasarkan JAM, bukan status siapa yang sudah absen
   if(nowMin()<t2m(JAM.mulai)){
     bm.className='absen-btn ab-locked';
@@ -1063,7 +1061,7 @@ function updateAbsenBtns(){
     bm.className='absen-btn ab-masuk';
     if(im)im.textContent=isTerlambat()?'⚠ Terlambat':'⏰ Tepat waktu';
   }
- 
+
   // Tombol pulang - info saja, validasi per-guru saat scan/klik
   if(nowMin()<t2m(JAM.pulang)){
     bp.className='absen-btn ab-locked';
@@ -1078,7 +1076,7 @@ function updateAbsenBtns(){
   
   // Alpha trigger — ditangani oleh startAlphaChecker()
 }
- 
+
 // ═══════════════════════════════════════════════
 // CLOCK
 // ═══════════════════════════════════════════════
@@ -1090,7 +1088,7 @@ function updateClock(){
   const tEl=document.getElementById('tgl');if(tEl)tEl.textContent=H[n.getDay()]+', '+n.getDate()+' '+B[n.getMonth()]+' '+n.getFullYear();
   updateJamBar();updateAbsenBtns();
 }
- 
+
 // ═══════════════════════════════════════════════
 // NAV CONFIG
 // ═══════════════════════════════════════════════
@@ -1126,7 +1124,7 @@ const ROLE_META={
   kepsek:{lbl:'Kepala Sekolah',av:'🏫',bg:'#EEE9FF',fg:'#6C47FF'},
   yayasan:{lbl:'Ketua Yayasan',av:'🏛',bg:'#E0FAFA',fg:'#0ABAB5'}
 };
- 
+
 function buildNav(){
   const meta=ROLE_META[role];
   // Update topbar
@@ -1148,21 +1146,21 @@ function buildNav(){
   // Rekap tahunan - hanya admin
   const pt=document.getElementById('ptab-tahunan');
   if(pt)pt.style.display=role==='admin'?'block':'none';
- 
+
   // Tombol Tambah Guru - hanya admin
   const btnTambah=document.getElementById('btn-tambah-guru');
   if(btnTambah)btnTambah.style.display=role==='admin'?'flex':'none';
- 
+
   // Form edit guru - sembunyikan untuk selain admin
   const fGuru=document.getElementById('form-guru');
   if(fGuru&&role!=='admin')fGuru.style.display='none';
- 
+
   // Info panel manual - kontekstual per role
   const infoAdmin=document.getElementById('manual-admin-info');
   const infoGuru=document.getElementById('manual-guru-info');
   if(infoAdmin)infoAdmin.style.display=(role==='admin'||role==='kepsek')?'flex':'none';
   if(infoGuru)infoGuru.style.display=role==='guru'?'flex':'none';
- 
+
   // Filter tipe absen berdasarkan role
   onTipeChange();
   // Build bottomnav
@@ -1174,7 +1172,7 @@ function buildNav(){
   // Activate first tab
   switchTab(NAVS[role][0].id,NAVS[role][0].tab);
 }
- 
+
 let activeTab='tab-dash';
 function switchTab(navId,tabId){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
@@ -1187,12 +1185,16 @@ function switchTab(navId,tabId){
   if(tabId==='tab-dash'){renderDash();renderManualLog();}
   if(tabId==='tab-guru')renderGuru();
   if(tabId==='tab-qr'){renderQRGrid();populateQRSel();}
-  if(tabId==='tab-rekap'&&document.getElementById('r-harian').style.display!=='none'){
-    // Auto-load rekap harian
-    loadHarian();
+  if(tabId==='tab-rekap'){
+    // Set tanggal ke hari ini dan auto-load
+    const rTgl=document.getElementById('r-tgl');
+    if(rTgl&&!rTgl.value)rTgl.value=today();
+    if(document.getElementById('r-harian')?.style.display!=='none'){
+      loadHarian();
+    }
   }
 }
- 
+
 // ═══════════════════════════════════════════════
 // DROPDOWN
 // ═══════════════════════════════════════════════
@@ -1215,7 +1217,7 @@ function switchRole(r){
 }
 function doSyncNow(){closeUD();syncAll();}
 function doLogout(){if(!confirm('Keluar?'))return;closeUD();role='guru';buildNav();renderAll();}
- 
+
 // ═══════════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════════
@@ -1244,7 +1246,7 @@ function doLogin(){
     document.getElementById('lm-pass').value='';
   }
 }
- 
+
 // ═══════════════════════════════════════════════
 // ABSEN FLOW
 // ═══════════════════════════════════════════════
@@ -1258,7 +1260,7 @@ function bukaAbsen(tipe){
   document.getElementById('modal-absen-title').textContent=tipe==='masuk'?'🟢 Absen Masuk':'🟣 Absen Pulang';
   openModal('modal-absen');
 }
- 
+
 function goScan(){
   closeModal('modal-absen');
   const scanNav=NAVS[role].find(n=>n.id==='scan');
@@ -1267,7 +1269,7 @@ function goScan(){
   // Update scan header
   updateScanHeader();
 }
- 
+
 function updateScanHeader(){
   const h=document.getElementById('scan-title');
   const s=document.getElementById('scan-sub');
@@ -1276,7 +1278,7 @@ function updateScanHeader(){
   const sh=document.getElementById('scan-hdr');
   if(sh)sh.style.background=absenMode==='masuk'?'linear-gradient(135deg,var(--gn),#10B981)':'linear-gradient(135deg,var(--pu),#7C3AED)';
 }
- 
+
 function goManualAbsen(){
   closeModal('modal-absen');
   const mn=NAVS[role].find(n=>n.id==='manual');
@@ -1286,13 +1288,13 @@ function goManualAbsen(){
     onTipeChange();
   }
 }
- 
+
 // ═══════════════════════════════════════════════
 // SCANNER
 // ═══════════════════════════════════════════════
 const _scanDone=new Set();
 let _lastScan=0;
- 
+
 function startScanner(){
   if(scanOn)return;
   const el=document.getElementById('qr-reader');el.innerHTML='';
@@ -1305,32 +1307,32 @@ function startScanner(){
   });
 }
 function stopScanner(){if(scanner&&scanOn)scanner.stop().then(()=>scanOn=false).catch(()=>{});}
- 
+
 // onScan HARUS SYNC - delegate ke async via setTimeout
 function onScan(txt){
   const now=Date.now();
   if(now-_lastScan<3000)return; // debounce 3 detik
- 
+
   const p=txt.split('_');
   if(p[0]!=='SDIT'||p[1]!=='QK')return; // bukan QR kita
- 
+
   const guruId=p[2];
   const tipe=absenMode||'masuk';
   const key=guruId+'|'+tipe+'|'+today();
- 
+
   if(_scanDone.has(key)){
     const g=gurus.find(x=>x.id===guruId);
     if(g)toast(g.nama+' sudah absen '+tipe,'info');
     return;
   }
- 
+
   _lastScan=now;
   _scanDone.add(key);
- 
+
   // Delegate ke async
   setTimeout(()=>prosesAbsenScan(guruId,tipe),50);
 }
- 
+
 async function prosesAbsenScan(guruId,tipe){
   const g=gurus.find(x=>x.id===guruId);
   if(!g){
@@ -1338,7 +1340,7 @@ async function prosesAbsenScan(guruId,tipe){
     _scanDone.delete(guruId+'|'+tipe+'|'+today());
     return;
   }
- 
+
   // Cek sudah absen
   const m=absenMapToday();
   if(m[guruId+'|'+tipe]){
@@ -1346,7 +1348,7 @@ async function prosesAbsenScan(guruId,tipe){
     toast(g.nama+' sudah absen '+tipe,'info');
     return;
   }
- 
+
   // Validasi jam
   if(tipe==='masuk'){
     if(!bisaMasuk()){
@@ -1376,12 +1378,12 @@ async function prosesAbsenScan(guruId,tipe){
       return;
     }
   }
- 
+
   await doAbsen(guruId,tipe,'hadir','');
   showScanResult(g,{status:'hadir',waktu:nowTime(),tipe},false);
   setTimeout(()=>{const el=document.getElementById('scan-res');if(el)el.style.display='none';},4000);
 }
- 
+
 function showScanResult(g,a,sudah){
   const el=document.getElementById('scan-res');if(!el)return;
   el.style.display='block';
@@ -1397,7 +1399,7 @@ function showScanResult(g,a,sudah){
       <div style="font-size:9px;color:var(--tx3)">${sudah?'Sudah tercatat':'Tersimpan ✓ - Scanner siap guru berikutnya'}</div>
     </div></div>`;
 }
- 
+
 // Konfirmasi terlambat dari modal
 function konfirmasiTerlambat(){
   const ket=document.getElementById('terlambat-ket').value.trim();
@@ -1413,7 +1415,7 @@ function konfirmasiTerlambat(){
   }
 }
 function cancelTerlambat(){closeModal('modal-terlambat');pendingGuruId=null;}
- 
+
 // ═══════════════════════════════════════════════
 // CORE ABSEN - simpan lokal + kirim Sheets
 // ═══════════════════════════════════════════════
@@ -1429,7 +1431,7 @@ async function doAbsen(guruId,tipe,status,ket){
   if(tipe==='pulang'&&!sudahAbsenMasuk(guruId)){
     toast(g.nama+' belum absen masuk - tidak bisa absen pulang','err');return false;
   }
- 
+
   const waktu=nowTime();
   const entry={tanggal:today(),id:g.id,nama:g.nama,mapel:g.mapel,status,tipe,waktu,ket:ket||''};
   // Simpan lokal DULU
@@ -1441,7 +1443,7 @@ async function doAbsen(guruId,tipe,status,ket){
   saveAbsensi(entry).catch(()=>{});
   return true;
 }
- 
+
 // ═══════════════════════════════════════════════
 // MANUAL INPUT (Admin/Kepsek isi izin/sakit/alpha)
 // ═══════════════════════════════════════════════
@@ -1450,10 +1452,10 @@ function onTipeChange(){
   const sw=document.getElementById('mg-status-wrap');
   const kw=document.getElementById('mg-ket-wrap');
   if(!tipeEl||!sw||!kw)return;
- 
+
   const tipe=tipeEl.value;
   const isAdminKepsek=(role==='admin'||role==='kepsek');
- 
+
   // Opsi dropdown: guru hanya bisa masuk/pulang
   [...tipeEl.options].forEach(o=>{
     if(['izin','sakit','alpha'].includes(o.value)){
@@ -1465,7 +1467,7 @@ function onTipeChange(){
   if(!isAdminKepsek&&['izin','sakit','alpha'].includes(tipe)){
     tipeEl.value='masuk';
   }
- 
+
   // Tampilkan keterangan jika perlu
   const curTipe=tipeEl.value;
   if(['izin','sakit','alpha'].includes(curTipe)){
@@ -1485,20 +1487,20 @@ function onTipeChange(){
     guruInfo.style.display=isAdminKepsek?'none':'block';
   }
 }
- 
+
 function populateManualGuru(){
   const sel=document.getElementById('mg-guru');if(!sel)return;
   sel.innerHTML='<option value="">-- Pilih Guru --</option>';
   gurus.forEach(g=>sel.innerHTML+=`<option value="${g.id}">${g.nama}</option>`);
 }
- 
+
 async function simpanManual(){
   const guruId=document.getElementById('mg-guru').value;
   const tipeVal=document.getElementById('mg-tipe').value;
   const ket=document.getElementById('mg-ket').value.trim();
   const tgl=document.getElementById('mg-tgl').value||today();
   if(!guruId){toast('Pilih guru!','err');return;}
- 
+
   let tipe,status;
   if(tipeVal==='izin'){tipe='tidak masuk';status='izin';}
   else if(tipeVal==='sakit'){tipe='tidak masuk';status='sakit';}
@@ -1509,21 +1511,21 @@ async function simpanManual(){
   } else {
     tipe='pulang';status='hadir';
   }
- 
+
   if((status==='izin'||status==='sakit'||status==='alpha'||status==='terlambat')&&!ket){
     toast('Keterangan wajib diisi!','err');
     document.getElementById('mg-ket-wrap').style.display='block';
     return;
   }
- 
+
   const g=gurus.find(x=>x.id===guruId);
   if(!g){toast('Guru tidak ditemukan','err');return;}
- 
+
   // Validasi pulang: harus sudah absen masuk
   if(tipeVal==='pulang'&&tgl===today()&&!sudahAbsenMasuk(guruId)){
     toast(g.nama+' belum absen masuk - tidak bisa absen pulang','err');return;
   }
- 
+
   // Validasi jam untuk GURU (admin/kepsek bebas koreksi kapan saja)
   if(role==='guru'&&tgl===today()){
     if(tipeVal==='masuk'&&!bisaMasuk()){
@@ -1533,11 +1535,11 @@ async function simpanManual(){
       toast('Waktu absen pulang belum/sudah berakhir ('+JAM.pulang+'-'+JAM.maxpulang+')','err');return;
     }
   }
- 
+
   const waktu=tgl===today()?nowTime():'--:--';
   document.getElementById('mg-waktu').value=waktu;
   const entry={tanggal:tgl,id:g.id,nama:g.nama,mapel:g.mapel,status,tipe,waktu,ket:ket||''};
- 
+
   // Cek duplikat hanya untuk hari ini
   if(tgl===today()){
     const m=absenMapToday();
@@ -1546,7 +1548,7 @@ async function simpanManual(){
     saveLocal();
     renderDash();renderManualLog();
   }
- 
+
   const btn=document.getElementById('btn-manual');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
   const ok=await saveAbsensi(entry);
@@ -1554,7 +1556,7 @@ async function simpanManual(){
   if(ok)toast('✅ Absensi tersimpan ke Sheets','ok');
   resetManual();
 }
- 
+
 function resetManual(){
   const els=['mg-guru','mg-ket','mg-waktu'];
   els.forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
@@ -1562,7 +1564,7 @@ function resetManual(){
   onTipeChange();
   document.getElementById('mg-tgl').value=today();
 }
- 
+
 // ═══════════════════════════════════════════════
 // RENDER DASHBOARD
 // ═══════════════════════════════════════════════
@@ -1580,7 +1582,7 @@ function renderDash(){
   const sakit =semua.filter(a=>a.status==='sakit').length;
   const alp   =semua.filter(a=>a.status==='alpha').length;
   const blm   =Math.max(0,total-semua.length);
- 
+
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   sv('s-tot',total);
   sv('s-hdr',hadir+tlt);
@@ -1588,20 +1590,20 @@ function renderDash(){
   sv('s-izn',izin+sakit);
   sv('s-alph',alp);
   sv('s-alp',blm);
- 
+
   // Recent - semua absensi hari ini
   const el=document.getElementById('list-recent');if(!el)return;
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ic">📋</div><p>Belum ada absensi</p></div>';return;}
   el.innerHTML=[...list].sort((a,b)=>b.waktu.localeCompare(a.waktu)).map(a=>liHTML(a)).join('');
 }
- 
+
 function renderManualLog(){
   const el=document.getElementById('list-manual');if(!el)return;
   const list=todayList();
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ic">📋</div><p>Belum ada absensi</p></div>';return;}
   el.innerHTML=[...list].sort((a,b)=>b.waktu.localeCompare(a.waktu)).map(a=>liHTML(a)).join('');
 }
- 
+
 function liHTML(a){
   const g=gurus.find(x=>x.id===a.id);
   const i=gurus.indexOf(g);
@@ -1613,7 +1615,7 @@ function liHTML(a){
   return `<div class="litem">${av}<div class="linf"><div class="lnm">${a.nama}</div><div class="lsb">${g?g.mapel:''} · ${tipeTx}</div></div>
     <div class="lrt"><div class="ltm">${a.waktu}</div><span class="badge ${bCls}">${bTx}</span></div></div>`;
 }
- 
+
 // ═══════════════════════════════════════════════
 // RENDER GURU
 // ═══════════════════════════════════════════════
@@ -1639,7 +1641,7 @@ function renderGuru(){
   }).join('');
   if(!f.length)grid.innerHTML='<div style="grid-column:1/-1" class="empty"><div class="empty-ic">🔍</div><p>Tidak ditemukan</p></div>';
 }
- 
+
 // ── FOTO ──
 function loadFoto(input){
   const file=input.files[0];if(!file)return;
@@ -1662,7 +1664,7 @@ function loadFoto(input){
   };
   reader.readAsDataURL(file);
 }
- 
+
 function showFormGuru(id=null){
   if(role!=='admin'){toast('Hanya Admin yang dapat mengelola data guru','err');return;}
   editGuruId=id;fotoData='';
@@ -1689,7 +1691,7 @@ function showFormGuru(id=null){
 }
 function cancelFormGuru(){document.getElementById('form-guru').style.display='none';editGuruId=null;}
 function editGuru(id){showFormGuru(id);}
- 
+
 async function simpanGuru(){
   const nama=document.getElementById('fg-nama').value.trim();
   const nip=document.getElementById('fg-nip').value.trim();
@@ -1714,7 +1716,7 @@ async function simpanGuru(){
   }catch(e){toast('⚠ Tersimpan lokal: '+e.message,'warn');}
   btn.disabled=false;btn.textContent='💾 Simpan';
 }
- 
+
 async function hapusGuru(id){
   if(role!=='admin'){toast('Hanya Admin yang dapat menghapus data guru','err');return;}
   if(!confirm('Hapus guru ini?'))return;
@@ -1723,7 +1725,7 @@ async function hapusGuru(id){
   renderGuru();renderDash();
   try{await POST('deleteGuru',{id});toast('Guru dihapus','ok');}catch(e){toast('Dihapus lokal','warn');}
 }
- 
+
 // ═══════════════════════════════════════════════
 // QR CODE
 // ═══════════════════════════════════════════════
@@ -1769,12 +1771,12 @@ function dlQR(){
   const a=document.createElement('a');a.href=img.src;
   a.download='QR_'+curQRGuru.id+'_'+curQRGuru.nama.replace(/\s+/g,'_')+'.png';a.click();
 }
- 
+
 // ═══════════════════════════════════════════════
 // REKAP
 // ═══════════════════════════════════════════════
 let currentPeriod='harian';
- 
+
 function filterRekap(){
   const q=(document.getElementById('rekap-cari')?.value||'').toLowerCase().trim();
   // Filter tabel yang sedang aktif
@@ -1790,7 +1792,7 @@ function filterRekap(){
   const info=document.getElementById('rekap-filter-info');
   if(info)info.textContent=q?'Menampilkan '+visible+' guru':'';
 }
- 
+
 function setPeriod(p,btn){
   currentPeriod=p;
   ['harian','bulanan','semester','tahunan'].forEach(id=>{
@@ -1804,12 +1806,12 @@ function setPeriod(p,btn){
   if(cari)cari.value='';
   filterRekap();
 }
- 
+
 // REKAP HARIAN - selalu ambil dari Sheets untuk akurasi
 async function loadHarian(){
   const tgl=document.getElementById('r-tgl')?.value||today();
   let data=[];
- 
+
   // Cek cache lokal dulu (termasuk tanggal lampau)
   const cached=absenDB[tgl];
   if(cached&&cached.length>0){
@@ -1818,7 +1820,7 @@ async function loadHarian(){
     renderHarian(data,tgl);
     // Tetap fetch dari Sheets di background untuk update
   }
- 
+
   // Fetch dari Sheets (pakai JSONP+fetch race untuk bypass CORS)
   try{
     setInfoBar('🔄 Mengambil data '+tgl+'...','info');
@@ -1852,7 +1854,7 @@ async function loadHarian(){
   window._lastHarianData=data;
   renderHarian(data,tgl);
 }
- 
+
 function renderHarian(data,tgl){
   const tbody=document.getElementById('tbl-harian');if(!tbody)return;
   if(!data.length){
@@ -1888,7 +1890,7 @@ function renderHarian(data,tgl){
       <td style="font-size:10px;color:var(--tx2)">${r.ket}</td></tr>`;
   }).join('');
 }
- 
+
 async function loadBulanan(){
   const bln=document.getElementById('r-bln')?.value;
   const thn=document.getElementById('r-thn-b')?.value;
@@ -1921,7 +1923,7 @@ async function loadTahunan(){
     renderRekapTable('tbl-tahunan',Object.values(map));
   }catch(e){toast('Gagal: '+e.message,'err');}
 }
- 
+
 function renderRekapTable(tbodyId,data){
   const tbody=document.getElementById(tbodyId);if(!tbody)return;
   if(!data||!data.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--tx3)">Belum ada data</td></tr>';return;}
@@ -1946,7 +1948,7 @@ function renderRekapTable(tbodyId,data){
     </tr>`;
   }).join('');
 }
- 
+
 function exportCSV(type){
   let rows=[],fname='';
   if(type==='harian'){
@@ -1972,7 +1974,7 @@ function exportCSV(type){
   a.download=fname;a.click();
   toast('📥 CSV diunduh','ok');
 }
- 
+
 // ═══════════════════════════════════════════════
 // SETTING
 // ═══════════════════════════════════════════════
@@ -1982,7 +1984,7 @@ document.addEventListener('input',function(e){
     updateLogoPreview();
   }
 });
- 
+
 function saveJam(){
   JAM.mulai=document.getElementById('cfg-mulai').value;
   JAM.batas=document.getElementById('cfg-batas').value;
@@ -2019,7 +2021,7 @@ async function testConn(){
     toast('❌ Gagal: '+e.message,'err');
   }
 }
- 
+
 // ═══════════════════════════════════════════════
 // MODAL & TOAST
 // ═══════════════════════════════════════════════
@@ -2030,14 +2032,14 @@ function toast(msg,type=''){
   t.textContent=msg;t.className='toast t-'+type;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3500);
 }
- 
+
 // ═══════════════════════════════════════════════
 // RENDER ALL
 // ═══════════════════════════════════════════════
 function renderAll(){
   renderDash();renderManualLog();renderGuru();renderQRGrid();populateManualGuru();populateQRSel();
 }
- 
+
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
@@ -2064,14 +2066,14 @@ function loadIdentitas(){
   sv('cfg-sekolah',nama);sv('cfg-tagline',tagline);sv('cfg-logo',logo);
   updateLogoPreview();
 }
- 
+
 function setLogoEl(el,logo,imgStyle){
   if(!el)return;
   if(logo&&(logo.startsWith('http')||logo.startsWith('data:'))){
     el.innerHTML='<img src="'+logo+'" style="'+imgStyle+'">';
   } else {el.innerHTML='';el.textContent=logo||'🏫';}
 }
- 
+
 function updateLogoPreview(){
   const logo=(document.getElementById('cfg-logo')?.value)||ls('sch_logo')||'🏫';
   const nama=(document.getElementById('cfg-sekolah')?.value)||'SDIT Qudwatun Hasanah';
@@ -2081,7 +2083,7 @@ function updateLogoPreview(){
   const nm=document.getElementById('nama-preview');if(nm)nm.textContent=nama;
   const tg=document.getElementById('tagline-preview');if(tg)tg.textContent=tagline;
 }
- 
+
 function handleLogoUpload(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
@@ -2104,7 +2106,7 @@ function handleLogoUpload(input){
   };
   reader.readAsDataURL(file);
 }
- 
+
 function saveIdentitas(){
   const nama=document.getElementById('cfg-sekolah')?.value||'';
   const tagline=document.getElementById('cfg-tagline')?.value||'';
@@ -2114,7 +2116,7 @@ function saveIdentitas(){
   loadIdentitas();
   toast('Identitas sekolah disimpan','ok');
 }
- 
+
 function applyTheme(c1,c2,silent){
   document.documentElement.style.setProperty('--or',c1);
   const tb=document.querySelector('.topbar');
@@ -2129,7 +2131,7 @@ function applyTheme(c1,c2,silent){
     ':root{--or:'+c1+';--or2:'+c1+'15}';
   if(!silent){ls('sch_warna1',c1);ls('sch_warna2',c2);toast('Tema warna diterapkan','ok');}
 }
- 
+
 function applyCustomColor(){
   const c=document.getElementById('custom-color')?.value||'#FF6B35';
   const hex=c.replace('#','');
@@ -2138,7 +2140,7 @@ function applyCustomColor(){
   const b=Math.max(0,parseInt(hex.slice(4,6),16)-20).toString(16).padStart(2,'0');
   applyTheme(c,'#'+r+g+b);
 }
- 
+
 // ═══════════════════════════════════════════════
 // CETAK PDF
 // ═══════════════════════════════════════════════
@@ -2148,15 +2150,15 @@ function cetakPDF(type){
   const logo    = ls('sch_logo')    || '🏫';
   const now     = new Date();
   const tglStr  = now.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
- 
+
   let title='', subtitle='', header=[], rows=[];
- 
+
   if(type==='harian'){
     const tgl=document.getElementById('r-tgl')?.value||today();
     title='Rekap Absensi Harian';
     subtitle='Tanggal: '+tgl;
     header=['No','Nama Guru','Mapel / Jabatan','NIP','Jam Masuk','Jam Pulang','Status','Keterangan'];
- 
+
     // Ambil data dari variabel JS (bukan dari HTML tabel)
     let dataHarian=[];
     if(tgl===today()){
@@ -2165,7 +2167,7 @@ function cetakPDF(type){
       // Data sudah di-load ke tabel, baca dari lastHarianData
       dataHarian=window._lastHarianData||[];
     }
- 
+
     // Gabungkan masuk dan pulang per guru
     const map={};
     dataHarian.forEach(a=>{
@@ -2178,13 +2180,13 @@ function cetakPDF(type){
       }
       if(tipe==='pulang') map[a.id].pulang=a.waktu;
     });
- 
+
     Object.values(map).forEach((r,i)=>{
       const g=gurus.find(x=>x.id===r.id)||{nip:'-',mapel:r.mapel||'-'};
       const stLabel={hadir:'Hadir',terlambat:'Terlambat',izin:'Izin',sakit:'Sakit',alpha:'Alpha'}[r.status]||r.status||'--';
       rows.push([i+1, r.nama, g.mapel||r.mapel||'-', g.nip||'-', r.masuk, r.pulang, stLabel, r.ket||'']);
     });
- 
+
   } else if(type==='bulanan'){
     const bln=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
     const b=document.getElementById('r-bln')?.value||String(now.getMonth()+1);
@@ -2192,7 +2194,7 @@ function cetakPDF(type){
     title='Rekap Absensi Bulanan';
     subtitle='Periode: '+bln[parseInt(b)]+' '+th;
     header=['No','Nama Guru','Mapel / Jabatan','NIP','Hadir','Terlambat','Izin','Sakit','Alpha','% Hadir'];
- 
+
     const data=window._lastBulananData||[];
     data.forEach((r,i)=>{
       const g=gurus.find(x=>x.id===r.id)||{nip:'-',mapel:r.mapel||'-'};
@@ -2201,14 +2203,14 @@ function cetakPDF(type){
       rows.push([i+1,r.nama,g.mapel||r.mapel||'-',g.nip||'-',
         r.hadir||0,r.terlambat||0,r.izin||0,r.sakit||0,r.alpha||0,pct]);
     });
- 
+
   } else if(type==='semester'){
     const sem=document.getElementById('r-sem')?.value||'1';
     const th=document.getElementById('r-thn-s')?.value||String(now.getFullYear());
     title='Rekap Absensi Semester';
     subtitle='Semester '+(sem==='1'?'1 (Juli - Desember)':'2 (Januari - Juni)')+' Tahun '+th;
     header=['No','Nama Guru','Mapel / Jabatan','NIP','Hadir','Terlambat','Izin','Sakit','Alpha','% Hadir'];
- 
+
     const data=window._lastSemesterData||[];
     data.forEach((r,i)=>{
       const g=gurus.find(x=>x.id===r.id)||{nip:'-',mapel:r.mapel||'-'};
@@ -2218,13 +2220,13 @@ function cetakPDF(type){
         r.hadir||0,r.terlambat||0,r.izin||0,r.sakit||0,r.alpha||0,pct]);
     });
   }
- 
+
   if(!rows.length){toast('Tidak ada data untuk dicetak. Klik 🔄 refresh dulu.','warn');return;}
- 
+
   const logoHTML = logo.startsWith('http')
     ? '<img src="'+logo+'" style="height:56px;width:56px;object-fit:contain;border-radius:8px">'
     : '<span style="font-size:46px;line-height:1">'+logo+'</span>';
- 
+
   // Warna per status
   function stColor(v){
     const s=String(v).toLowerCase();
@@ -2244,7 +2246,7 @@ function cetakPDF(type){
     if(s==='alpha')return '#FFE4E6';
     return '#F3F4F6';
   }
- 
+
   const isStatusCol = type==='harian' ? 6 : -1; // kolom status di harian = index 6
   const rowsHTML = rows.map((r,ri)=>{
     const cells = r.map((c,ci)=>{
@@ -2260,11 +2262,11 @@ function cetakPDF(type){
     const bg = ri%2===0?'#FFFFFF':'#F9FAFB';
     return '<tr style="background:'+bg+'">'+cells+'</tr>';
   }).join('');
- 
+
   const headHTML = header.map(h=>
     '<th style="background:#FF6B35;color:#fff;padding:9px 9px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap">'+h+'</th>'
   ).join('');
- 
+
   const html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
     +'<title>'+title+' - '+nama+'</title>'
     +'<style>'
@@ -2303,13 +2305,13 @@ function cetakPDF(type){
     +'</div>'
     +'<script>window.onload=function(){window.print();}<\/script>'
     +'</body></html>';
- 
+
   const w = window.open('','_blank','width=900,height=700,scrollbars=yes');
   if(!w){toast('Izinkan popup di browser untuk cetak PDF','warn');return;}
   w.document.write(html);
   w.document.close();
 }
- 
+
 window.onload=function(){
   // Isi config
   const cfgUrl=document.getElementById('cfg-url');if(cfgUrl)cfgUrl.value=GAS;
@@ -2318,26 +2320,26 @@ window.onload=function(){
   document.getElementById('cfg-maxmasuk').value=JAM.maxmasuk;
   document.getElementById('cfg-pulang').value=JAM.pulang;
   document.getElementById('cfg-maxpulang').value=JAM.maxpulang;
- 
+
   // Set tanggal hari ini di form
   const rTgl=document.getElementById('r-tgl');if(rTgl)rTgl.value=today();
   const mgTgl=document.getElementById('mg-tgl');if(mgTgl)mgTgl.value=today();
- 
+
   // Set bulan & tahun sekarang di rekap bulanan
   const now=new Date();
   const rbln=document.getElementById('r-bln');if(rbln)rbln.value=now.getMonth()+1;
   const rthn=document.getElementById('r-thn-b');if(rthn)rthn.value=now.getFullYear();
- 
+
   // Load identitas sekolah
   loadIdentitas();
- 
+
   // Load cache guru — selalu ada data awal
   try{
     const gc=ls('guru_cache');
     gurus=gc?JSON.parse(gc):defaultGurus();
     if(!gurus||!gurus.length)gurus=defaultGurus();
   }catch(e){gurus=defaultGurus();}
- 
+
   // Load cache absensi — muat semua tanggal yang tersimpan di localStorage
   try{
     for(let i=0;i<localStorage.length;i++){
@@ -2356,23 +2358,23 @@ window.onload=function(){
     if(!absenDB[today()])absenDB[today()]=[];
     console.log('[init] Cache dimuat untuk:',Object.keys(absenDB).join(', '));
   }catch(e){absenDB[today()]=[];}
- 
+
   // Jam bar
   updateClock();setInterval(updateClock,1000);
- 
+
   // Build UI dengan data yang ada (cache/default)
   role='guru';buildNav();renderAll();
- 
+
   // Tampilkan status loading
   const hasCache=!!(ls('guru_cache'));
   if(!hasCache){
     setInfoBar('⏳ Memuat data pertama kali, harap tunggu...');
     setSyncDot('sync');
   }
- 
+
   // Sync dari Sheets langsung saat load
   syncAll();
- 
+
   // Auto sync setiap 30 detik
   syncTimer=setInterval(async()=>{
     await syncAbsensiOnly();
@@ -2381,7 +2383,7 @@ window.onload=function(){
   // Cek alpha otomatis setiap menit
   startAlphaChecker();
 };
- 
+
 function defaultGurus(){
   return [
     {id:'G001',nama:'Ustadzah Rina Safitri',nip:'19850312001',mapel:'Kepala Sekolah',hp:'',foto:''},
