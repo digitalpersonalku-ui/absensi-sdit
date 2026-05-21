@@ -736,29 +736,69 @@ async function fbGetRekapSemester(semester,tahun){
  
 // REALTIME LISTENERS
 let _guruL=false,_absTgl=null;
+// Listen identitas sekolah dari Firebase (sinkron ke semua device)
+function listenIdentitas(){
+  db.ref('identitas').on('value',snap=>{
+    const d=snap.val();
+    if(!d)return;
+    // Update localStorage
+    if(d.nama)ls('sch_nama',d.nama);
+    if(d.tagline)ls('sch_tagline',d.tagline);
+    if(d.logo)ls('sch_logo',d.logo);
+    if(d.warna1)ls('sch_warna1',d.warna1);
+    if(d.warna2)ls('sch_warna2',d.warna2);
+    // Apply ke UI
+    loadIdentitas();
+    console.log('[Firebase] Identitas updated:',d.nama);
+  });
+}
+ 
 function listenGuru(){
   if(_guruL)return;_guruL=true;
-  db.ref('guru').on('value',snap=>{
-    const list=Object.values(snap.val()||{});
-    if(list.length>0){
-      gurus=list;
-      try{localStorage.setItem('guru_cache',JSON.stringify(gurus));}catch(e){}
+  console.log('[Firebase] Mulai listen guru...');
+  db.ref('guru').on('value',
+    snap=>{
+      const raw=snap.val();
+      console.log('[Firebase] Guru snapshot:',raw?Object.keys(raw).length+' guru':'kosong');
+      const list=Object.values(raw||{});
+      if(list.length>0){
+        gurus=list;
+        try{localStorage.setItem('guru_cache',JSON.stringify(gurus));}catch(e){}
+        renderAll();
+      }
+    },
+    err=>{
+      console.error('[Firebase] Guru listen error:',err.message,err.code);
+      // Fallback ke cache
+      try{
+        const gc=localStorage.getItem('guru_cache');
+        if(gc)gurus=JSON.parse(gc);
+      }catch(e){}
       renderAll();
-      console.log('[Firebase] Guru updated:',gurus.length);
     }
-  });
+  );
 }
 function listenTodayAbsensi(){
   const tgl=today();
-  if(_absTgl)db.ref('absensi/'+fbKey(_absTgl)).off();
+  if(_absTgl)db.ref('absensi/'+fbKey(_absTgl)).off('value');
   _absTgl=tgl;
-  db.ref('absensi/'+fbKey(tgl)).on('value',snap=>{
-    const list=Object.values(snap.val()||{}).map(a=>({...a,tipe:a.tipe||'masuk'}));
-    absenDB[tgl]=list;
-    try{localStorage.setItem('ac_'+tgl,JSON.stringify(list));}catch(e){}
-    renderDash();renderManualLog();
-    console.log('[Firebase] Absensi:',list.length);
-  });
+  console.log('[Firebase] Mulai listen absensi untuk:',tgl,'path: absensi/'+fbKey(tgl));
+  db.ref('absensi/'+fbKey(tgl)).on('value',
+    snap=>{
+      const raw=snap.val();
+      console.log('[Firebase] Absensi snapshot:',raw?Object.keys(raw).length+' records':'kosong');
+      const list=Object.values(raw||{}).map(a=>({...a,tipe:a.tipe||'masuk'}));
+      absenDB[tgl]=list;
+      try{localStorage.setItem('ac_'+tgl,JSON.stringify(list));}catch(e){}
+      // Render — pastikan di tab dashboard
+      renderDash();
+      renderManualLog();
+    },
+    err=>{
+      console.error('[Firebase] Listen error:',err.message,err.code);
+      setInfoBar('⚠️ Firebase error: '+err.message,'err');
+    }
+  );
 }
 async function testFirebase(){
   const cs=document.getElementById('fb-conn-status');
@@ -2283,29 +2323,43 @@ function handleLogoUpload(input){
   reader.readAsDataURL(file);
 }
  
-function saveIdentitas(){
+async function saveIdentitas(){
   const nama=document.getElementById('cfg-sekolah')?.value||'';
   const tagline=document.getElementById('cfg-tagline')?.value||'';
   const logo=document.getElementById('cfg-logo')?.value||'🏫';
   if(!nama){toast('Nama sekolah tidak boleh kosong','err');return;}
   ls('sch_nama',nama);ls('sch_tagline',tagline);ls('sch_logo',logo);
+  // Simpan ke Firebase agar sinkron ke semua device
+  try{
+    const w1=ls('sch_warna1')||'#FF6B35';
+    const w2=ls('sch_warna2')||'#FF8C00';
+    await db.ref('identitas').set({nama,tagline,logo,warna1:w1,warna2:w2});
+    toast('✅ Identitas disimpan & sinkron semua device','ok');
+  }catch(e){
+    toast('✅ Identitas disimpan (lokal)','ok');
+  }
   loadIdentitas();
-  toast('Identitas sekolah disimpan','ok');
 }
  
 function applyTheme(c1,c2,silent){
   document.documentElement.style.setProperty('--or',c1);
   const tb=document.querySelector('.topbar');
   if(tb)tb.style.background='linear-gradient(135deg,'+c1+','+c2+')';
+  const lpb=document.getElementById('logo-preview-bar');
+  if(lpb)lpb.style.background='linear-gradient(135deg,'+c1+','+c2+')';
   let st=document.getElementById('theme-style');
   if(!st){st=document.createElement('style');st.id='theme-style';document.head.appendChild(st);}
   st.textContent=
     '.bn.active{color:'+c1+'!important}'+
-    '.btn.bp,.ab-masuk{background:linear-gradient(135deg,'+c1+','+c2+')!important;box-shadow:0 4px 14px '+c1+'44!important}'+
+    '.btn.bp{background:linear-gradient(135deg,'+c1+','+c2+')!important;box-shadow:0 4px 14px '+c1+'44!important}'+
     '.ptab.active{background:'+c1+'!important;border-color:'+c1+'!important}'+
-    '.scard:first-child{border-left-color:'+c1+'!important}'+
     ':root{--or:'+c1+';--or2:'+c1+'15}';
-  if(!silent){ls('sch_warna1',c1);ls('sch_warna2',c2);toast('Tema warna diterapkan','ok');}
+  if(!silent){
+    ls('sch_warna1',c1);ls('sch_warna2',c2);
+    // Sinkron warna ke Firebase
+    db.ref('identitas').update({warna1:c1,warna2:c2}).catch(()=>{});
+    toast('Tema warna diterapkan & disinkron','ok');
+  }
 }
  
 function applyCustomColor(){
@@ -2335,13 +2389,11 @@ function cetakPDF(type){
     subtitle='Tanggal: '+tgl;
     header=['No','Nama Guru','Mapel / Jabatan','NIP','Jam Masuk','Jam Pulang','Status','Keterangan'];
  
-    // Ambil data dari variabel JS (bukan dari HTML tabel)
-    let dataHarian=[];
-    if(tgl===today()){
-      dataHarian=todayList();
-    } else {
-      // Data sudah di-load ke tabel, baca dari lastHarianData
-      dataHarian=window._lastHarianData||[];
+    // Ambil data — prioritas _lastHarianData, fallback todayList
+    let dataHarian=window._lastHarianData||[];
+    if(!dataHarian.length){
+      // Belum di-refresh, pakai data yang ada
+      dataHarian=tgl===today()?todayList():(absenDB[tgl]||[]);
     }
  
     // Gabungkan masuk dan pulang per guru
@@ -2549,6 +2601,7 @@ window.onload = function(){
   renderAll();
  
   // Firebase realtime listeners
+  listenIdentitas();
   listenGuru();
   listenTodayAbsensi();
  
