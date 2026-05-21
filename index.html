@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -166,38 +167,133 @@ tbody tr:hover{background:var(--bg);}
 .gcsb{font-size:10px;color:var(--tx2);margin-bottom:7px;}
 
 /* ── QR DISP ── */
-/* ── ID CARD: Biru Muda + Tosca + Oranye ── */
+/* ── ID CARD PORTRAIT CR80 (53.98 x 85.6mm) ── */
 .qrdisp{display:flex;flex-direction:column;align-items:center;padding:0;background:transparent;margin-top:12px;}
-.idcard{width:100%;max-width:240px;aspect-ratio:540/856;border-radius:14px;overflow:hidden;box-shadow:0 16px 48px rgba(14,100,160,.25),0 4px 12px rgba(0,0,0,.1);display:flex;flex-direction:column;}
-.idc-content{display:flex;flex-direction:column;height:100%;}
-.idc-top{background:linear-gradient(135deg,#1565C0 0%,#0897A7 45%,#06B89A 100%);padding:16px 16px 14px;text-align:center;position:relative;overflow:hidden;flex-shrink:0;}
-.idc-top::before{content:'';position:absolute;inset:0;opacity:.06;background-image:radial-gradient(circle,#fff 1.5px,transparent 1.5px);background-size:16px 16px;}
-.idc-top::after{content:'';position:absolute;top:0;left:0;right:0;height:3.5px;background:linear-gradient(90deg,#FF6B35 0%,#FFB347 50%,#FF6B35 100%);}
+.idcard{
+  width:240px;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(14,100,160,.3),0 6px 20px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;
+}
+
+/* HEADER — gradien biru→tosca */
+.idc-top{
+  background:linear-gradient(135deg,#1565C0 0%,#0897A7 50%,#06B89A 100%);
+  padding:16px 16px 14px;
+  text-align:center;position:relative;overflow:hidden;flex-shrink:0;
+}
+.idc-top::before{
+  content:'';position:absolute;inset:0;opacity:.07;
+  background-image:radial-gradient(circle,#fff 1.5px,transparent 1.5px);
+  background-size:14px 14px;
+}
+.idc-top::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#FF6B35,#FFB347,#FF6B35);
+}
 .idc-top-inner{position:relative;z-index:1;}
-.idc-logo-school{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px;overflow:hidden;}
-.idc-school{font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px;}
-.idc-title{font-size:9px;color:rgba(255,255,255,.65);letter-spacing:.5px;}
-.idc-body{background:#fff;display:flex;flex-direction:column;position:relative;flex:1;overflow:hidden;}
+.idc-logo-school{
+  width:44px;height:44px;border-radius:12px;
+  background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin:0 auto 8px;overflow:hidden;
+}
+.idc-school{font-size:10.5px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px;}
+.idc-title{font-size:8.5px;color:rgba(255,255,255,.7);letter-spacing:.5px;}
+
+/* BODY — background gradasi halus */
+.idc-body{
+  background:linear-gradient(180deg,#f0f8ff 0%,#e8f7f5 50%,#f5f9ff 100%);
+  display:flex;flex-direction:column;
+  position:relative;flex:1;
+}
+/* Subtle pattern */
+.idc-body::before{
+  content:'';position:absolute;inset:0;opacity:.04;
+  background-image:radial-gradient(circle,#1565C0 1px,transparent 1px);
+  background-size:18px 18px;pointer-events:none;
+}
 .idc-sidebar{display:none;}
-.idc-foto-col{padding:16px 0 10px;display:flex;justify-content:center;flex-shrink:0;}
-.idc-foto{width:76px;height:94px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#e8f4fd,#e0f7f4);display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;box-shadow:inset 0 0 0 2px rgba(6,184,154,.3),0 4px 14px rgba(21,101,192,.15);margin:0 auto;}
-.idc-foto::after{content:'';position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;border-width:0 0 16px 16px;border-color:transparent transparent #FF6B35 transparent;}
+
+/* Foto: tengah dengan shadow */
+.idc-foto-col{
+  padding:16px 0 10px;
+  display:flex;justify-content:center;
+  position:relative;z-index:1;flex-shrink:0;
+}
+.idc-foto{
+  width:78px;height:96px;border-radius:10px;
+  overflow:hidden;
+  background:linear-gradient(135deg,#deeeff,#d5f5ee);
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;position:relative;
+  box-shadow:
+    0 0 0 2.5px #fff,
+    0 0 0 4px rgba(8,151,167,.3),
+    0 6px 18px rgba(21,101,192,.2);
+}
+.idc-foto::after{
+  content:'';position:absolute;bottom:0;left:0;
+  width:0;height:0;border-style:solid;
+  border-width:0 0 14px 14px;
+  border-color:transparent transparent #FF6B35 transparent;
+}
 .idc-foto img{width:100%;height:100%;object-fit:cover;}
-.idc-info-col{width:100%;padding:8px 16px 12px;display:flex;flex-direction:column;align-items:center;min-width:0;}
-.idc-nama{font-size:13px;font-weight:700;color:#0F172A;line-height:1.3;margin-bottom:5px;text-align:center;}
-.idc-jabatan{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#E3F0FF,#E0F7F4);border:1px solid rgba(8,151,167,.3);border-radius:20px;padding:3px 10px;margin-bottom:10px;width:fit-content;}
-.idc-jabatan-dot{width:5px;height:5px;border-radius:50%;background:linear-gradient(135deg,#FF6B35,#FFB347);flex-shrink:0;}
-.idc-jabatan-txt{font-size:9px;font-weight:600;color:#0F5E8A;letter-spacing:.2px;}
-.idc-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,107,53,.5),rgba(8,151,167,.4),transparent);margin-bottom:10px;width:100%;}
+
+/* Info: nama, badge, divider, QR */
+.idc-info-col{
+  width:100%;padding:6px 16px 14px;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;z-index:1;
+}
+.idc-nama{
+  font-size:13px;font-weight:700;color:#0F172A;
+  line-height:1.3;margin-bottom:6px;text-align:center;
+}
+.idc-jabatan{
+  display:inline-flex;align-items:center;gap:4px;
+  background:linear-gradient(135deg,rgba(21,101,192,.1),rgba(8,151,167,.1));
+  border:1px solid rgba(8,151,167,.35);
+  border-radius:20px;padding:3px 10px;margin-bottom:10px;
+}
+.idc-jabatan-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:linear-gradient(135deg,#FF6B35,#FFB347);flex-shrink:0;
+}
+.idc-jabatan-txt{font-size:9px;font-weight:600;color:#0B5EA8;letter-spacing:.2px;}
+.idc-divider{
+  height:1px;width:85%;
+  background:linear-gradient(90deg,transparent,rgba(255,107,53,.45),rgba(8,151,167,.45),transparent);
+  margin-bottom:10px;
+}
 .idc-qr-row{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;}
-.idc-qr-label{font-size:7px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;text-align:center;}
-.idc-qr-wrap{width:64px;height:64px;border-radius:8px;background:#0F172A;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(21,101,192,.25),0 0 0 2.5px #fff;overflow:hidden;}
-.idc-qr-wrap img,.idc-qr-wrap canvas{border-radius:3px;}
+.idc-qr-label{
+  font-size:7px;color:#7a9bb5;
+  text-transform:uppercase;letter-spacing:.6px;font-weight:600;
+}
+.idc-qr-wrap{
+  width:72px;height:72px;border-radius:10px;
+  background:#0F172A;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(21,101,192,.3),0 0 0 3px #fff;
+  overflow:hidden;
+}
+.idc-qr-wrap img,.idc-qr-wrap canvas{border-radius:4px;}
 .idc-year{display:none;}
 .idc-year-lbl{display:none;}
 .idc-year-val{display:none;}
-.idc-footer{background:linear-gradient(90deg,#1565C0 0%,#0897A7 50%,#06B89A 100%);padding:7px 14px;display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;}
-.idc-footer-txt{font-size:7.5px;font-weight:600;color:rgba(255,255,255,.85);text-transform:uppercase;letter-spacing:.6px;}
+
+/* FOOTER */
+.idc-footer{
+  background:linear-gradient(90deg,#1565C0 0%,#0897A7 50%,#06B89A 100%);
+  padding:8px 14px;display:flex;align-items:center;justify-content:center;
+  gap:8px;flex-shrink:0;
+}
+.idc-footer-txt{
+  font-size:7.5px;font-weight:600;color:rgba(255,255,255,.88);
+  text-transform:uppercase;letter-spacing:.6px;
+}
 .idc-footer-dot{width:4px;height:4px;border-radius:50%;background:#FF6B35;flex-shrink:0;}
 
 /* ── ALERT ── */
@@ -459,6 +555,7 @@ tbody tr:hover{background:var(--bg);}
         <button class="btn bp" style="width:auto;padding:9px 14px" onclick="loadHarian()">🔄</button>
         <button class="btn bs" style="width:auto;padding:9px 10px" onclick="exportCSV('harian')">CSV</button>
         <button class="btn bd" style="width:auto;padding:9px 10px;background:var(--rd)" onclick="cetakPDF('harian')">📄 PDF</button>
+        <button class="btn" style="width:auto;padding:9px 10px;background:#1D6F42;color:#fff;border-radius:var(--rs);font-size:11px;font-weight:700" onclick="exportExcel('harian')">📊 Excel</button>
       </div>
     </div>
     <div class="card" id="wrap-harian">
@@ -486,6 +583,7 @@ tbody tr:hover{background:var(--bg);}
         <button class="btn bp" style="width:auto;padding:9px 14px" onclick="loadBulanan()">🔄</button>
         <button class="btn bs" style="width:auto;padding:9px 10px" onclick="exportCSV('bulanan')">CSV</button>
         <button class="btn bd" style="width:auto;padding:9px 10px;background:var(--rd)" onclick="cetakPDF('bulanan')">📄 PDF</button>
+        <button class="btn" style="width:auto;padding:9px 10px;background:#1D6F42;color:#fff;border-radius:var(--rs);font-size:11px;font-weight:700" onclick="exportExcel('bulanan')">📊 Excel</button>
       </div>
     </div>
     <div class="card"><div class="tbl-wrap"><table>
@@ -507,6 +605,7 @@ tbody tr:hover{background:var(--bg);}
         <button class="btn bp" style="width:auto;padding:9px 14px" onclick="loadSemester()">🔄</button>
         <button class="btn bs" style="width:auto;padding:9px 10px" onclick="exportCSV('semester')">CSV</button>
         <button class="btn bd" style="width:auto;padding:9px 10px;background:var(--rd)" onclick="cetakPDF('semester')">📄 PDF</button>
+        <button class="btn" style="width:auto;padding:9px 10px;background:#1D6F42;color:#fff;border-radius:var(--rs);font-size:11px;font-weight:700" onclick="exportExcel('semester')">📊 Excel</button>
       </div>
     </div>
     <div class="card"><div class="tbl-wrap"><table>
@@ -1826,13 +1925,15 @@ async function simpanManual(){
   document.getElementById('mg-waktu').value=waktu;
   const entry={tanggal:tgl,id:g.id,nama:g.nama,mapel:g.mapel,status,tipe,waktu,ket:ket||''};
 
-  // Cek duplikat hanya untuk hari ini
+  // Cek duplikat dari Firebase (mencegah double dari admin & guru bersamaan)
   if(tgl===today()){
-    const m=absenMapToday();
-    if(m[g.id+'|'+tipe]){toast(g.nama+' sudah absen '+tipe+' hari ini','info');return;}
-    todayList().push(entry);
-    saveLocal();
-    renderDash();renderManualLog();
+    const fbKey2=fbKey(g.id)+'_'+tipe.replace(/ /g,'_');
+    const snapCek=await db.ref('absensi/'+fbKey(tgl)+'/'+fbKey2).once('value');
+    if(snapCek.exists()){
+      const ex=snapCek.val();
+      toast(g.nama+' sudah tercatat '+tipe+': '+(ex.status||'')+' pukul '+(ex.waktu||''),'info');
+      return;
+    }
   }
 
   const btn=document.getElementById('btn-manual');
@@ -2079,8 +2180,8 @@ function genQR(){
   // Ambil warna tema dari CSS variable
   new QRCode(document.getElementById('qrcode-out'),{
     text:'SDIT_QK_'+g.id+'_'+g.nama,
-    width:56,height:56,
-    colorDark:'#0F172A',
+    width:64,height:64,
+    colorDark:'#1565C0',
     colorLight:'#ffffff',
     correctLevel:QRCode.CorrectLevel.H
   });
@@ -2134,7 +2235,7 @@ function printQR(){
   w.document.write('.sn{font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:2px;}');
   w.document.write('.st{font-size:9px;color:rgba(255,255,255,.65);letter-spacing:.5px;}');
   // Body
-  w.document.write('.body{background:#fff;display:flex;flex-direction:column;flex:1;overflow:hidden;}');
+  w.document.write('.body{background:linear-gradient(180deg,#f0f8ff 0%,#e8f7f5 50%,#f5f9ff 100%);display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative;}');
   w.document.write('.foto-col{padding:14px 0 8px;display:flex;justify-content:center;}');
   w.document.write('.foto{width:64px;height:80px;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#e8f4fd,#e0f7f4);display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;box-shadow:inset 0 0 0 2px rgba(6,184,154,.3),0 4px 12px rgba(21,101,192,.15);}');
   w.document.write('.foto::after{content:"";position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;border-width:0 0 12px 12px;border-color:transparent transparent #FF6B35 transparent;}');
@@ -2146,7 +2247,7 @@ function printQR(){
   w.document.write('.hr{height:1px;background:linear-gradient(90deg,transparent,rgba(255,107,53,.5),rgba(8,151,167,.4),transparent);margin-bottom:8px;width:100%;}');
   w.document.write('.qr-row{display:flex;flex-direction:column;align-items:center;gap:4px;}');
   w.document.write('.ql{font-size:6.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;text-align:center;}');
-  w.document.write('.qb{width:56px;height:56px;border-radius:7px;background:#0F172A;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(21,101,192,.2),0 0 0 2px #fff;overflow:hidden;}');
+  w.document.write('.qb{width:78px;height:78px;border-radius:9px;background:#0F172A;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(21,101,192,.2),0 0 0 2.5px #fff;overflow:hidden;}');
   // Footer
   w.document.write('.footer{background:linear-gradient(90deg,#1565C0 0%,#0897A7 50%,#06B89A 100%);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;}');
   w.document.write('.ft{font-size:8px;font-weight:600;color:rgba(255,255,255,.85);text-transform:uppercase;letter-spacing:.6px;}');
@@ -2167,7 +2268,7 @@ function printQR(){
   w.document.write('<div class="hr"></div>');
   w.document.write('<div class="qr-row">');
   w.document.write('<div class="ql">Scan untuk absensi</div>');
-  w.document.write('<div class="qb"><img src="'+qrImg.src+'" width="48" height="48" style="border-radius:3px"></div>');
+  w.document.write('<div class="qb"><img src="'+qrImg.src+'" width="70" height="70" style="border-radius:3px"></div>');
   w.document.write('</div></div></div>');
   w.document.write('<div class="footer"><span class="ft">'+sNama+'</span><div class="fd"></div><span class="ft">Absensi Guru</span></div>');
   w.document.write('</div>');
@@ -2570,6 +2671,175 @@ function applyCustomColor(){
 // ═══════════════════════════════════════════════
 // CETAK PDF
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════
+// EXPORT EXCEL
+// ═══════════════════════════════════════
+async function exportExcel(type){
+  const sNama=ls('sch_nama')||'SDIT Qudwatun Hasanah';
+  const now=new Date();
+  const wb=XLSX.utils.book_new();
+
+  // Warna header
+  const hdrFill={fgColor:{rgb:'1565C0'}};
+  const hdrFont={bold:true,color:{rgb:'FFFFFF'},sz:10};
+  const borderAll={top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
+  const centerAlign={horizontal:'center',vertical:'center',wrapText:true};
+
+  if(type==='harian'){
+    const tgl=document.getElementById('r-tgl')?.value||today();
+    const data=window._lastHarianData||await fbGetAbsensi(tgl);
+
+    // Buat map masuk+pulang per guru
+    const map={};
+    data.forEach(a=>{
+      if(!map[a.id])map[a.id]={nama:a.nama,mapel:a.mapel,masuk:'',pulang:'',status:'',ket:''};
+      if(a.tipe==='masuk'||a.tipe==='tidak masuk'){
+        map[a.id].masuk=a.tipe==='masuk'?a.waktu:'';
+        map[a.id].status=a.status;
+        map[a.id].ket=a.ket||'';
+      }
+      if(a.tipe==='pulang')map[a.id].pulang=a.waktu;
+    });
+
+    const rows=[];
+    // Judul
+    rows.push([sNama]);
+    rows.push(['LAPORAN ABSENSI HARIAN - '+tgl]);
+    rows.push([]);
+    // Header
+    rows.push(['No','Nama Guru','Jabatan/Mapel','Jam Masuk','Jam Pulang','Status','Keterangan','TTD']);
+    // Data
+    Object.values(map).forEach((r,i)=>{
+      const stLabel={hadir:'Hadir',terlambat:'Terlambat',izin:'Izin',sakit:'Sakit',alpha:'Alpha'}[r.status]||'-';
+      rows.push([i+1,r.nama,r.mapel,r.masuk||'-',r.pulang||'-',stLabel,r.ket||'','']);
+    });
+    rows.push([]);
+    rows.push(['','','','','','','Mengetahui,','']);
+    rows.push(['','','','','','','Kepala Sekolah','']);
+    rows.push([]);rows.push([]);rows.push([]);
+    rows.push(['','','','','','','(________________________)','']);
+
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    // Lebar kolom
+    ws['!cols']=[{wch:4},{wch:28},{wch:18},{wch:10},{wch:10},{wch:12},{wch:22},{wch:14}];
+    // Merge judul
+    ws['!merges']=[
+      {s:{r:0,c:0},e:{r:0,c:7}},
+      {s:{r:1,c:0},e:{r:1,c:7}},
+    ];
+    XLSX.utils.book_append_sheet(wb,ws,'Harian '+tgl);
+    XLSX.writeFile(wb,'Absensi_Harian_'+tgl+'.xlsx');
+    toast('📊 Excel harian diunduh','ok');
+
+  } else if(type==='bulanan'){
+    const bln=document.getElementById('r-bln')?.value||String(now.getMonth()+1);
+    const thn=document.getElementById('r-thn-b')?.value||String(now.getFullYear());
+    const blnNm=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    // Ambil semua data bulan ini dari Firebase
+    const prefix=thn+'-'+String(bln).padStart(2,'0');
+    const snap=await db.ref('absensi').once('value');
+    const all=snap.val()||{};
+
+    // Kumpulkan semua tanggal di bulan ini
+    const daysInMonth=new Date(parseInt(thn),parseInt(bln),0).getDate();
+    const tanggalList=[];
+    for(let d=1;d<=daysInMonth;d++)tanggalList.push(d);
+
+    // Map per guru per tanggal
+    const guruMap={};
+    Object.entries(all).forEach(([tgl,entries])=>{
+      if(!tgl.startsWith(prefix))return;
+      const d=parseInt(tgl.split('-')[2]);
+      Object.values(entries).forEach(a=>{
+        if(a.tipe==='pulang')return; // skip pulang untuk rekap bulanan
+        if(!guruMap[a.id])guruMap[a.id]={nama:a.nama,mapel:a.mapel,hari:{}};
+        guruMap[a.id].hari[d]={status:a.status,masuk:a.tipe==='masuk'?a.waktu:'',pulang:'',ket:a.ket||''};
+      });
+      // Tambah jam pulang
+      Object.values(entries).forEach(a=>{
+        if(a.tipe!=='pulang')return;
+        if(guruMap[a.id]&&guruMap[a.id].hari[d]){
+          guruMap[a.id].hari[d].pulang=a.waktu;
+        }
+      });
+    });
+
+    // Buat spreadsheet format: nama|bulan|tanggal 1..30|dst
+    // Setiap tanggal punya 4 baris: status, jam masuk, jam pulang, TTD
+    const rows=[];
+    rows.push([sNama]);
+    rows.push(['LAPORAN ABSENSI BULANAN - '+blnNm[parseInt(bln)]+' '+thn]);
+    rows.push([]);
+
+    // Header row 1: Nama Guru | Bulan | 1 | 1 | 1 | 1 | 2 | 2 | ...
+    const h1=['Nama Guru',blnNm[parseInt(bln)]];
+    tanggalList.forEach(d=>{h1.push(d,'','','');});
+    rows.push(h1);
+
+    // Header row 2: | Tanggal | status | jam masuk | jam pulang | TTD | ...
+    const h2=['','Tanggal'];
+    tanggalList.forEach(()=>{h2.push('Status','Jam Masuk','Jam Pulang','TTD');});
+    rows.push(h2);
+
+    // Data per guru
+    const guruList=gurus.length>0?gurus:Object.values(guruMap);
+    guruList.forEach((g,idx)=>{
+      const gd=guruMap[g.id]||{hari:{}};
+      const row=[g.nama||gd.nama||'',blnNm[parseInt(bln)]];
+      tanggalList.forEach(d=>{
+        const h=gd.hari[d];
+        const stLabel=h?({hadir:'H',terlambat:'T',izin:'I',sakit:'S',alpha:'A'}[h.status]||'-'):'-';
+        row.push(stLabel,h?h.masuk||'-':'-',h?h.pulang||'-':'-','');
+      });
+      rows.push(row);
+    });
+
+    rows.push([]);
+    rows.push(['Keterangan: H=Hadir, T=Terlambat, I=Izin, S=Sakit, A=Alpha']);
+
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    const colW=[{wch:28},{wch:10}];
+    tanggalList.forEach(()=>{colW.push({wch:6},{wch:8},{wch:8},{wch:6});});
+    ws['!cols']=colW;
+    XLSX.utils.book_append_sheet(wb,ws,blnNm[parseInt(bln)]+' '+thn);
+    XLSX.writeFile(wb,'Absensi_Bulanan_'+blnNm[parseInt(bln)]+'_'+thn+'.xlsx');
+    toast('📊 Excel bulanan diunduh','ok');
+
+  } else if(type==='semester'){
+    const sem=document.getElementById('r-sem')?.value||'1';
+    const thn=document.getElementById('r-thn-s')?.value||String(now.getFullYear());
+    const blnList=sem==='1'?[7,8,9,10,11,12]:[1,2,3,4,5,6];
+    const blnNm=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const semNm=sem==='1'?'Semester 1 (Jul-Des)':'Semester 2 (Jan-Jun)';
+
+    const data=await fbGetRekapSemester(sem,thn);
+    const rows=[];
+    rows.push([sNama]);
+    rows.push(['LAPORAN ABSENSI '+semNm.toUpperCase()+' '+thn]);
+    rows.push([]);
+    rows.push(['No','Nama Guru','Jabatan/Mapel','Hadir','Terlambat','Izin','Sakit','Alpha','Total Hari','% Kehadiran']);
+    data.forEach((r,i)=>{
+      const h=(parseInt(r.hadir)||0)+(parseInt(r.terlambat)||0);
+      const total=h+(parseInt(r.izin)||0)+(parseInt(r.sakit)||0)+(parseInt(r.alpha)||0);
+      const pct=total>0?Math.round(h/total*100)+'%':'-';
+      rows.push([i+1,r.nama,r.mapel||'-',r.hadir||0,r.terlambat||0,r.izin||0,r.sakit||0,r.alpha||0,total,pct]);
+    });
+    rows.push([]);
+    rows.push(['','','','','','','','','Mengetahui,']);
+    rows.push(['','','','','','','','','Kepala Sekolah']);
+    rows.push([]);rows.push([]);rows.push([]);
+    rows.push(['','','','','','','','','(________________________)']);
+
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:4},{wch:28},{wch:20},{wch:8},{wch:10},{wch:6},{wch:8},{wch:8},{wch:10},{wch:12}];
+    ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:9}},{s:{r:1,c:0},e:{r:1,c:9}}];
+    XLSX.utils.book_append_sheet(wb,ws,semNm);
+    XLSX.writeFile(wb,'Absensi_'+semNm.replace(/ /g,'_')+'_'+thn+'.xlsx');
+    toast('📊 Excel semester diunduh','ok');
+  }
+}
+
 function cetakPDF(type){
   const nama    = ls('sch_nama')    || 'SDIT Qudwatun Hasanah';
   const tagline = ls('sch_tagline') || 'Sistem Absensi Digital';
@@ -2736,8 +3006,8 @@ function cetakPDF(type){
   // Footer
   w.document.write('<p style="font-size:10px;color:#9CA3AF;text-align:right;margin-bottom:4px">Total: '+rows.length+' guru | '+nama+'</p>');
   w.document.write('<div class="footer">');
-  w.document.write('<div class="sign"><p>Mengetahui,</p><p><b>Kepala Sekolah</b></p><div class="sign-line"><p>( _________________________ )</p><p style="margin-top:3px">NIP. _____________________</p></div></div>');
-  w.document.write('<div class="sign" style="text-align:right"><p>'+tglStr+'</p><p><b>Admin / Operator</b></p><div class="sign-line"><p>( _________________________ )</p><p style="margin-top:3px">NIP. _____________________</p></div></div>');
+  w.document.write('<div class="sign"><p>Mengetahui,</p><p><b>Pengawas Sekolah</b></p><div class="sign-line"><p>( _________________________ )</p><p style="margin-top:3px">NIP. _____________________</p></div></div>');
+  w.document.write('<div class="sign" style="text-align:right"><p>'+tglStr+'</p><p><b>Kepala Sekolah</b></p><div class="sign-line"><p>( _________________________ )</p><p style="margin-top:3px">NIP. _____________________</p></div></div>');
   w.document.write('</div>');
   w.document.write('<scr'+'ipt>window.onload=function(){window.print();}</scr'+'ipt>');
   w.document.write('</body></html>');
