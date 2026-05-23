@@ -425,41 +425,50 @@ tbody tr:hover{background:var(--bg);}
   <div class="card cp">
     <div class="ct">✏️ Input Absensi Manual</div>
     <!-- Info kontekstual berdasarkan role -->
+    <!-- Info Admin/Kepsek -->
     <div class="alert a-info" style="margin-bottom:10px" id="manual-admin-info">
       <span>ℹ️</span>
-      <span>Gunakan form ini untuk mengisi absensi guru yang <b>Izin, Sakit, atau Alpha</b>, serta koreksi data absensi.</span>
+      <span>Gunakan form ini untuk input <b>Izin, Sakit, Alpha</b>, dan koreksi data absensi.</span>
     </div>
-    <div class="alert a-warn" style="margin-bottom:10px;display:none" id="manual-guru-info">
-      <span>⚠️</span>
-      <span>Sebagai Guru, Anda hanya bisa input <b>Absen Masuk</b> atau <b>Absen Pulang</b>. Untuk Izin/Sakit, hubungi Admin atau Kepala Sekolah.</span>
+    <!-- Info Guru -->
+    <div class="alert a-ok" style="margin-bottom:10px;display:none" id="manual-guru-info">
+      <span>📝</span>
+      <span>Anda bisa input <b>Absen Masuk, Pulang, Izin</b>, atau <b>Sakit</b>. Wajib isi keterangan untuk Izin/Sakit.</span>
     </div>
-    <div class="fg"><label class="fl">Pilih Guru</label>
-      <select class="fc" id="mg-guru"><option value="">-- Pilih Guru --</option></select></div>
-    <div class="fg"><label class="fl">Jenis Absensi</label>
-      <select class="fc" id="mg-tipe" onchange="onTipeChange()">
-        <option value="masuk">🟢 Absen Masuk</option>
-        <option value="pulang">🟣 Absen Pulang</option>
-        <option value="izin">📝 Izin</option>
-        <option value="sakit">🏥 Sakit</option>
-        <option value="alpha">❌ Alpha / Tidak Hadir</option>
-      </select></div>
-    <div class="fg" id="mg-status-wrap">
-      <label class="fl">Status</label>
-      <select class="fc" id="mg-status">
-        <option value="hadir">Hadir Tepat Waktu</option>
-        <option value="terlambat">Terlambat</option>
-      </select>
+    <!-- Blokir Yayasan -->
+    <div class="alert a-err" style="margin-bottom:10px;display:none" id="manual-yayasan-info">
+      <span>🚫</span>
+      <span>Ketua Yayasan <b>tidak dapat</b> mengisi absensi. Fitur ini hanya untuk Guru, Admin, dan Kepala Sekolah.</span>
     </div>
-    <div class="fg" id="mg-ket-wrap" style="display:none">
-      <label class="fl">Keterangan *</label>
-      <textarea class="fc" id="mg-ket" rows="2" placeholder="Isi keterangan..."></textarea></div>
-    <!-- Tanggal otomatis diisi sistem -->
-    <input type="hidden" id="mg-tgl">
-    <div class="fg"><label class="fl">Waktu <small style="color:var(--tx3);font-weight:400">(otomatis saat simpan untuk absen hadir)</small></label>
-      <input type="text" class="fc" id="mg-waktu" readonly placeholder="Otomatis..."></div>
-    <div class="brow">
-      <button class="btn bs" onclick="resetManual()">Reset</button>
-      <button class="btn bp" id="btn-manual" onclick="simpanManual()">✅ Simpan</button>
+    <div id="manual-form-body">
+      <div class="fg"><label class="fl">Pilih Guru</label>
+        <select class="fc" id="mg-guru"><option value="">-- Pilih Guru --</option></select></div>
+      <div class="fg"><label class="fl">Jenis Absensi</label>
+        <select class="fc" id="mg-tipe" onchange="onTipeChange()">
+          <option value="masuk">🟢 Absen Masuk</option>
+          <option value="pulang">🟣 Absen Pulang</option>
+          <option value="izin">📝 Izin</option>
+          <option value="sakit">🏥 Sakit</option>
+          <option value="alpha">❌ Alpha / Tidak Hadir</option>
+        </select></div>
+      <div class="fg" id="mg-status-wrap">
+        <label class="fl">Status</label>
+        <select class="fc" id="mg-status">
+          <option value="hadir">Hadir Tepat Waktu</option>
+          <option value="terlambat">Terlambat</option>
+        </select>
+      </div>
+      <div class="fg" id="mg-ket-wrap" style="display:none">
+        <label class="fl" id="ket-label">Keterangan *</label>
+        <textarea class="fc" id="mg-ket" rows="2" placeholder="Isi keterangan..."></textarea>
+      </div>
+      <input type="hidden" id="mg-tgl">
+      <div class="fg"><label class="fl">Waktu <small style="color:var(--tx3);font-weight:400">(otomatis saat simpan)</small></label>
+        <input type="text" class="fc" id="mg-waktu" readonly placeholder="Otomatis..."></div>
+      <div class="brow">
+        <button class="btn bs" onclick="resetManual()">Reset</button>
+        <button class="btn bp" id="btn-manual" onclick="simpanManual()">✅ Simpan</button>
+      </div>
     </div>
   </div>
   <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px">📋 Log Hari Ini</div>
@@ -1667,6 +1676,7 @@ function doLogin(){
 // ABSEN FLOW
 // ═══════════════════════════════════════════════
 function bukaAbsen(tipe){
+  if(role==='yayasan'){toast('Ketua Yayasan tidak dapat melakukan absensi','err');return;}
   if(isHariLibur()){toast('Hari ini libur (Sabtu/Minggu)','warn');return;}
   const btn=document.getElementById(tipe==='masuk'?'btn-masuk':'btn-pulang');
   if(btn.classList.contains('ab-locked')){
@@ -1751,6 +1761,10 @@ function onScan(txt){
 }
 
 async function prosesAbsenScan(guruId,tipe){
+  if(role==='yayasan'){
+    toast('Ketua Yayasan tidak dapat melakukan absensi','err');
+    _scanDone.delete(guruId+'|'+tipe+'|'+today());return;
+  }
   const g=gurus.find(x=>x.id===guruId);
   if(!g){
     toast('Guru tidak ditemukan (ID: '+guruId+')','err');
@@ -1837,6 +1851,7 @@ function cancelTerlambat(){closeModal('modal-terlambat');pendingGuruId=null;}
 // CORE ABSEN - simpan lokal + kirim Sheets
 // ═══════════════════════════════════════════════
 async function doAbsen(guruId,tipe,status,ket){
+  if(role==='yayasan'){toast('Ketua Yayasan tidak dapat melakukan absensi','err');return false;}
   const g=gurus.find(x=>x.id===guruId);
   if(!g){toast('Data guru tidak ditemukan','err');return false;}
   // Cek duplikat
@@ -1876,23 +1891,40 @@ function onTipeChange(){
   const tipe=tipeEl.value;
   const isAdminKepsek=(role==='admin'||role==='kepsek');
 
-  // Opsi dropdown: guru hanya bisa masuk/pulang
+  // Alpha hanya admin/kepsek. Izin & Sakit boleh semua role termasuk guru.
   [...tipeEl.options].forEach(o=>{
-    if(['izin','sakit','alpha'].includes(o.value)){
+    if(o.value==='alpha'){
       o.disabled=!isAdminKepsek;
       o.style.display=isAdminKepsek?'':'none';
     }
+    // Pastikan izin & sakit selalu tampil untuk semua
+    if(o.value==='izin'||o.value==='sakit'){
+      o.disabled=false;
+      o.style.display='';
+    }
   });
-  // Jika guru tapi value tidak valid, reset
-  if(!isAdminKepsek&&['izin','sakit','alpha'].includes(tipe)){
-    tipeEl.value='masuk';
-  }
+  // Jika guru tapi pilih alpha, reset ke masuk
+  if(!isAdminKepsek && tipe==='alpha') tipeEl.value='masuk';
 
-  // Tampilkan keterangan jika perlu
-  const curTipe=tipeEl.value;
+  const curTipe = tipeEl.value;
+
+  // Tampilan status & keterangan
   if(['izin','sakit','alpha'].includes(curTipe)){
     sw.style.display='none';
     kw.style.display='block';
+    // Placeholder keterangan sesuai pilihan
+    const ket=document.getElementById('mg-ket');
+    if(ket){
+      const ph={
+        izin :'Contoh: Keperluan keluarga, dinas luar, dll...',
+        sakit:'Contoh: Demam, lampirkan surat dokter bila ada...',
+        alpha:'Keterangan tambahan (opsional)'
+      };
+      ket.placeholder=ph[curTipe]||'Isi keterangan...';
+    }
+    // Label keterangan wajib untuk izin & sakit
+    const lbl=document.getElementById('ket-label');
+    if(lbl) lbl.textContent=(curTipe==='alpha'?'Keterangan':'Keterangan *');
   } else if(curTipe==='masuk'){
     sw.style.display=isAdminKepsek?'block':'none';
     kw.style.display='none';
@@ -1900,12 +1932,18 @@ function onTipeChange(){
     sw.style.display='none';
     kw.style.display='none';
   }
-  
-  // Info untuk guru
+
+  // Info banner
   const guruInfo=document.getElementById('manual-guru-info');
-  if(guruInfo){
-    guruInfo.style.display=isAdminKepsek?'none':'block';
-  }
+  if(guruInfo) guruInfo.style.display=isAdminKepsek?'none':'flex';
+
+  // Alert khusus yayasan
+  const yayasanInfo=document.getElementById('manual-yayasan-info');
+  if(yayasanInfo) yayasanInfo.style.display=role==='yayasan'?'flex':'none';
+
+  // Sembunyikan seluruh form untuk yayasan
+  const formBody=document.getElementById('manual-form-body');
+  if(formBody) formBody.style.display=role==='yayasan'?'none':'block';
 }
 
 function populateManualGuru(){
@@ -1915,6 +1953,9 @@ function populateManualGuru(){
 }
 
 async function simpanManual(){
+  // Blokir total untuk yayasan
+  if(role==='yayasan'){toast('Ketua Yayasan tidak dapat mengisi absensi','err');return;}
+
   const guruId=document.getElementById('mg-guru').value;
   const tipeVal=document.getElementById('mg-tipe').value;
   const ket=document.getElementById('mg-ket').value.trim();
@@ -1932,9 +1973,11 @@ async function simpanManual(){
     tipe='pulang';status='hadir';
   }
 
-  if((status==='izin'||status==='sakit'||status==='alpha'||status==='terlambat')&&!ket){
-    toast('Keterangan wajib diisi!','err');
+  // Izin & Sakit WAJIB keterangan
+  if((status==='izin'||status==='sakit')&&!ket){
+    toast('Keterangan wajib diisi untuk Izin/Sakit!','err');
     document.getElementById('mg-ket-wrap').style.display='block';
+    document.getElementById('mg-ket').focus();
     return;
   }
 
