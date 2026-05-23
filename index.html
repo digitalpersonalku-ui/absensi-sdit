@@ -673,8 +673,16 @@ tbody tr:hover{background:var(--bg);}
     <div class="fg"><label class="fl">Jam Mulai Absen Masuk</label><input type="time" class="fc" id="cfg-mulai" value="06:30"></div>
     <div class="fg"><label class="fl">Batas Tepat Waktu (setelah ini = Terlambat)</label><input type="time" class="fc" id="cfg-batas" value="08:00"></div>
     <div class="fg"><label class="fl">Batas Maksimal Absen Masuk</label><input type="time" class="fc" id="cfg-maxmasuk" value="11:00"></div>
+    <div class="fg"><label class="fl">⚠️ Jam Alpha Otomatis (belum absen = Alpha)</label>
+      <input type="time" class="fc" id="cfg-jam-alpha" value="10:30">
+      <small style="color:var(--tx3);font-size:10px;display:block;margin-top:3px">Guru yang belum absen masuk setelah jam ini otomatis ditandai Alpha</small>
+    </div>
     <div class="fg"><label class="fl">Jam Mulai Absen Pulang</label><input type="time" class="fc" id="cfg-pulang" value="14:00"></div>
     <div class="fg"><label class="fl">Batas Akhir Absen Pulang</label><input type="time" class="fc" id="cfg-maxpulang" value="15:30"></div>
+    <div style="height:1px;background:var(--border);margin:10px 0"></div>
+    <p style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px">🕌 Jam Khusus Guru Al Quran</p>
+    <div class="fg"><label class="fl">Jam Mulai (Al Quran)</label><input type="time" class="fc" id="cfg-quran-mulai" value="07:00"></div>
+    <div class="fg"><label class="fl">Batas Tepat Waktu (Al Quran)</label><input type="time" class="fc" id="cfg-quran-batas" value="08:10"></div>
     <button class="btn bp" style="width:auto" onclick="saveJam()">💾 Simpan Jam</button>
   </div>
   <div class="card cp">
@@ -837,12 +845,26 @@ const DEFAULTS = {admin:{u:'admin',p:'sdit2025'},kepsek:{u:'kepsek',p:'kepsek202
 // JAM CONFIG
 // ═══════════════════════════════════════════════
 let JAM = {
-  mulai:    localStorage.getItem('j_mulai')    || '06:30',
-  batas:    localStorage.getItem('j_batas')    || '08:00',
-  maxmasuk: localStorage.getItem('j_maxmasuk') || '11:00',
-  pulang:   localStorage.getItem('j_pulang')   || '14:00',
-  maxpulang:localStorage.getItem('j_maxpulang')|| '15:30'
+  mulai:        localStorage.getItem('j_mulai')        || '06:30',
+  batas:        localStorage.getItem('j_batas')        || '08:00',
+  maxmasuk:     localStorage.getItem('j_maxmasuk')     || '11:00',
+  jam_alpha:    localStorage.getItem('j_jam_alpha')    || '10:30',
+  pulang:       localStorage.getItem('j_pulang')       || '14:00',
+  maxpulang:    localStorage.getItem('j_maxpulang')    || '15:30',
+  quran_mulai:  localStorage.getItem('j_quran_mulai')  || '07:00',
+  quran_batas:  localStorage.getItem('j_quran_batas')  || '08:10',
 };
+// Cek apakah hari ini libur (Sabtu/Minggu)
+function isHariLibur(tgl){
+  const d=tgl?new Date(tgl):new Date();
+  return d.getDay()===0||d.getDay()===6; // 0=Minggu, 6=Sabtu
+}
+// Cek apakah guru Al Quran (berdasarkan mapel)
+function isGuruQuran(g){
+  if(!g)return false;
+  const m=(g.mapel||'').toLowerCase();
+  return m.includes('quran')||m.includes('al quran')||m.includes('alquran');
+}
 
 // ═══════════════════════════════════════════════
 // STATE
@@ -1307,15 +1329,12 @@ function startAlphaChecker(){
 
 async function checkAndMarkAlpha(){
   if(role!=='admin'&&role!=='kepsek') return;
-  if(nowMin()<t2m('10:30')) return;
-  // Flag per hari per device — cukup sekali
+  if(isHariLibur()){console.log('[Alpha] Hari libur, skip');return;}
+  if(nowMin()<t2m(JAM.jam_alpha)){console.log('[Alpha] Belum jam alpha '+JAM.jam_alpha);return;}
   const flagKey='alpha_done_'+today();
-  if(ls(flagKey)==='1'){
-    console.log('[Alpha] Sudah ditandai hari ini, skip');
-    return;
-  }
-  // Set flag DULU sebelum proses (mencegah race condition antar tab)
+  if(ls(flagKey)==='1'){console.log('[Alpha] Sudah ditandai hari ini');return;}
   ls(flagKey,'1');
+  console.log('[Alpha] Mulai mark alpha pukul '+nowTime());
   await autoMarkAlpha();
 }
 
@@ -1362,7 +1381,18 @@ async function flushQueue(){
 // JAM LOGIC
 // ═══════════════════════════════════════════════
 function nowMin(){return t2m(nowTime());}
-function bisaMasuk(){const n=nowMin();return n>=t2m(JAM.mulai)&&n<=t2m(JAM.maxmasuk);}
+function bisaMasuk(guruId){
+  if(isHariLibur()) return false;
+  const n=nowMin();
+  const g=gurus.find(x=>x.id===guruId);
+  if(isGuruQuran(g)) return n>=t2m(JAM.quran_mulai)&&n<=t2m(JAM.maxmasuk);
+  return n>=t2m(JAM.mulai)&&n<=t2m(JAM.maxmasuk);
+}
+function isTerlambat(guruId){
+  const g=gurus.find(x=>x.id===guruId);
+  if(isGuruQuran(g)) return nowMin()>t2m(JAM.quran_batas);
+  return nowMin()>t2m(JAM.batas);
+}
 function isTerlambat(){return nowMin()>t2m(JAM.batas);}
 function isAlpha(){return nowMin()>t2m(JAM.maxmasuk);} // lewat 11:00 = alpha (tidak bisa absen masuk)
 function bisaPulang(){
@@ -1526,6 +1556,9 @@ function buildNav(){
   // Absen grid - sembunyikan untuk yayasan
   const ag=document.getElementById('absen-grid');
   if(ag)ag.style.display=role==='yayasan'?'none':'grid';
+  // Yayasan tidak bisa scan QR
+  const scanNav=document.getElementById('bn-scan');
+  if(scanNav)scanNav.style.display=role==='yayasan'?'none':'flex';
   // Rekap tahunan - hanya admin
   const pt=document.getElementById('ptab-tahunan');
   if(pt)pt.style.display=role==='admin'?'block':'none';
@@ -1634,6 +1667,7 @@ function doLogin(){
 // ABSEN FLOW
 // ═══════════════════════════════════════════════
 function bukaAbsen(tipe){
+  if(isHariLibur()){toast('Hari ini libur (Sabtu/Minggu)','warn');return;}
   const btn=document.getElementById(tipe==='masuk'?'btn-masuk':'btn-pulang');
   if(btn.classList.contains('ab-locked')){
     toast(tipe==='masuk'?'Belum/sudah berakhir waktu absen masuk':'Belum/sudah berakhir waktu absen pulang','warn');
@@ -2005,8 +2039,32 @@ function liHTML(a){
   const bCls=a.status==='hadir'?'b-ok':a.status==='terlambat'?'b-tl':a.status==='izin'?'b-iz':a.status==='sakit'?'b-sk':'b-al';
   const bTx={hadir:'Hadir',terlambat:'Terlambat',izin:'Izin',sakit:'Sakit',alpha:'Alpha'}[a.status]||a.status;
   const tipeTx=(a.tipe||'masuk')==='pulang'?'🟣 Pulang':'🟢 Masuk';
-  return `<div class="litem">${av}<div class="linf"><div class="lnm">${a.nama}</div><div class="lsb">${g?g.mapel:''} · ${tipeTx}</div></div>
-    <div class="lrt"><div class="ltm">${a.waktu}</div><span class="badge ${bCls}">${bTx}</span></div></div>`;
+  const canEdit=(role==='admin'||role==='kepsek');
+  const eBtn=canEdit?`<button onclick="editAbsensi('${a.id}','${a.tipe||'masuk'}','${a.tanggal}')"
+    style="border:none;background:var(--bl2);color:var(--bl);border-radius:5px;padding:2px 6px;font-size:9px;cursor:pointer;font-weight:600">✏️</button>`:'';
+  return `<div class="litem">${av}<div class="linf"><div class="lnm">${a.nama}</div>
+    <div class="lsb">${g?g.mapel:''} · ${tipeTx}</div></div>
+    <div class="lrt">${eBtn}<div class="ltm">${a.waktu}</div><span class="badge ${bCls}">${bTx}</span></div></div>`;
+}
+
+function editAbsensi(guruId,tipe,tgl){
+  if(role!=='admin'&&role!=='kepsek'){toast('Hanya Admin/Kepsek','err');return;}
+  if(!absenDB[tgl])absenDB[tgl]=[];
+  const a=absenDB[tgl].find(x=>x.id===guruId&&(x.tipe||'masuk')===tipe);
+  if(!a){toast('Data tidak ditemukan','err');return;}
+  const mn=NAVS[role].find(n=>n.id==='manual');
+  if(mn)switchTab(mn.id,mn.tab);
+  setTimeout(()=>{
+    const s=document.getElementById('mg-guru');if(s)s.value=guruId;
+    const tm={'masuk':'masuk','pulang':'pulang','tidak masuk':a.status==='izin'?'izin':a.status==='sakit'?'sakit':'alpha'};
+    const te=document.getElementById('mg-tipe');
+    if(te){te.value=tm[tipe]||'masuk';onTipeChange();}
+    const se=document.getElementById('mg-status');if(se)se.value=a.status;
+    const ke=document.getElementById('mg-ket');if(ke)ke.value=a.ket||'';
+    const tg=document.getElementById('mg-tgl');if(tg)tg.value=tgl;
+    const we=document.getElementById('mg-waktu');if(we)we.value=a.waktu||'';
+    toast('✏️ Edit mode aktif','info');
+  },350);
 }
 
 // ═══════════════════════════════════════════════
@@ -2472,12 +2530,16 @@ document.addEventListener('input',function(e){
 });
 
 function saveJam(){
-  JAM.mulai=document.getElementById('cfg-mulai').value;
-  JAM.batas=document.getElementById('cfg-batas').value;
-  JAM.maxmasuk=document.getElementById('cfg-maxmasuk').value;
-  JAM.pulang=document.getElementById('cfg-pulang').value;
-  JAM.maxpulang=document.getElementById('cfg-maxpulang').value;
-  ['mulai','batas','maxmasuk','pulang','maxpulang'].forEach(k=>ls('j_'+k,JAM[k]));
+  JAM.mulai       = document.getElementById('cfg-mulai').value;
+  JAM.batas       = document.getElementById('cfg-batas').value;
+  JAM.maxmasuk    = document.getElementById('cfg-maxmasuk').value;
+  JAM.jam_alpha   = document.getElementById('cfg-jam-alpha')?.value||'10:30';
+  JAM.pulang      = document.getElementById('cfg-pulang').value;
+  JAM.maxpulang   = document.getElementById('cfg-maxpulang').value;
+  JAM.quran_mulai = document.getElementById('cfg-quran-mulai')?.value||'07:00';
+  JAM.quran_batas = document.getElementById('cfg-quran-batas')?.value||'08:10';
+  ['mulai','batas','maxmasuk','jam_alpha','pulang','maxpulang','quran_mulai','quran_batas']
+    .forEach(k=>ls('j_'+k,JAM[k]));
   toast('✅ Konfigurasi jam disimpan','ok');
   updateAbsenBtns();
 }
@@ -3180,7 +3242,9 @@ window.onload = function(){
   // Set nilai jam dari config
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
   sv('cfg-mulai',JAM.mulai);sv('cfg-batas',JAM.batas);
-  sv('cfg-maxmasuk',JAM.maxmasuk);sv('cfg-pulang',JAM.pulang);sv('cfg-maxpulang',JAM.maxpulang);
+  sv('cfg-maxmasuk',JAM.maxmasuk);sv('cfg-jam-alpha',JAM.jam_alpha);
+  sv('cfg-pulang',JAM.pulang);sv('cfg-maxpulang',JAM.maxpulang);
+  sv('cfg-quran-mulai',JAM.quran_mulai);sv('cfg-quran-batas',JAM.quran_batas);
 
   // Set tanggal default
   const rTgl=document.getElementById('r-tgl');if(rTgl)rTgl.value=today();
