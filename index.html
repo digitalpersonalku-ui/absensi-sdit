@@ -72,13 +72,13 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
   border-radius:14px;
   box-shadow:0 8px 32px rgba(0,0,0,.18);
   border:1px solid var(--border);
-  z-index:9999;/* harus di atas segalanya */
+  z-index:10000;
   overflow:hidden;
-  opacity:0;visibility:hidden;
+  opacity:0;pointer-events:none;
   transform:translateY(-6px) scale(.97);
-  transition:all .2s cubic-bezier(.4,0,.2,1);
+  transition:opacity .2s,transform .2s;
 }
-.ud-menu.ud-open{opacity:1;visibility:visible;transform:translateY(0) scale(1);}
+.ud-menu.ud-open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
 .ud-mhead{padding:12px 14px;background:var(--or2);border-bottom:1px solid var(--border);}
 .ud-mhead p{font-size:10px;color:var(--tx3);margin-bottom:1px;}
 .ud-mhead b{font-size:13px;font-family:"Plus Jakarta Sans",sans-serif;}
@@ -92,7 +92,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
 .ud-divider{height:1px;background:var(--border);margin:4px 0;}
 
 /* OVERLAY untuk menutup dropdown saat klik luar */
-#ud-overlay{position:fixed;inset:0;z-index:9998;display:none;}
+#ud-overlay{position:fixed;inset:0;z-index:9999;display:none;background:transparent;}
 #ud-overlay.active{display:block;}
 
 /* BOTTOM NAV */
@@ -1071,6 +1071,11 @@ function applyRole(){
   });
   gel('udi-logout').style.display=role!=='guru'?'flex':'none';
   // nav
+  // Nav: Guru hanya dapat Dashboard, Scan, Manual
+  // ID Card & Rekap: Guru tidak perlu (absen pakai scan)
+  const isGuru=role==='guru';
+  gel('bn-qr').style.display=isGuru?'none':'flex';
+  gel('bn-rekap').style.display='flex';// semua role bisa lihat rekap
   gel('bn-guru').style.display=isAdmin?'flex':'none';
   gel('bn-setting').style.display=isAdmin?'flex':'none';
   gel('ptab-tahunan').style.display=isPriv?'block':'none';
@@ -1111,7 +1116,7 @@ function applyRole(){
 // --- FIREBASE ---
 function initFB(){
   DB.ref('guru').on('value',snap=>{
-    guruData={};snap.forEach(c=>{guruData[c.key]=c.val();});
+    guruData={};snap.forEach(ch=>{guruData[ch.key]=ch.val();});
     renderGuru();fillSelects();renderQrGrid();loadStats();
   });
   DB.ref('identitas').on('value',snap=>{
@@ -1187,12 +1192,19 @@ function renderGuru(){
 }
 function fillSelects(){
   const list=Object.entries(guruData).filter(([,g])=>(g.status||'aktif')==='aktif').sort((a,b)=>a[1].nama.localeCompare(b[1].nama));
+  // Isi semua select yang berhubungan dengan guru
   ['mg-guru','qr-sel'].forEach(sid=>{
     const s=gel(sid);if(!s)return;
     const prev=s.value;
     s.innerHTML='<option value="">-- Pilih Guru --</option>';
-    list.forEach(([id,g])=>{s.innerHTML+=`<option value="${esc(id)}">${esc(g.nama)}${g.mapel?' — '+esc(g.mapel):''}</option>`;});
-    if(prev)s.value=prev;
+    list.forEach(([id,g])=>{
+      const opt=document.createElement('option');
+      opt.value=id;
+      opt.textContent=g.nama+(g.mapel?' — '+g.mapel:'');
+      s.appendChild(opt);
+    });
+    // Kembalikan pilihan sebelumnya jika masih valid
+    if(prev && guruData[prev]) s.value=prev;
   });
 }
 function showFormGuru(id){
@@ -1831,6 +1843,7 @@ function init(){
 
 // EXPOSE PUBLIC API
 return {
+  init,
   toggleUD,closeUD,switchRole,doLogin,cancelLogin,doLogout,togglePw,renewSession,
   bukaAbsen,onTipeChange,simpanManual,resetManual,
   renderGuru,showFormGuru,hideFormGuru,editGuru,hapusGuru,simpanGuru,handleFoto,
@@ -1845,22 +1858,12 @@ return {
 };
 })();
 
-document.addEventListener('DOMContentLoaded', APP.init || (()=>{}));
-// Fallback jika DOMContentLoaded sudah lewat
-if(document.readyState!=='loading'){
-  if(typeof APP !== 'undefined' && APP.init){
-    // sudah terpanggil via addEventListener
-  }
+// Inisialisasi aplikasi - dipanggil saat DOM siap
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', ()=>APP.init());
+} else {
+  APP.init();
 }
-
-// Expose init untuk dipanggil setelah DOM ready
-window.addEventListener('load',()=>{
-  if(typeof APP!=='undefined'){
-    // Re-init color grid dan FAB jika perlu
-    const fab=document.getElementById('fab');
-    if(fab&&!fab.classList.contains('fab-vis'))fab.classList.add('fab-vis');
-  }
-});
 </script>
 </body>
 </html>
