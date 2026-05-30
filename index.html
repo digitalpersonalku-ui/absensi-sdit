@@ -2,15 +2,14 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#FF6B35">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-touch-fullscreen" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Absensi SDIT">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6B35'/%3E%3Ctext y='24' x='4' font-size='22'%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23FF6B35'/><text y='24' x='4' font-size='22'>🏫</text></svg>">
 <title>Absensi - SDIT Qudwatun Hasanah</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
@@ -18,159 +17,90 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 :root{
-  --or:#FF6B35;--or2:#FFF0E8;
-  --tl:#0ABAB5;--tl2:#E0FAFA;
-  --pu:#6C47FF;--pu2:#EEE9FF;
-  --gn:#06C270;--gn2:#E6FAF0;
-  --rd:#FF4D6D;--rd2:#FFE8ED;
-  --yl:#F59E0B;--yl2:#FEF3C7;
-  --bl:#2563EB;--bl2:#EEF2FF;
+  --or:#FF6B35;--or2:#FFF0E8;--or3:#FFD4C2;
+  --tl:#0ABAB5;--tl2:#E0FAFA;--pu:#6C47FF;--pu2:#EEE9FF;
+  --gn:#06C270;--gn2:#E6FAF0;--rd:#FF4D6D;--rd2:#FFE8ED;
+  --yl:#F59E0B;--yl2:#FEF3C7;--bl:#2563EB;--bl2:#EEF2FF;
   --pi:#EC4899;--pi2:#FCE7F3;
-  --bg:#F1F5F9;--card:#fff;
-  --tx:#0F172A;--tx2:#475569;--tx3:#94A3B8;
-  --border:#E2E8F0;
-  --sh:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);
+  --bg:#F1F5F9;--card:#fff;--tx:#0F172A;--tx2:#475569;--tx3:#94A3B8;
+  --border:#E2E8F0;--sh:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);
   --r:14px;--rs:9px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
-
-/* TOPBAR - overflow hidden penting untuk mencegah QR data bocor */
-.topbar{
-  height:56px;display:flex;align-items:center;
-  justify-content:space-between;padding:0 16px;
-  background:linear-gradient(135deg,var(--or),#FF8C00);
-  box-shadow:0 2px 12px rgba(255,107,53,.3);
-  position:sticky;top:0;z-index:100;
-  overflow:hidden;/* KRITIS: cegah QR data bocor */
-  max-width:100vw;
-}
-.tb-left{display:flex;align-items:center;gap:9px;flex:1;min-width:0;overflow:hidden;}
-.tb-logo{width:34px;height:34px;min-width:34px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
-.tb-logo img{width:28px;height:28px;border-radius:7px;object-fit:cover;}
-.tb-name{min-width:0;overflow:hidden;}
-.tb-name h1{font-family:"Plus Jakarta Sans",sans-serif;font-size:13px;font-weight:800;color:#fff;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tb-name p{font-size:9px;color:rgba(255,255,255,.8);white-space:nowrap;}
-.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.tb-clk{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:800;color:#fff;line-height:1;text-align:right;}
-.tb-dt{font-size:9px;color:rgba(255,255,255,.8);text-align:right;}
-
-/* DROPDOWN - fix z-index & event handling */
+html{scroll-behavior:smooth;}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+.tab{display:none;animation:fadeIn .22s ease;}
+.tab.on{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skPulse 1.4s ease infinite;border-radius:6px;}
+@keyframes skPulse{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:linear-gradient(135deg,var(--or) 0%,#FF8C00 100%);box-shadow:0 2px 16px rgba(255,107,53,.35);position:sticky;top:0;z-index:100;}
+.tb-left{display:flex;align-items:center;gap:9px;}
+.tb-logo{width:34px;height:34px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.tb-name h1{font-family:"Plus Jakarta Sans",sans-serif;font-size:13px;font-weight:800;color:#fff;line-height:1.2;}
+.tb-name p{font-size:9px;color:rgba(255,255,255,.8);}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.tb-time{text-align:right;}
+.tb-clk{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:800;color:#fff;line-height:1;}
+.tb-dt{font-size:9px;color:rgba(255,255,255,.8);}
 .ud-wrap{position:relative;}
-.ud-btn{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 5px;
-  border-radius:30px;background:rgba(255,255,255,.18);
-  border:1.5px solid rgba(255,255,255,.3);cursor:pointer;
-  transition:background .2s;user-select:none;}
+.ud-btn{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 5px;border-radius:30px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s;font-family:"DM Sans",sans-serif;}
 .ud-btn:hover{background:rgba(255,255,255,.28);}
-.ud-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
-.ud-nm{font-size:11px;font-weight:700;color:#fff;max-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ud-arr{font-size:9px;color:rgba(255,255,255,.7);transition:transform .2s;flex-shrink:0;}
-.ud-open .ud-arr{transform:rotate(180deg);}
-.ud-menu{
-  position:fixed;top:64px;right:12px;
-  min-width:220px;background:#fff;
-  border-radius:14px;
-  box-shadow:0 8px 32px rgba(0,0,0,.18);
-  border:1px solid var(--border);
-  z-index:10000;
-  overflow:hidden;
-  opacity:0;pointer-events:none;
-  transform:translateY(-6px) scale(.97);
-  transition:opacity .2s,transform .2s;
-}
-.ud-menu.ud-open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
-.ud-mhead{padding:12px 14px;background:var(--or2);border-bottom:1px solid var(--border);}
+.ud-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.ud-nm{font-size:11px;font-weight:700;color:#fff;max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ud-arr{font-size:9px;color:rgba(255,255,255,.7);transition:transform .2s;}
+.ud-btn.open .ud-arr{transform:rotate(180deg);}
+.ud-menu{position:fixed;top:64px;right:12px;min-width:220px;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.2);border:1px solid var(--border);z-index:9999;overflow:hidden;display:none;}
+.ud-menu.open{display:block;}
+.ud-mhead{padding:13px 15px;background:var(--or2);border-bottom:1px solid var(--border);}
 .ud-mhead p{font-size:10px;color:var(--tx3);margin-bottom:1px;}
 .ud-mhead b{font-size:13px;font-family:"Plus Jakarta Sans",sans-serif;}
-.ud-sep{padding:6px 14px;font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;}
-.ud-it{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx);transition:background .15s;user-select:none;}
+.ud-sep{padding:7px 15px;font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;}
+.ud-it{display:flex;align-items:center;gap:9px;padding:9px 15px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx);transition:background .15s;}
 .ud-it:hover{background:var(--bg);}
-.ud-it.udi-active{background:var(--or2);color:var(--or);}
-.ud-it.udi-active::after{content:"✓";margin-left:auto;font-weight:900;}
-.ud-it.ud-danger{color:var(--rd);}
+.ud-it.active{background:var(--or2);color:var(--or);}
+.ud-it.active::after{content:"✓";margin-left:auto;font-weight:900;}
+.ud-it.danger{color:var(--rd);}
 .ud-ic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.ud-divider{height:1px;background:var(--border);margin:4px 0;}
-
-/* OVERLAY untuk menutup dropdown saat klik luar */
-#ud-overlay{position:fixed;inset:0;z-index:9999;display:none;background:transparent;}
-#ud-overlay.active{display:block;}
-
-/* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:0;right:0;height:60px;
-  background:rgba(255,255,255,.97);border-top:1px solid var(--border);
-  display:flex;z-index:99;box-shadow:0 -2px 12px rgba(0,0,0,.07);}
-.bn{flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:2px;border:none;background:none;
-  cursor:pointer;font-family:"DM Sans",sans-serif;
-  font-size:9px;font-weight:600;color:var(--tx3);
-  transition:color .2s;padding:6px 2px;position:relative;}
-.bn .bi{font-size:20px;line-height:1;transition:transform .2s;}
-.bn.bn-active{color:var(--or);}
-.bn.bn-active .bi{transform:scale(1.1);}
-.bn-line{position:absolute;bottom:0;left:50%;transform:translateX(-50%);
-  width:20px;height:3px;background:var(--or);border-radius:3px 3px 0 0;
-  opacity:0;transition:opacity .2s;}
-.bn.bn-active .bn-line{opacity:1;}
-
-/* INFO BAR */
-#info-bar{display:none;font-size:11px;font-weight:600;padding:7px 16px;text-align:center;color:#fff;}
-
-/* CONTENT */
+.bnav{position:fixed;bottom:0;left:0;right:0;height:60px;background:rgba(255,255,255,.97);border-top:1px solid var(--border);display:flex;z-index:99;box-shadow:0 -2px 16px rgba(0,0,0,.08);}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:9px;font-weight:600;color:var(--tx3);transition:color .2s;padding:6px 2px;position:relative;}
+.bn .bi{font-size:20px;line-height:1;transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
+.bn.active{color:var(--or);}
+.bn.active .bi{transform:scale(1.15);}
+.bn-line{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:20px;height:3px;background:var(--or);border-radius:3px 3px 0 0;opacity:0;transition:opacity .2s;}
+.bn.active .bn-line{opacity:1;}
+#info-bar{display:none;background:linear-gradient(135deg,#1E40AF,#1D4ED8);color:#fff;font-size:11px;font-weight:600;padding:7px 16px;text-align:center;}
 .content{padding:14px 14px 72px;}
-.tab{display:none;}
-.tab.tab-on{display:block;}
-
-/* CARD */
-.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
-  border:1px solid var(--border);overflow:hidden;margin-bottom:12px;}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;}
 .cp{padding:14px 16px;}
 .ct{font-family:"Plus Jakarta Sans",sans-serif;font-size:14px;font-weight:800;margin-bottom:12px;}
-
-/* JAM BAR */
-.jambar{background:var(--card);border-radius:var(--r);padding:13px 14px;
-  box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:10px;
-  position:relative;overflow:hidden;}
-.jambar::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--gn),var(--yl),var(--rd));}
+.jambar{background:var(--card);border-radius:var(--r);padding:13px 14px;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:10px;position:relative;overflow:hidden;}
+.jambar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gn),var(--yl),var(--rd));}
 .jambar-head{display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:8px;}
 .jambar-track{height:8px;background:var(--bg);border-radius:4px;position:relative;}
-.jambar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gn),var(--yl),var(--rd));transition:width .5s;}
-.jambar-ptr{position:absolute;top:-4px;width:16px;height:16px;background:#fff;
-  border:2px solid var(--or);border-radius:50%;transform:translateX(-50%);
-  box-shadow:0 2px 6px rgba(0,0,0,.2);transition:left .5s;}
+.jambar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gn),var(--yl),var(--rd));transition:width .6s cubic-bezier(.4,0,.2,1);}
+.jambar-ptr{position:absolute;top:-4px;width:16px;height:16px;background:#fff;border:2px solid var(--or);border-radius:50%;transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.2);transition:left .6s cubic-bezier(.4,0,.2,1);}
 .jambar-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:5px;}
-
-/* STATS */
 .sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;}
-.scard{background:var(--card);border-radius:var(--r);padding:14px;
-  box-shadow:var(--sh);border:1px solid var(--border);border-left:4px solid transparent;}
+.scard{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--sh);border:1px solid var(--border);border-left:4px solid transparent;position:relative;overflow:hidden;}
 .slbl{font-size:10px;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
-.snum{font-family:"Plus Jakarta Sans",sans-serif;font-size:30px;font-weight:900;line-height:1;}
-
-/* ABSEN BUTTONS */
+.snum{font-family:"Plus Jakarta Sans",sans-serif;font-size:30px;font-weight:900;line-height:1;transition:all .3s;}
+.snum.bump{animation:numBump .3s ease;}
+@keyframes numBump{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
 .absen-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-.absen-btn{border:none;border-radius:var(--r);padding:18px 14px;cursor:pointer;
-  font-family:"Plus Jakarta Sans",sans-serif;font-size:13px;font-weight:800;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:6px;transition:all .2s;width:100%;min-height:90px;}
-.absen-btn .aic{font-size:28px;line-height:1;}
+.absen-btn{border:none;border-radius:var(--r);padding:18px 14px;cursor:pointer;font-family:"Plus Jakarta Sans",sans-serif;font-size:13px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:all .25s cubic-bezier(.34,1.56,.64,1);width:100%;min-height:92px;}
+.absen-btn .aic{font-size:30px;line-height:1;transition:transform .3s;}
 .absen-btn .atx{font-size:13px;font-weight:800;line-height:1;}
 .absen-btn .asc{font-size:10px;font-weight:500;opacity:.85;text-align:center;}
-.ab-masuk{background:linear-gradient(135deg,#06C270,#10B981);color:#fff;box-shadow:0 6px 18px rgba(6,194,112,.35);}
-.ab-pulang{background:linear-gradient(135deg,#6C47FF,#7C3AED);color:#fff;box-shadow:0 6px 18px rgba(108,71,255,.35);}
+.ab-masuk{background:linear-gradient(135deg,#06C270,#10B981);color:#fff;box-shadow:0 6px 20px rgba(6,194,112,.38);}
+.ab-pulang{background:linear-gradient(135deg,#6C47FF,#7C3AED);color:#fff;box-shadow:0 6px 20px rgba(108,71,255,.38);}
 .ab-locked{background:#f1f5f9;color:#94a3b8;cursor:not-allowed;box-shadow:none;border:2px dashed #e2e8f0;}
-.absen-btn:not(.ab-locked):hover{transform:translateY(-2px);}
-.absen-btn:not(.ab-locked):active{transform:scale(.97);}
-
-/* PROGRESS BAR */
-.pbar{height:5px;border-radius:3px;background:var(--border);margin-top:4px;overflow:hidden;}
-.pfill{height:100%;border-radius:3px;transition:width .5s;}
-
-/* LIST ITEM */
+.absen-btn:not(.ab-locked):hover{transform:translateY(-3px);filter:brightness(1.06);}
+.absen-btn:not(.ab-locked):active{transform:scale(.96);}
 .litem{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);transition:background .15s;}
 .litem:last-child{border-bottom:none;}
 .litem:hover{background:rgba(241,245,249,.5);}
-.lav{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;overflow:hidden;}
+.lav{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;overflow:hidden;}
 .lav img{width:100%;height:100%;object-fit:cover;}
 .linf{flex:1;min-width:0;}
 .lnm{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -183,194 +113,129 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--tx);min-h
 .b-iz{background:var(--bl2);color:#1E40AF;}
 .b-sk{background:var(--pi2);color:#9D174D;}
 .b-al{background:var(--rd2);color:#9F1239;}
-.b-lb{background:#F3F4F6;color:#6B7280;}
-
-/* FORM */
+.b-lbr{background:#F3F4F6;color:#6B7280;}
 .fg{margin-bottom:12px;}
 .fl{display:block;font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
-.fc{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--rs);
-  font-family:"DM Sans",sans-serif;font-size:13px;color:var(--tx);background:#fff;
-  outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.fc{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:"DM Sans",sans-serif;font-size:13px;color:var(--tx);background:#fff;outline:none;transition:all .2s;appearance:none;-webkit-appearance:none;}
 .fc:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,107,53,.1);}
-.fc[readonly]{background:var(--bg);color:var(--tx2);}
-.fc:disabled{opacity:.5;background:var(--bg);cursor:not-allowed;}
+.fc[readonly]{background:var(--bg);color:var(--tx2);cursor:default;}
+.fc:disabled{opacity:.5;cursor:not-allowed;background:var(--bg);}
 .brow{display:flex;gap:8px;}
-.btn{flex:1;padding:11px 14px;border:none;border-radius:var(--rs);
-  font-family:"Plus Jakarta Sans",sans-serif;font-size:12px;font-weight:700;
-  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.btn{flex:1;padding:11px 14px;border:none;border-radius:var(--rs);font-family:"Plus Jakarta Sans",sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;}
 .btn:disabled{opacity:.45;cursor:not-allowed;}
 .btn:not(:disabled):active{transform:scale(.97);}
-.bp{background:linear-gradient(135deg,var(--or),#FF8050);color:#fff;box-shadow:0 3px 10px rgba(255,107,53,.3);}
+.bp{background:linear-gradient(135deg,var(--or),#FF8050);color:#fff;box-shadow:0 3px 12px rgba(255,107,53,.3);}
 .bs{background:var(--bg);color:var(--tx2);border:1.5px solid var(--border);}
+.bg_{background:var(--gn);color:#fff;}
 .bd{background:var(--rd);color:#fff;}
+.bpu{background:var(--pu);color:#fff;}
 .btl{background:var(--tl);color:#fff;}
-.bxl{background:#1D6F42;color:#fff;border:none;cursor:pointer;border-radius:var(--rs);font-family:"Plus Jakarta Sans",sans-serif;font-size:11px;font-weight:700;padding:9px 10px;}
-.bpdf{background:var(--rd);color:#fff;border:none;cursor:pointer;border-radius:var(--rs);font-family:"Plus Jakarta Sans",sans-serif;font-size:11px;font-weight:700;padding:9px 10px;}
-
-/* FOTO UPLOAD */
 .fotorow{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.fotoprev{width:68px;height:68px;border-radius:14px;border:2px dashed var(--border);
-  display:flex;align-items:center;justify-content:center;font-size:26px;
-  background:var(--bg);overflow:hidden;flex-shrink:0;cursor:pointer;transition:all .2s;}
+.fotoprev{width:68px;height:68px;border-radius:14px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--bg);overflow:hidden;flex-shrink:0;cursor:pointer;transition:all .2s;}
 .fotoprev:hover{border-color:var(--or);}
 .fotoprev img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
-
-/* SCAN */
 .scan-hdr{padding:15px;text-align:center;}
 .scan-hdr h2{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:800;margin-bottom:3px;}
 .scan-hdr p{font-size:11px;color:var(--tx2);}
-
-/* TABLE */
+.scan-res{padding:10px 14px;border-top:1px solid var(--border);}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;}
 thead th{background:var(--bg);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;white-space:nowrap;}
 tbody td{padding:9px 10px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle;}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:rgba(241,245,249,.5);}
-
-/* PERIOD TABS */
-.ptabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;}
+.ptabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
 .ptabs::-webkit-scrollbar{display:none;}
-.ptab{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);
-  font-size:11px;font-weight:600;color:var(--tx2);cursor:pointer;white-space:nowrap;transition:all .2s;}
-.ptab.ptab-active{background:var(--or);color:#fff;border-color:var(--or);box-shadow:0 3px 10px rgba(255,107,53,.3);}
-
-/* GURU GRID */
+.ptab{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);font-size:11px;font-weight:600;color:var(--tx2);cursor:pointer;white-space:nowrap;transition:all .2s;font-family:"DM Sans",sans-serif;}
+.ptab.active{background:var(--or);color:#fff;border-color:var(--or);box-shadow:0 3px 10px rgba(255,107,53,.3);}
 .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px;}
-.gc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);padding:14px;text-align:center;transition:all .2s;}
-.gc:hover{transform:translateY(-2px);border-color:var(--or);}
-.gcav{width:54px;height:54px;border-radius:14px;margin:0 auto 9px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;}
+.gc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);padding:14px;text-align:center;transition:all .22s;cursor:default;}
+.gc:hover{transform:translateY(-3px);border-color:var(--or);box-shadow:0 6px 20px rgba(255,107,53,.15);}
+.gcav{width:54px;height:54px;border-radius:14px;margin:0 auto 9px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;}
 .gcav img{width:100%;height:100%;object-fit:cover;}
 .gcnm{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:12px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .gcsb{font-size:10px;color:var(--tx2);margin-bottom:7px;}
-.gc-act{display:flex;gap:4px;justify-content:center;}
-.gcbtn{padding:4px 8px;font-size:10px;font-weight:700;border:none;border-radius:6px;cursor:pointer;font-family:"DM Sans",sans-serif;}
-
-/* ID CARD */
-.qrdisp{display:flex;flex-direction:column;align-items:center;padding:0;margin-top:12px;}
-.idcard{width:240px;border-radius:16px;overflow:hidden;
-  box-shadow:0 20px 60px rgba(14,100,160,.3),0 6px 20px rgba(0,0,0,.12);
-  display:flex;flex-direction:column;}
-.idc-top{background:linear-gradient(135deg,#1565C0,#0897A7,#06B89A);
-  padding:16px 16px 14px;text-align:center;position:relative;overflow:hidden;flex-shrink:0;}
-.idc-top::before{content:"";position:absolute;inset:0;opacity:.07;
-  background-image:radial-gradient(circle,#fff 1.5px,transparent 1.5px);background-size:14px 14px;}
-.idc-top::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,#FF6B35,#FFB347,#FF6B35);}
-.idc-ti{position:relative;z-index:1;}
-.idc-logo{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);
-  border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;
-  justify-content:center;font-size:22px;margin:0 auto 8px;overflow:hidden;}
-.idc-logo img{width:100%;height:100%;object-fit:cover;}
-.idc-sn{font-size:10.5px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px;}
-.idc-tag{font-size:8.5px;color:rgba(255,255,255,.7);letter-spacing:.5px;}
-.idc-body{background:linear-gradient(180deg,#f0f8ff,#e8f7f5,#f5f9ff);
-  display:flex;flex-direction:column;position:relative;flex:1;}
-.idc-body::before{content:"";position:absolute;inset:0;opacity:.04;
-  background-image:radial-gradient(circle,#1565C0 1px,transparent 1px);background-size:18px 18px;pointer-events:none;}
-.idc-foto-col{padding:16px 0 10px;display:flex;justify-content:center;position:relative;z-index:1;}
-.idc-foto{width:78px;height:96px;border-radius:10px;overflow:hidden;
-  background:linear-gradient(135deg,#deeeff,#d5f5ee);display:flex;align-items:center;
-  justify-content:center;font-size:30px;position:relative;
-  box-shadow:0 0 0 2.5px #fff,0 0 0 4px rgba(8,151,167,.3),0 6px 18px rgba(21,101,192,.2);}
-.idc-foto::after{content:"";position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;
-  border-width:0 0 14px 14px;border-color:transparent transparent #FF6B35 transparent;}
+.gc-btn{padding:4px 8px;font-size:10px;font-weight:700;border:none;border-radius:6px;cursor:pointer;transition:all .15s;font-family:"DM Sans",sans-serif;margin:2px;}
+.qrdisp{display:flex;flex-direction:column;align-items:center;padding:0;background:transparent;margin-top:12px;}
+.idcard{width:240px;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(14,100,160,.3),0 6px 20px rgba(0,0,0,.12);display:flex;flex-direction:column;}
+.idc-top{background:linear-gradient(135deg,#1565C0 0%,#0897A7 50%,#06B89A 100%);padding:16px 16px 14px;text-align:center;position:relative;overflow:hidden;flex-shrink:0;}
+.idc-top::before{content:'';position:absolute;inset:0;opacity:.07;background-image:radial-gradient(circle,#fff 1.5px,transparent 1.5px);background-size:14px 14px;}
+.idc-top::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF6B35,#FFB347,#FF6B35);}
+.idc-top-inner{position:relative;z-index:1;}
+.idc-logo-school{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px;overflow:hidden;}
+.idc-school{font-size:10.5px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px;}
+.idc-title{font-size:8.5px;color:rgba(255,255,255,.7);letter-spacing:.5px;}
+.idc-body{background:linear-gradient(180deg,#f0f8ff 0%,#e8f7f5 50%,#f5f9ff 100%);display:flex;flex-direction:column;position:relative;flex:1;}
+.idc-body::before{content:'';position:absolute;inset:0;opacity:.04;background-image:radial-gradient(circle,#1565C0 1px,transparent 1px);background-size:18px 18px;pointer-events:none;}
+.idc-sidebar{display:none;}
+.idc-foto-col{padding:16px 0 10px;display:flex;justify-content:center;position:relative;z-index:1;flex-shrink:0;}
+.idc-foto{width:78px;height:96px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#deeeff,#d5f5ee);display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;box-shadow:0 0 0 2.5px #fff,0 0 0 4px rgba(8,151,167,.3),0 6px 18px rgba(21,101,192,.2);}
+.idc-foto::after{content:'';position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;border-width:0 0 14px 14px;border-color:transparent transparent #FF6B35 transparent;}
 .idc-foto img{width:100%;height:100%;object-fit:cover;}
-.idc-info{width:100%;padding:6px 16px 14px;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;}
+.idc-info-col{width:100%;padding:6px 16px 14px;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;}
 .idc-nama{font-size:13px;font-weight:700;color:#0F172A;line-height:1.3;margin-bottom:6px;text-align:center;}
-.idc-jab{display:inline-flex;align-items:center;gap:4px;
-  background:linear-gradient(135deg,rgba(21,101,192,.1),rgba(8,151,167,.1));
-  border:1px solid rgba(8,151,167,.35);border-radius:20px;padding:3px 10px;margin-bottom:10px;}
-.idc-jab-dot{width:5px;height:5px;border-radius:50%;background:linear-gradient(135deg,#FF6B35,#FFB347);flex-shrink:0;}
-.idc-jab-txt{font-size:9px;font-weight:600;color:#0B5EA8;}
-.idc-div{height:1px;width:85%;background:linear-gradient(90deg,transparent,rgba(255,107,53,.45),rgba(8,151,167,.45),transparent);margin-bottom:10px;}
-.idc-qr-lbl{font-size:7px;color:#7a9bb5;text-transform:uppercase;letter-spacing:.6px;font-weight:600;text-align:center;margin-bottom:4px;}
-.idc-qr-box{width:88px;height:88px;border-radius:10px;background:#fff;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 14px rgba(21,101,192,.3),0 0 0 3px #1565C0;
-  overflow:hidden;padding:4px;margin:0 auto;}
-.idc-qr-box img,.idc-qr-box canvas{border-radius:4px;}
-.idc-footer{background:linear-gradient(90deg,#1565C0,#0897A7,#06B89A);
-  padding:8px 14px;display:flex;align-items:center;justify-content:center;
-  gap:8px;flex-shrink:0;}
-.idc-ft{font-size:7.5px;font-weight:600;color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.6px;}
-.idc-fdot{width:4px;height:4px;border-radius:50%;background:#FF6B35;flex-shrink:0;}
-
-/* ALERT */
-.alert{padding:11px 12px;border-radius:var(--rs);font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;}
+.idc-jabatan{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(21,101,192,.1),rgba(8,151,167,.1));border:1px solid rgba(8,151,167,.35);border-radius:20px;padding:3px 10px;margin-bottom:10px;}
+.idc-jabatan-dot{width:5px;height:5px;border-radius:50%;background:linear-gradient(135deg,#FF6B35,#FFB347);flex-shrink:0;}
+.idc-jabatan-txt{font-size:9px;font-weight:600;color:#0B5EA8;}
+.idc-divider{height:1px;width:85%;background:linear-gradient(90deg,transparent,rgba(255,107,53,.45),rgba(8,151,167,.45),transparent);margin-bottom:10px;}
+.idc-qr-row{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;}
+.idc-qr-label{font-size:7px;color:#7a9bb5;text-transform:uppercase;letter-spacing:.6px;font-weight:600;}
+.idc-qr-wrap{width:88px;height:88px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(21,101,192,.3),0 0 0 3px #1565C0;overflow:hidden;padding:4px;}
+.idc-qr-wrap img,.idc-qr-wrap canvas{border-radius:4px;}
+.idc-footer{background:linear-gradient(90deg,#1565C0 0%,#0897A7 50%,#06B89A 100%);padding:8px 14px;display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;}
+.idc-footer-txt{font-size:7.5px;font-weight:600;color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.6px;}
+.idc-footer-dot{width:4px;height:4px;border-radius:50%;background:#FF6B35;flex-shrink:0;}
+.alert{padding:11px 13px;border-radius:var(--rs);font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;}
 .a-ok{background:var(--gn2);color:#065F46;}
 .a-warn{background:var(--yl2);color:#92400E;}
 .a-info{background:var(--bl2);color:#1E40AF;}
 .a-err{background:var(--rd2);color:#9F1239;}
-
-/* MODAL */
-.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;
-  display:none;align-items:flex-end;justify-content:center;}
-.modal-ov.mo-open{display:flex;}
-.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 30px;
-  width:100%;max-width:480px;max-height:88vh;overflow-y:auto;}
-.mdrag{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px;}
-.mtitle{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:800;margin-bottom:12px;}
-
-/* LOGIN */
-.login-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;
-  display:none;align-items:center;justify-content:center;padding:20px;}
-.login-ov.lo-open{display:flex;}
-.login-box{background:#fff;border-radius:20px;padding:26px 22px;width:100%;max-width:340px;box-shadow:0 24px 80px rgba(0,0,0,.3);}
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.modal-ov.open{display:flex;}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 30px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.4,0,.2,1);}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mdrag{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 15px;}
+.mtitle{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:800;margin-bottom:13px;}
+.login-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);}
+.login-modal-ov.open{display:flex;}
+.login-box{background:#fff;border-radius:20px;padding:26px 22px;width:100%;max-width:340px;box-shadow:0 24px 80px rgba(0,0,0,.3);animation:zoomIn .25s cubic-bezier(.4,0,.2,1);}
+@keyframes zoomIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
 .login-logo{text-align:center;margin-bottom:18px;}
-.login-logo .le{font-size:38px;margin-bottom:6px;}
-.login-logo h2{font-family:"Plus Jakarta Sans",sans-serif;font-size:16px;font-weight:800;}
-.login-logo p{font-size:11px;color:var(--tx2);margin-top:2px;}
-.login-err{background:var(--rd2);color:#9F1239;border-radius:var(--rs);padding:9px 12px;font-size:12px;font-weight:600;margin-bottom:10px;display:none;}
+.login-logo div:first-child{font-size:38px;margin-bottom:6px;}
+.login-logo h2{font-family:"Plus Jakarta Sans",sans-serif;font-size:16px;font-weight:800;margin-bottom:2px;}
+.login-logo p{font-size:11px;color:var(--tx2);}
 .pw-wrap{position:relative;}
 .pw-wrap .fc{padding-right:42px;}
-.pweye{position:absolute;right:11px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;background:none;border:none;padding:4px;}
-
-/* TOAST */
-.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;
-  background:var(--tx);color:#fff;padding:10px 20px;border-radius:30px;
-  font-size:12px;font-weight:600;z-index:10000;transition:all .3s;
-  pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
-.toast.t-show{transform:translateX(-50%) translateY(0);opacity:1;}
+.pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;background:none;border:none;padding:4px;}
+.login-err{background:var(--rd2);color:#9F1239;border-radius:var(--rs);padding:9px 12px;font-size:12px;font-weight:600;margin-bottom:10px;display:none;}
+.toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--tx);color:#fff;padding:10px 20px;border-radius:30px;font-size:12px;font-weight:600;z-index:500;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 .t-ok{background:var(--gn);}.t-err{background:var(--rd);}.t-warn{background:var(--yl);color:var(--tx);}.t-info{background:var(--pu);}
-
-/* SPINNER */
 .spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
-
-/* MISC */
-.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;background:var(--bg);border:1px solid var(--border);}
-.empty{padding:32px;text-align:center;color:var(--tx3);}
-.empty-ic{font-size:36px;margin-bottom:8px;}
-.divider{height:1px;background:var(--border);margin:10px 0;}
 .color-sw{border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;color:#fff;font-size:16px;font-weight:700;transition:transform .2s;box-shadow:0 3px 10px rgba(0,0,0,.2);}
 .color-sw span{display:block;font-size:10px;margin-top:3px;font-family:"DM Sans",sans-serif;}
 .color-sw:hover{transform:scale(1.08);}
-.fab{position:fixed;bottom:70px;right:16px;width:46px;height:46px;border-radius:50%;
-  background:linear-gradient(135deg,var(--or),#FF8050);color:#fff;border:none;
-  font-size:18px;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,53,.4);
-  z-index:98;display:none;align-items:center;justify-content:center;transition:all .2s;}
-.fab.fab-vis{display:flex;}
-.fab:hover{transform:scale(1.08);}
-.sess-warn{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#92400E,#b45309);
-  color:#fff;padding:10px 16px;font-size:12px;font-weight:700;z-index:600;text-align:center;display:none;}
-
+.empty{padding:34px;text-align:center;color:var(--tx3);}
+.empty-ic{font-size:38px;margin-bottom:9px;}
+.divider{height:1px;background:var(--border);margin:10px 0;}
+.pbar{height:5px;border-radius:3px;background:var(--border);margin-top:4px;overflow:hidden;}
+.pfill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.fab{position:fixed;bottom:70px;right:16px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--or),#FF8050);color:#fff;border:none;font-size:18px;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,53,.4);z-index:98;transition:all .25s cubic-bezier(.34,1.56,.64,1);display:none;align-items:center;justify-content:center;}
+.fab:hover{transform:scale(1.1);}
+.fab.vis{display:flex;}
+.sess-warn{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#92400E,#b45309);color:#fff;padding:10px 16px;font-size:12px;font-weight:700;z-index:600;text-align:center;display:none;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;background:var(--bg);border:1px solid var(--border);}
 @media(min-width:480px){.sgrid{grid-template-columns:repeat(3,1fr);}}
-@media(min-width:600px){.sgrid{grid-template-columns:repeat(6,1fr);}.content{padding:16px 20px 74px;}}
-@media print{
-  .topbar,.bnav,.fab,.ptabs,.brow,.btn,#absen-grid,.jambar,.alert,#ud-overlay{display:none!important;}
-  .content{padding:0!important;}
-  .card{box-shadow:none!important;}
-  body{background:#fff!important;}
-}
+@media(min-width:600px){.sgrid{grid-template-columns:repeat(6,1fr);}.content{padding:16px 20px 74px;}.absen-grid{max-width:460px;}}
+@media print{.topbar,.bnav,.fab,.ptabs,.brow,.btn,#absen-grid,.jambar,.alert{display:none!important;}.content{padding:0;}.card{box-shadow:none;}body{background:#fff;}}
 </style>
 </head>
 <body>
 <!-- SESSION WARN -->
-<div class="sess-warn" id="sess-warn">⚠️ Sesi berakhir dalam <span id="sess-cd">5</span> menit. <button onclick="APP.renewSession()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;margin-left:8px;">Perpanjang</button></div>
+<div class="sess-warn" id="sess-warn">⚠️ Sesi berakhir dalam <span id="sess-cd">5</span> menit. <button onclick="A.renewSession()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;margin-left:8px;">Perpanjang</button></div>
 
 <!-- OVERLAY untuk menutup dropdown -->
-<div id="ud-overlay" onclick="APP.closeUD()"></div>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -387,7 +252,7 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
       <div class="tb-dt" id="tgl">--</div>
     </div>
     <div class="ud-wrap">
-      <div class="ud-btn" id="ud-btn" onclick="APP.toggleUD(event)">
+      <div class="ud-btn" id="ud-btn" onclick="A.toggleUD()">
         <div class="ud-av" id="ud-av">👩‍🏫</div>
         <span class="ud-nm" id="ud-nm">Guru</span>
         <span class="ud-arr">▼</span>
@@ -395,14 +260,14 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
       <div class="ud-menu" id="ud-menu">
         <div class="ud-mhead"><p>Masuk sebagai</p><b id="ud-role">Guru</b></div>
         <div class="ud-sep">Ganti Akses</div>
-        <div class="ud-it" id="udi-guru" onclick="APP.switchRole('guru')"><div class="ud-ic" style="background:var(--gn2)">👩‍🏫</div>Guru</div>
-        <div class="ud-it" id="udi-admin" onclick="APP.switchRole('admin')"><div class="ud-ic" style="background:var(--or2)">👨‍💼</div>Admin</div>
-        <div class="ud-it" id="udi-kepsek" onclick="APP.switchRole('kepsek')"><div class="ud-ic" style="background:var(--pu2)">🏫</div>Kepala Sekolah</div>
-        <div class="ud-it" id="udi-yayasan" onclick="APP.switchRole('yayasan')"><div class="ud-ic" style="background:var(--tl2)">🏛️</div>Ketua Yayasan</div>
+        <div class="ud-it" id="udi-guru" onclick="A.switchRole('guru')"><div class="ud-ic" style="background:var(--gn2)">👩‍🏫</div>Guru</div>
+        <div class="ud-it" id="udi-admin" onclick="A.switchRole('admin')"><div class="ud-ic" style="background:var(--or2)">👨‍💼</div>Admin</div>
+        <div class="ud-it" id="udi-kepsek" onclick="A.switchRole('kepsek')"><div class="ud-ic" style="background:var(--pu2)">🏫</div>Kepala Sekolah</div>
+        <div class="ud-it" id="udi-yayasan" onclick="A.switchRole('yayasan')"><div class="ud-ic" style="background:var(--tl2)">🏛️</div>Ketua Yayasan</div>
         <div class="ud-divider"></div>
-        <div class="ud-it" onclick="APP.doSyncNow()"><div class="ud-ic" style="background:var(--bl2)">🔄</div><span>Sinkronisasi</span><span id="sync-dot" style="margin-left:auto;font-size:10px;color:var(--gn)">●</span></div>
-        <div class="ud-it" onclick="APP.toggleDark()"><div class="ud-ic" style="background:#1e293b">🌙</div><span id="dm-lbl">Mode Gelap</span></div>
-        <div class="ud-it ud-danger" id="udi-logout" onclick="APP.doLogout()" style="display:none"><div class="ud-ic" style="background:var(--rd2)">🚪</div>Keluar</div>
+        <div class="ud-it" onclick="A.doSyncNow()"><div class="ud-ic" style="background:var(--bl2)">🔄</div><span>Sinkronisasi</span><span id="sync-dot" style="margin-left:auto;font-size:10px;color:var(--gn)">●</span></div>
+        <div class="ud-it" onclick="A.toggleDark()"><div class="ud-ic" style="background:#1e293b">🌙</div><span id="dm-lbl">Mode Gelap</span></div>
+        <div class="ud-it ud-danger" id="udi-logout" onclick="A.doLogout()" style="display:none"><div class="ud-ic" style="background:var(--rd2)">🚪</div>Keluar</div>
       </div>
     </div>
   </div>
@@ -422,11 +287,11 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
     <div class="jambar-lbl"><span>06:30</span><span>08:00</span><span>11:00</span><span>14:00</span><span>15:30</span></div>
   </div>
   <div class="absen-grid" id="absen-grid">
-    <button class="absen-btn ab-locked" id="btn-masuk" onclick="APP.bukaAbsen('masuk')">
+    <button class="absen-btn ab-locked" id="btn-masuk" onclick="A.bukaAbsen('masuk')">
       <span class="aic">🟢</span><span class="atx">Absen Masuk</span>
       <span class="asc" id="info-masuk">Aktif pukul 06:30</span>
     </button>
-    <button class="absen-btn ab-locked" id="btn-pulang" onclick="APP.bukaAbsen('pulang')">
+    <button class="absen-btn ab-locked" id="btn-pulang" onclick="A.bukaAbsen('pulang')">
       <span class="aic">🟣</span><span class="atx">Absen Pulang</span>
       <span class="asc" id="info-pulang">Aktif pukul 14:00</span>
     </button>
@@ -482,7 +347,7 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
       <div class="fg"><label class="fl">Pilih Guru</label>
         <select class="fc" id="mg-guru"><option value="">-- Pilih Guru --</option></select></div>
       <div class="fg"><label class="fl">Jenis Absensi</label>
-        <select class="fc" id="mg-tipe" onchange="APP.onTipeChange()">
+        <select class="fc" id="mg-tipe" onchange="A.onTipeChange()">
           <option value="masuk">🟢 Absen Masuk</option>
           <option value="pulang">🟣 Absen Pulang</option>
           <option value="izin">📝 Izin</option>
@@ -498,8 +363,8 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
       <div class="fg"><label class="fl">Tanggal</label>
         <input type="date" class="fc" id="mg-tgl"></div>
       <div class="brow">
-        <button class="btn bs" onclick="APP.resetManual()">Reset</button>
-        <button class="btn bp" onclick="APP.simpanManual()">✅ Simpan</button>
+        <button class="btn bs" onclick="A.resetManual()">Reset</button>
+        <button class="btn bp" onclick="A.simpanManual()">✅ Simpan</button>
       </div>
     </div>
   </div>
@@ -513,7 +378,7 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
     <div class="ct">🔲 ID Card &amp; QR Absensi</div>
     <div class="fg" style="margin-bottom:0">
       <label class="fl">Pilih Guru</label>
-      <select class="fc" id="qr-sel" onchange="APP.buatIDCard()"><option value="">-- Pilih Guru --</option></select>
+      <select class="fc" id="qr-sel" onchange="A.buatIDCard()"><option value="">-- Pilih Guru --</option></select>
     </div>
   </div>
   <div id="qr-disp" style="display:none;flex-direction:column;align-items:center;margin-top:12px">
@@ -547,8 +412,8 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
       </div>
     </div>
     <div style="display:flex;gap:10px;margin-top:14px;width:100%;max-width:300px">
-      <button class="btn bp" onclick="APP.cetakIDCard()" style="flex:1">🖨️ Cetak</button>
-      <button class="btn bs" onclick="APP.unduhQR()" style="flex:1">💾 Unduh QR</button>
+      <button class="btn bp" onclick="A.cetakIDCard()" style="flex:1">🖨️ Cetak</button>
+      <button class="btn bs" onclick="A.unduhQR()" style="flex:1">💾 Unduh QR</button>
     </div>
   </div>
   <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin:14px 0 10px">👥 Pilih Guru</div>
@@ -558,24 +423,24 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
 <!-- TAB: REKAP -->
 <div class="tab" id="tab-rekap">
   <div class="ptabs" id="ptabs">
-    <button class="ptab ptab-active" id="ptab-harian" onclick="APP.setPeriod('harian',this)">📅 Harian</button>
-    <button class="ptab" id="ptab-bulanan" onclick="APP.setPeriod('bulanan',this)">📆 Bulanan</button>
-    <button class="ptab" id="ptab-semester" onclick="APP.setPeriod('semester',this)">📚 Semester</button>
-    <button class="ptab" id="ptab-tahunan" style="display:none" onclick="APP.setPeriod('tahunan',this)">📊 Tahunan</button>
+    <button class="ptab ptab-active" id="ptab-harian" onclick="A.setPeriod('harian',this)">📅 Harian</button>
+    <button class="ptab" id="ptab-bulanan" onclick="A.setPeriod('bulanan',this)">📆 Bulanan</button>
+    <button class="ptab" id="ptab-semester" onclick="A.setPeriod('semester',this)">📚 Semester</button>
+    <button class="ptab" id="ptab-tahunan" style="display:none" onclick="A.setPeriod('tahunan',this)">📊 Tahunan</button>
   </div>
   <div style="margin-bottom:10px">
-    <input type="text" class="fc" id="rekap-cari" placeholder="🔍 Cari nama guru..." oninput="APP.filterRekap()">
+    <input type="text" class="fc" id="rekap-cari" placeholder="🔍 Cari nama guru..." oninput="A.filterRekap()">
   </div>
 
   <!-- HARIAN -->
   <div id="r-harian">
     <div class="card cp" style="padding-bottom:10px">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input type="date" class="fc" id="r-tgl" style="flex:1;min-width:120px" onchange="APP.loadHarian()">
-        <button class="btn bp" style="width:auto;padding:9px 14px;flex:none" onclick="APP.loadHarian()">🔄</button>
-        <button class="btn bs" style="width:auto;padding:9px 10px;flex:none" onclick="APP.eksporCSV()">CSV</button>
-        <button class="bpdf" onclick="APP.cetakPDF()">📄 PDF</button>
-        <button class="bxl" onclick="APP.eksporExcel()">📊 Excel</button>
+        <input type="date" class="fc" id="r-tgl" style="flex:1;min-width:120px" onchange="A.loadHarian()">
+        <button class="btn bp" style="width:auto;padding:9px 14px;flex:none" onclick="A.loadHarian()">🔄</button>
+        <button class="btn bs" style="width:auto;padding:9px 10px;flex:none" onclick="A.eksporCSV()">CSV</button>
+        <button class="bpdf" onclick="A.cetakPDF()">📄 PDF</button>
+        <button class="bxl" onclick="A.eksporExcel()">📊 Excel</button>
       </div>
     </div>
     <div class="card">
@@ -600,10 +465,10 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
         <select class="fc" id="r-thn-b" style="flex:1;min-width:80px">
           <option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option>
         </select>
-        <button class="btn bp" style="width:auto;padding:9px 14px;flex:none" onclick="APP.loadBulanan()">🔄</button>
-        <button class="btn bs" style="width:auto;padding:9px 10px;flex:none" onclick="APP.eksporCSV()">CSV</button>
-        <button class="bpdf" onclick="APP.cetakPDF()">📄 PDF</button>
-        <button class="bxl" onclick="APP.eksporExcelBulanan()">📊 Excel</button>
+        <button class="btn bp" style="width:auto;padding:9px 14px;flex:none" onclick="A.loadBulanan()">🔄</button>
+        <button class="btn bs" style="width:auto;padding:9px 10px;flex:none" onclick="A.eksporCSV()">CSV</button>
+        <button class="bpdf" onclick="A.cetakPDF()">📄 PDF</button>
+        <button class="bxl" onclick="A.eksporExcelBulanan()">📊 Excel</button>
       </div>
     </div>
     <div class="card"><div class="tbl-wrap"><table>
@@ -622,8 +487,8 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
         <select class="fc" id="r-thn-s" style="flex:1;min-width:80px">
           <option value="2025">2025</option><option value="2026" selected>2026</option>
         </select>
-        <button class="btn bp" style="width:auto;padding:9px 14px;flex:none" onclick="APP.loadSemester()">🔄</button>
-        <button class="bpdf" onclick="APP.cetakPDF()">📄 PDF</button>
+        <button class="btn bp" style="width:auto;padding:9px 14px;flex:none" onclick="A.loadSemester()">🔄</button>
+        <button class="bpdf" onclick="A.cetakPDF()">📄 PDF</button>
       </div>
     </div>
     <div class="card"><div class="tbl-wrap"><table>
@@ -639,8 +504,8 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
         <select class="fc" id="r-thn-t" style="flex:1">
           <option value="2025">2025</option><option value="2026" selected>2026</option>
         </select>
-        <button class="btn bp" style="width:auto;padding:9px 14px;flex:none" onclick="APP.loadTahunan()">🔄</button>
-        <button class="btn bs" style="width:auto;padding:9px 10px;flex:none" onclick="APP.eksporCSV()">CSV</button>
+        <button class="btn bp" style="width:auto;padding:9px 14px;flex:none" onclick="A.loadTahunan()">🔄</button>
+        <button class="btn bs" style="width:auto;padding:9px 10px;flex:none" onclick="A.eksporCSV()">CSV</button>
       </div>
     </div>
     <div class="card"><div class="tbl-wrap"><table>
@@ -653,8 +518,8 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
 <!-- TAB: GURU -->
 <div class="tab" id="tab-guru">
   <div style="display:flex;gap:8px;margin-bottom:10px">
-    <input type="text" class="fc" id="cari-guru" placeholder="🔍 Cari..." oninput="APP.renderGuru()" style="flex:1">
-    <button class="btn bp" style="width:auto" id="btn-tambah-guru" onclick="APP.showFormGuru(null)">+ Tambah</button>
+    <input type="text" class="fc" id="cari-guru" placeholder="🔍 Cari..." oninput="A.renderGuru()" style="flex:1">
+    <button class="btn bp" style="width:auto" id="btn-tambah-guru" onclick="A.showFormGuru(null)">+ Tambah</button>
   </div>
   <div class="ggrid" id="guru-grid"></div>
   <div id="form-guru" style="display:none">
@@ -663,7 +528,7 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
       <div class="fotorow">
         <div class="fotoprev" id="foto-prev" onclick="document.getElementById('foto-input').click()">👤</div>
         <div>
-          <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="APP.handleFoto(this)">
+          <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="A.handleFoto(this)">
           <button class="btn bs" style="width:auto;font-size:11px" onclick="document.getElementById('foto-input').click()">📷 Pilih Foto</button>
           <div style="font-size:10px;color:var(--tx3);margin-top:4px">JPG/PNG maks 2MB</div>
         </div>
@@ -680,8 +545,8 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
         <select class="fc" id="g-status"><option value="aktif">Aktif</option><option value="nonaktif">Non-Aktif</option></select></div>
       <input type="hidden" id="g-id">
       <div class="brow">
-        <button class="btn bs" onclick="APP.hideFormGuru()">Batal</button>
-        <button class="btn bp" onclick="APP.simpanGuru()">💾 Simpan</button>
+        <button class="btn bs" onclick="A.hideFormGuru()">Batal</button>
+        <button class="btn bp" onclick="A.simpanGuru()">💾 Simpan</button>
       </div>
     </div>
   </div>
@@ -690,7 +555,7 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
     <div class="alert a-info" style="margin-bottom:10px"><span>ℹ️</span><span>Format kolom: Nama | Mapel | NIP | Jenis (umum/quran)</span></div>
     <div class="fg"><label class="fl">URL Google Sheets (CSV)</label>
       <input type="text" class="fc" id="sheets-url" placeholder="https://docs.google.com/spreadsheets/..."></div>
-    <button class="btn btl" onclick="APP.importSheets()" style="width:100%"><span id="import-spin"></span>📊 Import</button>
+    <button class="btn btl" onclick="A.importSheets()" style="width:100%"><span id="import-spin"></span>📊 Import</button>
   </div>
 </div>
 
@@ -701,7 +566,7 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
     <div class="fg"><label class="fl">Nama Sekolah</label><input type="text" class="fc" id="s-nama" placeholder="Nama sekolah"></div>
     <div class="fg"><label class="fl">Tagline / Motto</label><input type="text" class="fc" id="s-tagline" placeholder="Tagline atau motto"></div>
     <div class="fg"><label class="fl">Logo (URL gambar atau Emoji)</label><input type="text" class="fc" id="s-logo" placeholder="https://... atau 🏫"></div>
-    <button class="btn bp" onclick="APP.simpanIdentitas()" style="width:100%">💾 Simpan Identitas</button>
+    <button class="btn bp" onclick="A.simpanIdentitas()" style="width:100%">💾 Simpan Identitas</button>
   </div>
   <div class="card cp">
     <div class="ct">⏰ Konfigurasi Jam Absen</div>
@@ -715,13 +580,13 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
       <div class="fg"><label class="fl">Quran Mulai</label><input type="time" class="fc" id="j-qmulai" value="07:00"></div>
       <div class="fg"><label class="fl">Quran Batas</label><input type="time" class="fc" id="j-qbatas" value="08:10"></div>
     </div>
-    <button class="btn bp" onclick="APP.simpanJam()" style="width:100%">💾 Simpan Jam</button>
+    <button class="btn bp" onclick="A.simpanJam()" style="width:100%">💾 Simpan Jam</button>
   </div>
   <div class="card cp">
     <div class="ct">🎨 Tema Warna</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px" id="color-grid"></div>
     <div class="fg" style="margin-bottom:0"><label class="fl">Warna Kustom</label>
-      <input type="color" class="fc" id="custom-color" value="#FF6B35" oninput="APP.applyColor(this.value)" style="height:44px;padding:4px;cursor:pointer"></div>
+      <input type="color" class="fc" id="custom-color" value="#FF6B35" oninput="A.applyColor(this.value)" style="height:44px;padding:4px;cursor:pointer"></div>
   </div>
   <div class="card cp" id="setting-security" style="display:none">
     <div class="ct">🔐 Keamanan</div>
@@ -731,10 +596,10 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
         <option value="120">2 jam</option><option value="0">Tidak pernah</option>
       </select></div>
     <div class="fg"><label class="fl">Ganti Password Admin</label>
-      <div class="pw-wrap"><input type="password" class="fc" id="s-pw-baru" placeholder="Password baru (min 8 karakter)"><button class="pweye" onclick="APP.togglePw('s-pw-baru')">👁</button></div></div>
+      <div class="pw-wrap"><input type="password" class="fc" id="s-pw-baru" placeholder="Password baru (min 8 karakter)"><button class="pweye" onclick="A.togglePw('s-pw-baru')">👁</button></div></div>
     <div class="fg"><label class="fl">Konfirmasi Password</label>
-      <div class="pw-wrap"><input type="password" class="fc" id="s-pw-konfirm" placeholder="Ulangi password baru"><button class="pweye" onclick="APP.togglePw('s-pw-konfirm')">👁</button></div></div>
-    <button class="btn bp" onclick="APP.gantiPassword()" style="width:100%">🔒 Simpan Password</button>
+      <div class="pw-wrap"><input type="password" class="fc" id="s-pw-konfirm" placeholder="Ulangi password baru"><button class="pweye" onclick="A.togglePw('s-pw-konfirm')">👁</button></div></div>
+    <button class="btn bp" onclick="A.gantiPassword()" style="width:100%">🔒 Simpan Password</button>
   </div>
   <div class="card cp">
     <div class="ct">🔄 Firebase &amp; Data</div>
@@ -743,11 +608,11 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
       <span style="font-size:12px;font-weight:600" id="fb-status">Memeriksa koneksi...</span>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn bs" onclick="APP.doSyncNow()" style="flex:1">🔄 Sinkronisasi</button>
-      <button class="btn bd" onclick="APP.resetHariIni()" style="flex:1">🗑 Reset Hari Ini</button>
+      <button class="btn bs" onclick="A.doSyncNow()" style="flex:1">🔄 Sinkronisasi</button>
+      <button class="btn bd" onclick="A.resetHariIni()" style="flex:1">🗑 Reset Hari Ini</button>
     </div>
     <div style="margin-top:8px">
-      <button class="btn bs" onclick="APP.eksporBackup()" style="width:100%">📦 Export Backup JSON</button>
+      <button class="btn bs" onclick="A.eksporBackup()" style="width:100%">📦 Export Backup JSON</button>
     </div>
   </div>
 </div>
@@ -756,13 +621,13 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
 
 <!-- BOTTOM NAV -->
 <nav class="bnav">
-  <button class="bn bn-active" id="bn-dash" onclick="APP.goTab('dash')"><span class="bi">🏠</span>Dashboard<div class="bn-line"></div></button>
-  <button class="bn" id="bn-scan" onclick="APP.goTab('scan')"><span class="bi">📷</span>Scan QR<div class="bn-line"></div></button>
-  <button class="bn" id="bn-manual" onclick="APP.goTab('manual')"><span class="bi">✏️</span>Manual<div class="bn-line"></div></button>
-  <button class="bn" id="bn-qr" onclick="APP.goTab('qr')"><span class="bi">🪪</span>ID Card<div class="bn-line"></div></button>
-  <button class="bn" id="bn-rekap" onclick="APP.goTab('rekap')"><span class="bi">📊</span>Rekap<div class="bn-line"></div></button>
-  <button class="bn" id="bn-guru" onclick="APP.goTab('guru')" style="display:none"><span class="bi">👥</span>Guru<div class="bn-line"></div></button>
-  <button class="bn" id="bn-setting" onclick="APP.goTab('setting')" style="display:none"><span class="bi">⚙️</span>Setting<div class="bn-line"></div></button>
+  <button class="bn bn-active" id="bn-dash" onclick="A.goTab('dash')"><span class="bi">🏠</span>Dashboard<div class="bn-line"></div></button>
+  <button class="bn" id="bn-scan" onclick="A.goTab('scan')"><span class="bi">📷</span>Scan QR<div class="bn-line"></div></button>
+  <button class="bn" id="bn-manual" onclick="A.goTab('manual')"><span class="bi">✏️</span>Manual<div class="bn-line"></div></button>
+  <button class="bn" id="bn-qr" onclick="A.goTab('qr')"><span class="bi">🪪</span>ID Card<div class="bn-line"></div></button>
+  <button class="bn" id="bn-rekap" onclick="A.goTab('rekap')"><span class="bi">📊</span>Rekap<div class="bn-line"></div></button>
+  <button class="bn" id="bn-guru" onclick="A.goTab('guru')" style="display:none"><span class="bi">👥</span>Guru<div class="bn-line"></div></button>
+  <button class="bn" id="bn-setting" onclick="A.goTab('setting')" style="display:none"><span class="bi">⚙️</span>Setting<div class="bn-line"></div></button>
 </nav>
 
 <!-- LOGIN MODAL -->
@@ -773,10 +638,10 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
     <div class="alert a-warn" id="login-warn" style="display:none"><span>⚠️</span><span id="login-warn-txt">Tersisa beberapa percobaan</span></div>
     <div class="fg"><label class="fl">Username</label><input type="text" class="fc" id="login-user" autocomplete="username"></div>
     <div class="fg"><label class="fl">Password</label>
-      <div class="pw-wrap"><input type="password" class="fc" id="login-pw" autocomplete="current-password" onkeydown="if(event.key==='Enter')APP.doLogin()"><button class="pweye" onclick="APP.togglePw('login-pw')">👁</button></div></div>
+      <div class="pw-wrap"><input type="password" class="fc" id="login-pw" autocomplete="current-password" onkeydown="if(event.key==='Enter')A.doLogin()"><button class="pweye" onclick="A.togglePw('login-pw')">👁</button></div></div>
     <div class="brow">
-      <button class="btn bs" onclick="APP.cancelLogin()">Batal</button>
-      <button class="btn bp" onclick="APP.doLogin()">🔓 Masuk</button>
+      <button class="btn bs" onclick="A.cancelLogin()">Batal</button>
+      <button class="btn bp" onclick="A.doLogin()">🔓 Masuk</button>
     </div>
   </div>
 </div>
@@ -788,7 +653,7 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
     <div class="mtitle" id="konfirm-title">Konfirmasi</div>
     <p id="konfirm-msg" style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.6"></p>
     <div class="brow">
-      <button class="btn bs" onclick="APP.closeKonfirm()">Batal</button>
+      <button class="btn bs" onclick="A.closeKonfirm()">Batal</button>
       <button class="btn bp" id="btn-konfirm-ok">Ya, Lanjutkan</button>
     </div>
   </div>
@@ -809,9 +674,9 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
     <div class="fg"><label class="fl">Keterangan</label><textarea class="fc" id="edit-ket" rows="2"></textarea></div>
     <input type="hidden" id="edit-key"><input type="hidden" id="edit-tgl">
     <div class="brow">
-      <button class="btn bs" onclick="APP.closeModal('modal-edit')">Batal</button>
-      <button class="btn bd" onclick="APP.hapusAbsensi()">🗑 Hapus</button>
-      <button class="btn bp" onclick="APP.simpanEditAbsensi()">💾 Simpan</button>
+      <button class="btn bs" onclick="A.closeModal('modal-edit')">Batal</button>
+      <button class="btn bd" onclick="A.hapusAbsensi()">🗑 Hapus</button>
+      <button class="btn bp" onclick="A.simpanEditAbsensi()">💾 Simpan</button>
     </div>
   </div>
 </div>
@@ -820,7 +685,8 @@ tbody tr:hover{background:rgba(241,245,249,.5);}
 <div class="toast" id="toast"></div>
 
 <!-- FAB -->
-<button class="fab" id="fab" onclick="APP.refreshDash()" title="Refresh">🔄</button>
+<button class="fab" id="fab" onclick="A.refreshDash()" title="Refresh">🔄</button>
+
 <script>
 // =====================================================
 // FIREBASE CONFIG
@@ -840,7 +706,7 @@ const DB = firebase.database();
 // =====================================================
 // APP NAMESPACE — hindari konflik nama global
 // =====================================================
-const APP = (function(){
+(function(){
 
 // --- STATE ---
 let role = 'guru';
@@ -966,22 +832,26 @@ function togglePw(id){const e=gel(id);if(e)e.type=e.type==='password'?'text':'pa
 
 // --- DROPDOWN ---
 // Pakai class pada menu, bukan inline style, dan pakai overlay terpisah
-function toggleUD(e){
-  if(e)e.stopPropagation();
+function toggleUD(){
+  const m=gel('ud-menu');if(!m)return;
+  udOpen=m.style.display==='block';
   udOpen=!udOpen;
-  const menu=gel('ud-menu'), ov=gel('ud-overlay'), btn=gel('ud-btn');
-  if(menu){menu.classList.toggle('ud-open',udOpen);}
-  if(ov){ov.style.display=udOpen?'block':'none';}
-  if(btn){btn.classList.toggle('ud-open',udOpen);}
+  m.style.display=udOpen?'block':'none';
+  const arr=gel('ud-arr');
+  if(arr)arr.style.transform=udOpen?'rotate(180deg)':'';
 }
 function closeUD(){
   if(!udOpen)return;
   udOpen=false;
-  const menu=gel('ud-menu'),ov=gel('ud-overlay'),btn=gel('ud-btn');
-  if(menu)menu.classList.remove('ud-open');
-  if(ov)ov.style.display='none';
-  if(btn)btn.classList.remove('ud-open');
+  const m=gel('ud-menu');
+  if(m)m.style.display='none';
+  const arr=gel('ud-arr');
+  if(arr)arr.style.transform='';
 }
+// Klik di luar dropdown -> tutup
+document.addEventListener('click',function(e){
+  if(udOpen&&!e.target.closest('#ud-btn')&&!e.target.closest('#ud-menu'))closeUD();
+},true);
 
 // --- LOGIN ---
 function switchRole(r){
@@ -1071,11 +941,6 @@ function applyRole(){
   });
   gel('udi-logout').style.display=role!=='guru'?'flex':'none';
   // nav
-  // Nav: Guru hanya dapat Dashboard, Scan, Manual
-  // ID Card & Rekap: Guru tidak perlu (absen pakai scan)
-  const isGuru=role==='guru';
-  gel('bn-qr').style.display=isGuru?'none':'flex';
-  gel('bn-rekap').style.display='flex';// semua role bisa lihat rekap
   gel('bn-guru').style.display=isAdmin?'flex':'none';
   gel('bn-setting').style.display=isAdmin?'flex':'none';
   gel('ptab-tahunan').style.display=isPriv?'block':'none';
@@ -1116,7 +981,7 @@ function applyRole(){
 // --- FIREBASE ---
 function initFB(){
   DB.ref('guru').on('value',snap=>{
-    guruData={};snap.forEach(ch=>{guruData[ch.key]=ch.val();});
+    guruData={};snap.forEach(c=>{guruData[c.key]=c.val();});
     renderGuru();fillSelects();renderQrGrid();loadStats();
   });
   DB.ref('identitas').on('value',snap=>{
@@ -1184,27 +1049,20 @@ function renderGuru(){
       <div class="gcsb">${esc(g.mapel||'-')}</div>
       ${g.jenis==='quran'?'<div style="margin-bottom:5px"><span class="chip" style="background:var(--tl2);color:var(--tl);border-color:var(--tl)">📖 Al Quran</span></div>':''}
       ${isAdmin?`<div class="gc-act">
-        <button class="gcbtn" style="background:var(--bl2);color:var(--bl)" onclick="APP.editGuru('${esc(id)}')">✏️</button>
-        <button class="gcbtn" style="background:var(--rd2);color:var(--rd)" onclick="APP.hapusGuru('${esc(id)}','${esc(g.nama)}')">🗑</button>
+        <button class="gcbtn" style="background:var(--bl2);color:var(--bl)" onclick="A.editGuru('${esc(id)}')">✏️</button>
+        <button class="gcbtn" style="background:var(--rd2);color:var(--rd)" onclick="A.hapusGuru('${esc(id)}','${esc(g.nama)}')">🗑</button>
       </div>`:''}
     </div>
   `).join('');
 }
 function fillSelects(){
   const list=Object.entries(guruData).filter(([,g])=>(g.status||'aktif')==='aktif').sort((a,b)=>a[1].nama.localeCompare(b[1].nama));
-  // Isi semua select yang berhubungan dengan guru
   ['mg-guru','qr-sel'].forEach(sid=>{
     const s=gel(sid);if(!s)return;
     const prev=s.value;
     s.innerHTML='<option value="">-- Pilih Guru --</option>';
-    list.forEach(([id,g])=>{
-      const opt=document.createElement('option');
-      opt.value=id;
-      opt.textContent=g.nama+(g.mapel?' — '+g.mapel:'');
-      s.appendChild(opt);
-    });
-    // Kembalikan pilihan sebelumnya jika masih valid
-    if(prev && guruData[prev]) s.value=prev;
+    list.forEach(([id,g])=>{s.innerHTML+=`<option value="${esc(id)}">${esc(g.nama)}${g.mapel?' — '+esc(g.mapel):''}</option>`;});
+    if(prev)s.value=prev;
   });
 }
 function showFormGuru(id){
@@ -1348,7 +1206,7 @@ function renderManualLog(){
   const items=Object.entries(absensiData).sort((a,b)=>b[1].createdAt-a[1].createdAt);
   if(!items.length){c.innerHTML='<div class="empty"><div class="empty-ic">📋</div><p>Belum ada absensi</p></div>';return;}
   c.innerHTML=items.map(([key,d])=>`
-    <div class="litem" ${canEdit?`onclick="APP.openEdit('${esc(key)}')" style="cursor:pointer"`:''}>
+    <div class="litem" ${canEdit?`onclick="A.openEdit('${esc(key)}')" style="cursor:pointer"`:''}>
       <div class="lav" style="background:${avClr(d.nama)}22;color:${avClr(d.nama)};font-size:16px">${sIcon(d.status)}</div>
       <div class="linf"><div class="lnm">${esc(d.nama)}</div><div class="lsb">${esc(d.mapel||'')} · ${esc(d.tipe)} · ${d.metode==='manual'?'Manual':'Scan'}</div></div>
       <div class="lrt"><div class="ltm">${d.waktu||'-'}</div><span class="badge ${sBadge(d.status)}">${esc(d.status)}</span></div>
@@ -1466,7 +1324,7 @@ function renderQrGrid(){
   const list=Object.entries(guruData).filter(([,g])=>(g.status||'aktif')==='aktif').sort((a,b)=>a[1].nama.localeCompare(b[1].nama));
   if(!list.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-ic">👥</div><p>Belum ada guru</p></div>';return;}
   grid.innerHTML=list.map(([id,g])=>`
-    <div class="gc" onclick="APP.pilihGuruQR('${esc(id)}')" style="cursor:pointer">
+    <div class="gc" onclick="A.pilihGuruQR('${esc(id)}')" style="cursor:pointer">
       <div class="gcav" style="background:${avClr(g.nama)}22;color:${avClr(g.nama)}">
         ${g.foto?`<img src="${esc(g.foto)}" alt="foto">`:`<span style="font-size:18px;font-weight:800">${avInit(g.nama)}</span>`}
       </div>
@@ -1711,7 +1569,7 @@ function applyColor(hex){
 }
 function initColorGrid(){
   const grid=gel('color-grid');if(!grid)return;
-  grid.innerHTML=COLORS.map(c=>`<div class="color-sw" style="background:${c.h}" onclick="APP.applyColor('${c.h}');APP.simpanWarna('${c.h}')"><span style="font-size:14px">●</span><span>${c.n}</span></div>`).join('');
+  grid.innerHTML=COLORS.map(c=>`<div class="color-sw" style="background:${c.h}" onclick="A.applyColor('${c.h}');A.simpanWarna('${c.h}')"><span style="font-size:14px">●</span><span>${c.n}</span></div>`).join('');
 }
 function simpanWarna(hex){DB.ref('identitas/warna').set(hex);toast('🎨 Tema diperbarui','ok');}
 function resetHariIni(){
@@ -1842,8 +1700,7 @@ function init(){
 }
 
 // EXPOSE PUBLIC API
-return {
-  init,
+window.A={
   toggleUD,closeUD,switchRole,doLogin,cancelLogin,doLogout,togglePw,renewSession,
   bukaAbsen,onTipeChange,simpanManual,resetManual,
   renderGuru,showFormGuru,hideFormGuru,editGuru,hapusGuru,simpanGuru,handleFoto,
@@ -1858,12 +1715,27 @@ return {
 };
 })();
 
-// Inisialisasi aplikasi - dipanggil saat DOM siap
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded', ()=>APP.init());
-} else {
-  APP.init();
+  document.addEventListener('DOMContentLoaded',()=>A.init());
+}else{A.init();}
+// Fallback jika DOMContentLoaded sudah lewat
+if(document.readyState!=='loading'){
+  if(typeof APP !== 'undefined' && A.init){
+    // sudah terpanggil via addEventListener
+  }
 }
+
+// Expose init untuk dipanggil setelah DOM ready
+window.addEventListener('load',()=>{
+  if(typeof APP!=='undefined'){
+    // Re-init color grid dan FAB jika perlu
+    const fab=document.getElementById('fab');
+    if(fab&&!fab.classList.contains('fab-vis'))fab.classList.add('fab-vis');
+  }
+});
 </script>
+</body>
+</html>
+
 </body>
 </html>
