@@ -1,3 +1,19 @@
+// Global error handler - tampilkan error di halaman
+window.onerror = function(msg, src, line, col, err) {
+  console.error('App Error:', msg, 'at line', line);
+  const t = document.getElementById('toast');
+  if (t) {
+    t.textContent = '⚠️ Error: ' + msg.slice(0, 80);
+    t.className = 'toast t-err show';
+    setTimeout(() => t.classList.remove('show'), 5000);
+  }
+  return false;
+};
+
+window.onunhandledrejection = function(e) {
+  console.error('Unhandled Promise:', e.reason);
+};
+
 // ═══════════════════════════════════════════════════════
 // ABSENSI SDIT - Bundle JS (auto-generated)
 // ═══════════════════════════════════════════════════════
