@@ -1856,6 +1856,12 @@ function eksporBackup() {
 let _curTab = 'dash';
 
 function goTab(name) {
+  // PENGAMAN: Jika Guru nekat mau buka rekap, tendang balik ke dashboard
+  if (name === 'rekap' && state.role === 'guru') {
+    toast('⛔ Anda tidak memiliki akses ke data Rekap!', 'err');
+    return;
+  }
+
   // Stop scanner kalau pindah dari scan
   if (_curTab === 'scan' && name !== 'scan') stopScanner();
   _curTab = name;
@@ -1868,7 +1874,7 @@ function goTab(name) {
 
   // FAB hanya di dashboard, bukan yayasan
   $('fab')?.classList.toggle('on', name === 'dash' && state.role !== 'yayasan');
-
+}
   // Inisialisasi per tab
   switch (name) {
     case 'rekap':
