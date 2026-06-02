@@ -1118,24 +1118,29 @@ function openEdit(key) {
   $('e-nama').value   = d.nama || '';
   $('e-status').value = d.status || 'hadir';
   
-  // ── PENGAMAN FORMAT JAM (KEBAL NULL / DATA KOSONG) ──
-  let jamMentah = d.waktu || ''; 
+  // ── SOLUSI TOTAL: AMANKAN INPUT JAM DARI CRASH ──
   let jamSelesai = '';
-
-  // Pastikan jamMentah ada isinya dan berupa string sebelum di-replace/match
-  if (jamMentah && typeof jamMentah === 'string') {
-    let jamFormatBaru = jamMentah.replace('.', ':'); 
-    const match = jamFormatBaru.match(/\d{2}:\d{2}/);
-    jamSelesai = match ? match[0] : '';
+  
+  // Pastikan data waktu ada nilainya dan tipenya teks (string)
+  if (d.waktu && typeof d.waktu === 'string') {
+    // Ganti titik menjadi titik dua (07.15 -> 07:16)
+    let jamBaru = d.waktu.replace('.', ':');
+    
+    // Cari format angka jam menit (XX:XX) biar aman dari emoji/teks lain
+    let cekJam = jamBaru.match(/\d{2}:\d{2}/);
+    if (cekJam) {
+      jamSelesai = cekJam[0];
+    }
   }
   
   $('e-waktu').value  = jamSelesai;
-  // ────────────────────────────────────────────────────
+  // ────────────────────────────────────────────────
   
   $('e-ket').value    = d.keterangan || '';
   $('e-key').value    = key;
   $('e-tgl').value    = d.tanggal || today();
   
+  // Membuka modal dengan kelas yang benar
   $('mov-edit').classList.add('on');
 }
 
