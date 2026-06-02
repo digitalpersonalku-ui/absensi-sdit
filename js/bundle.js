@@ -1118,16 +1118,18 @@ function openEdit(key) {
   $('e-nama').value   = d.nama || '';
   $('e-status').value = d.status || 'hadir';
   
-  // Ambil hanya format jam murni (HH:MM) agar input type="time" tidak macet
-  let jamBersih = d.waktu || '';
-  const match = jamBersih.match(/\d{2}:\d{2}/);
+  // ── BERSIHKAN & UBAH FORMAT JAM DISINI ──
+  let jamMentah = d.waktu || '';
+  // Mengubah tanda titik (.) menjadi titik dua (:) jika ada
+  let jamFormatBaru = jamMentah.replace('.', ':'); 
+  // Mengambil angka berformat HH:MM saja (misal 07:16)
+  const match = jamFormatBaru.match(/\d{2}:\d{2}/);
   $('e-waktu').value  = match ? match[0] : '';
   
   $('e-ket').value    = d.keterangan || '';
   $('e-key').value    = key;
   $('e-tgl').value    = d.tanggal || today();
   
-  // PERBAIKAN: Ganti 'open' menjadi 'on' agar modal aktif sempurna dan bisa diklik
   $('mov-edit').classList.add('on');
 }
 
