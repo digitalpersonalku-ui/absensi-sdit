@@ -657,18 +657,18 @@ function applyRole() {
   if (fab) fab.classList.toggle('on', !isYay);
 
   // Tab manual: form & info
-  const infoAdmin = $('info-admin'), infoGuru = $('info-guru');
-  const infoYay   = $('info-yay'),   frmManual = $('frm-manual');
+  const infoAdmin = $('#info-admin'), infoGuru = $('#info-guru');
+  const infoYay = $('#info-yayasan'), frmManual = $('#frm-manual');
   if (isYay) {
     infoAdmin.style.display  = 'none';
     infoGuru.style.display   = 'none';
     infoYay.style.display    = 'flex';
     frmManual.style.display  = 'none';
   } else {
-    infoYay.style.display    = 'none';
-    frmManual.style.display  = 'block';
-    infoAdmin.style.display  = isGuru ? 'none' : 'flex';
-    infoGuru.style.display   = isGuru ? 'flex' : 'none';
+    if (infoYay) infoYay.style.display = 'none';
+    if (frmManual) frmManual.style.display = 'block';
+    if (infoAdmin) infoAdmin.style.display = isGuru ? 'none' : 'flex';
+    if (infoGuru) infoGuru.style.display = isGuru ? 'flex' : 'none';
     // Opsi Alpha: hanya admin & kepsek
     const tipeOpts = Array.from($('mg-tipe')?.options || []);
     tipeOpts.forEach(o => {
