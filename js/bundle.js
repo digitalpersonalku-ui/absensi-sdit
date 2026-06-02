@@ -1118,13 +1118,19 @@ function openEdit(key) {
   $('e-nama').value   = d.nama || '';
   $('e-status').value = d.status || 'hadir';
   
-  // ── BERSIHKAN & UBAH FORMAT JAM DISINI ──
-  let jamMentah = d.waktu || '';
-  // Mengubah tanda titik (.) menjadi titik dua (:) jika ada
-  let jamFormatBaru = jamMentah.replace('.', ':'); 
-  // Mengambil angka berformat HH:MM saja (misal 07:16)
-  const match = jamFormatBaru.match(/\d{2}:\d{2}/);
-  $('e-waktu').value  = match ? match[0] : '';
+  // ── PENGAMAN FORMAT JAM (KEBAL NULL / DATA KOSONG) ──
+  let jamMentah = d.waktu || ''; 
+  let jamSelesai = '';
+
+  // Pastikan jamMentah ada isinya dan berupa string sebelum di-replace/match
+  if (jamMentah && typeof jamMentah === 'string') {
+    let jamFormatBaru = jamMentah.replace('.', ':'); 
+    const match = jamFormatBaru.match(/\d{2}:\d{2}/);
+    jamSelesai = match ? match[0] : '';
+  }
+  
+  $('e-waktu').value  = jamSelesai;
+  // ────────────────────────────────────────────────────
   
   $('e-ket').value    = d.keterangan || '';
   $('e-key').value    = key;
