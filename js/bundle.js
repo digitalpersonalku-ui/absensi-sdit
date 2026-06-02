@@ -1114,13 +1114,21 @@ function openEdit(key) {
   if (!checkRole(['admin','kepsek'])) return;
   const d = state.absensiData[key];
   if (!d) { toast('Data tidak ditemukan', 'err'); return; }
+  
   $('e-nama').value   = d.nama || '';
   $('e-status').value = d.status || 'hadir';
-  $('e-waktu').value  = d.waktu || '';
+  
+  // Ambil hanya format jam murni (HH:MM) agar input type="time" tidak macet
+  let jamBersih = d.waktu || '';
+  const match = jamBersih.match(/\d{2}:\d{2}/);
+  $('e-waktu').value  = match ? match[0] : '';
+  
   $('e-ket').value    = d.keterangan || '';
   $('e-key').value    = key;
   $('e-tgl').value    = d.tanggal || today();
-  $('mov-edit').classList.add('open');
+  
+  // PERBAIKAN: Ganti 'open' menjadi 'on' agar modal aktif sempurna dan bisa diklik
+  $('mov-edit').classList.add('on');
 }
 
 function simpanEditAbsensi() {
