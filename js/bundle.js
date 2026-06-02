@@ -675,7 +675,14 @@ function applyRole() {
       if (o.value === 'alpha') o.style.display = isGuru ? 'none' : '';
     });
   }
-
+  
+  // ── Sembunyikan Tombol Rekap jika User adalah Guru ──
+  const bnRekap = $('#bn-rekap');
+  if (bnRekap) {
+    // Jika Guru = 'none' (sembunyi), Jika Admin/Kepsek/Yayasan = 'flex' (tampil)
+    bnRekap.style.display = isGuru ? 'none' : 'flex'; 
+  }
+  
   updateInfoBar();
   updateAbsenBtns();
 
