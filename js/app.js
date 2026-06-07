@@ -586,57 +586,52 @@ function applyRole() {
   const isYay   = role === 'yayasan';
   const isGuru  = role === 'guru';
 
+  // Helper null-safe
+  function sd(id, val) { const e = $(id); if (e) e.style.display = val; }
+  function sc(id, val) { const e = $(id); if (e) e.textContent   = val; }
+  function tc(id, cls, v){ const e=$(id); if(e) e.classList.toggle(cls,v); }
+
   // Topbar
-  $('ud-av').textContent  = ROLES[role].icon;
-  $('ud-nm').textContent  = ROLES[role].label;
-  $('ud-role').textContent = ROLES[role].label;
+  sc('ud-av',   ROLES[role].icon);
+  sc('ud-nm',   ROLES[role].label);
+  sc('ud-role', ROLES[role].label);
 
   // Dropdown active state
   ['guru','admin','kepsek','yayasan'].forEach(r => {
     const el = $('udi-' + r);
     if (el) el.classList.toggle('act', r === role);
   });
-  $('udi-out').style.display = isGuru ? 'none' : 'flex';
+  sd('udi-out', isGuru ? 'none' : 'flex');
 
-  // Bottom nav visibility
-  $('bn-qr').style.display      = isGuru || isYay ? 'none' : 'flex';
-  $('bn-guru').style.display    = isAdmin ? 'flex' : 'none';
-  $('bn-setting').style.display = isAdmin ? 'flex' : 'none';
-  $('bn-rekap').style.display   = 'flex'; // semua role bisa lihat rekap
+  // Bottom nav
+  sd('bn-qr',      isGuru || isYay ? 'none' : 'flex');
+  sd('bn-guru',    isAdmin ? 'flex' : 'none');
+  sd('bn-setting', isAdmin ? 'flex' : 'none');
+  sd('bn-rekap',   'flex');
 
-  // Tab rekap: tahunan hanya admin & kepsek
-  const ptThn = $('pt-tahunan');
-  if (ptThn) ptThn.style.display = isPriv ? 'block' : 'none';
+  // Tahunan tab
+  sd('pt-tahunan', isPriv ? 'block' : 'none');
 
-  // Tab guru: tombol tambah & import hanya admin
-  const btnTambah = $('btn-tambah');
-  if (btnTambah) btnTambah.style.display = isAdmin ? 'flex' : 'none';
-  const importSec = $('import-sec');
-  if (importSec) importSec.style.display = isAdmin ? 'block' : 'none';
+  // Guru tab
+  sd('btn-tambah', isAdmin ? 'flex' : 'none');
+  sd('import-sec', isAdmin ? 'block' : 'none');
 
-  // Setting: bagian keamanan hanya admin
-  const secSecurity = $('sec-security');
-  if (secSecurity) secSecurity.style.display = isAdmin ? 'block' : 'none';
+  // Setting keamanan
+  sd('sec-security', isAdmin ? 'block' : 'none');
 
-  // Dashboard: tombol absen & FAB
-  const absenGrid = $('absen-grid');
-  if (absenGrid) absenGrid.style.display = isYay ? 'none' : 'grid';
+  // Dashboard absen & FAB
+  sd('absen-grid', isYay ? 'none' : 'grid');
   const fab = $('fab');
   if (fab) fab.classList.toggle('on', !isYay);
 
-  // Tab manual: form & info
-  const infoAdmin = $('info-admin'), infoGuru = $('info-guru');
-  const infoYay   = $('info-yay'),   frmManual = $('frm-manual');
+  // Manual form - null-safe
   if (isYay) {
-    infoAdmin.style.display  = 'none';
-    infoGuru.style.display   = 'none';
-    infoYay.style.display    = 'flex';
-    frmManual.style.display  = 'none';
+    sd('info-admin', 'none'); sd('info-guru', 'none');
+    sd('info-yayasan', 'flex'); sd('frm-manual', 'none');
   } else {
-    infoYay.style.display    = 'none';
-    frmManual.style.display  = 'block';
-    infoAdmin.style.display  = isGuru ? 'none' : 'flex';
-    infoGuru.style.display   = isGuru ? 'flex' : 'none';
+    sd('info-yayasan', 'none'); sd('frm-manual', 'block');
+    sd('info-admin', isGuru ? 'none' : 'flex');
+    sd('info-guru',  isGuru ? 'flex' : 'none');
     // Opsi Alpha: hanya admin & kepsek
     const tipeOpts = Array.from($('mg-tipe')?.options || []);
     tipeOpts.forEach(o => {
@@ -646,9 +641,6 @@ function applyRole() {
 
   updateInfoBar();
   updateAbsenBtns();
-
-  // Trigger re-render komponen yang role-aware
-  // (dipanggil dari main.js setelah import)
   document.dispatchEvent(new CustomEvent('roleChanged', { detail: { role } }));
 }
 
