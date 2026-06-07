@@ -603,11 +603,23 @@ function applyRole() {
   });
   sd('udi-out', isGuru ? 'none' : 'flex');
 
-  // Bottom nav
-  sd('bn-qr',      isGuru || isYay ? 'none' : 'flex');
-  sd('bn-guru',    isAdmin ? 'flex' : 'none');
-  sd('bn-setting', isAdmin ? 'flex' : 'none');
-  sd('bn-rekap',   'flex');
+  // Bottom nav - pakai inline style untuk override CSS default
+  function sdf(id, val) {
+    const e = $(id);
+    if (e) e.setAttribute('style', 'display:' + val + ' !important');
+  }
+  // Nav sesuai role
+  // Guru    : Dashboard, Scan, Manual
+  // Admin   : Dashboard, Scan, Manual, ID Card, Guru, Rekap, Setting
+  // Kepsek  : Dashboard, Scan, Manual, Guru, Rekap
+  // Yayasan : Dashboard, Guru, Rekap
+  sdf('bn-dash',    'flex');
+  sdf('bn-scan',    isYay   ? 'none' : 'flex');
+  sdf('bn-manual',  isYay   ? 'none' : 'flex');
+  sdf('bn-qr',      isAdmin ? 'flex' : 'none');
+  sdf('bn-guru',    isGuru  ? 'none' : 'flex');
+  sdf('bn-rekap',   isGuru  ? 'none' : 'flex');
+  sdf('bn-setting', isAdmin ? 'flex' : 'none');
 
   // Tahunan tab
   sd('pt-tahunan', isPriv ? 'block' : 'none');
