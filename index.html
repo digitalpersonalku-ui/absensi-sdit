@@ -86,8 +86,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 #sess-warn{display:none;position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#92400E,#B45309);color:#fff;padding:10px 16px;font-size:12px;font-weight:700;text-align:center;z-index:600}
 
 /* ── TABS: KRITIS - hanya .on yang tampil ───────────── */
-.tab{display:none}
-.tab.on{display:block}
+.tab{display:none!important}
+.tab.on{display:block!important}
 /* CATATAN: Tidak ada display:grid/flex untuk #tab-* di luar .on!
    Desktop grid hanya aktif saat tab-dash.on */
 
@@ -97,22 +97,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 /* ── CARDS ──────────────────────────────────────────── */
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--bdr);overflow:hidden;margin-bottom:12px;transition:box-shadow .25s,transform .25s}
 .card:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
-.cp{padding:14px 16px}
-.ct{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px;color:var(--tx)}
-.card-head{padding:12px 16px;border-bottom:1px solid var(--bdr);font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--tx)}
+.cp{padding:16px}
+.ct{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:14px;color:var(--tx)}
+.card-head{padding:14px 16px;border-bottom:1px solid var(--bdr);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--tx);background:var(--card)}
 
 /* ── AYAT BANNER ────────────────────────────────────── */
-#ayat-banner{background:var(--grad-tl);border-radius:var(--r);padding:20px 24px 18px;color:#fff;margin-bottom:12px;position:relative;overflow:hidden;min-height:100px}
-#ayat-banner::before{content:'☽';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:80px;opacity:.06;pointer-events:none;line-height:1}
-.ayat-arabic{font-size:22px;margin-bottom:8px;text-align:right;line-height:2.2;font-family:'Noto Naskh Arabic','Traditional Arabic','Arabic Typesetting',Arial,serif;direction:rtl;unicode-bidi:bidi-override;font-weight:700}
-.ayat-trans{font-size:13px;opacity:.92;line-height:1.6;font-weight:500}
-.ayat-src{font-size:11px;opacity:.72;margin-top:6px}
+#ayat-banner{background:var(--grad-tl);border-radius:var(--r);padding:22px 26px 20px;color:#fff;margin-bottom:12px;position:relative;overflow:hidden}
+#ayat-banner::before{content:'☽';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:90px;opacity:.07;pointer-events:none;line-height:1}
+#ayat-banner::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,rgba(255,255,255,.3),rgba(255,255,255,.1),rgba(255,255,255,.3))}
+.ayat-arabic{font-size:22px;margin-bottom:10px;text-align:right;line-height:2.3;font-family:'Noto Naskh Arabic','Traditional Arabic','Arabic Typesetting',Arial Unicode MS,serif;direction:rtl;unicode-bidi:bidi-override;font-weight:700;letter-spacing:.3px}
+.ayat-trans{font-size:13px;opacity:.93;line-height:1.6;font-weight:600}
+.ayat-src{font-size:11px;opacity:.75;margin-top:6px;font-style:italic}
 
 /* ── JAM BAR ────────────────────────────────────────── */
 #jambar{background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);border:1px solid var(--bdr);margin-bottom:12px;position:relative;overflow:hidden}
 #jambar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--tl),var(--or),var(--rd))}
-#jb-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:600;margin-bottom:10px}
-#jb-txt{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;border:1px solid currentColor}
+#jb-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:600;margin-bottom:12px}
+#jb-txt{font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;border:1px solid currentColor}
 #jb-track{height:7px;background:var(--bg);border-radius:4px;position:relative}
 #jb-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--tl) 0%,var(--or) 60%,var(--rd) 100%);transition:width .6s cubic-bezier(.4,0,.2,1)}
 #jb-ptr{position:absolute;top:-5px;width:17px;height:17px;background:var(--card);border:2.5px solid var(--or);border-radius:50%;transform:translateX(-50%);box-shadow:0 0 0 3px rgba(255,107,53,.2),0 2px 8px rgba(0,0,0,.15);transition:left .6s}
@@ -120,8 +121,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 
 /* ── STATS ──────────────────────────────────────────── */
 #sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
-.sc{background:var(--card);border-radius:var(--r2);padding:14px;box-shadow:var(--sh);border:1px solid var(--bdr);border-left:3.5px solid transparent;transition:transform .2s,box-shadow .2s}
-.sc:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.sc{background:var(--card);border-radius:var(--r2);padding:14px 16px;box-shadow:var(--sh);border:1px solid var(--bdr);border-left:4px solid transparent;transition:transform .2s,box-shadow .2s}
+.sc:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
 .sc-lbl{font-size:9px;color:var(--tx2);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 .sc-num{font-family:'Plus Jakarta Sans',sans-serif;font-size:34px;font-weight:900;line-height:1}
 @keyframes statPulse{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
@@ -146,8 +147,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .ab-masuk.active-pulse{animation:activePulse 2s ease infinite}
 
 /* ── PROGRESS ───────────────────────────────────────── */
-.pbar{height:6px;border-radius:3px;background:var(--bg2);overflow:hidden}
-.pfill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1),background .5s}
+#keh-card{background:linear-gradient(135deg,var(--card),rgba(255,255,255,.95));position:relative;overflow:hidden}
+#keh-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gn),var(--or))}
+.pbar{height:8px;border-radius:4px;background:var(--bg2);overflow:hidden}
+.pfill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1),background .5s}
 
 /* ── LIST ITEMS ─────────────────────────────────────── */
 .litem{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid var(--bdr);transition:background .15s}
@@ -332,7 +335,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 
 /* ── RESPONSIVE ──────────────────────────────────────── */
 /* Mobile: 2 kolom stats dari 480px */
-@media(min-width:480px){#sgrid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:480px){#sgrid{grid-template-columns:repeat(3,1fr);gap:8px}}
 
 /* Tablet: lebih lebar */
 @media(min-width:600px){
@@ -342,34 +345,45 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 /* Desktop 900px+: dashboard 2 kolom grid HANYA saat .on */
 @media(min-width:900px){
   #content{max-width:1100px;padding:20px 24px 76px;margin:0 auto}
-  /* KRITIS: #tab-dash.on bukan #tab-dash! */
+
+  /* ── DASHBOARD GRID (KRITIS: hanya saat .on) ── */
   #tab-dash.on{
     display:grid!important;
     grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:16px;
+    grid-template-rows:auto auto auto auto;
+    gap:14px;
     align-items:start;
   }
-  #ayat-banner{grid-column:1/-1}
-  #jambar{grid-column:1/-1}
-  #absen-grid{grid-column:1}
-  #keh-card{grid-column:1}
-  #list-recent-wrap{grid-column:2}
-  #sgrid{grid-column:2;grid-template-columns:repeat(3,1fr)}
-  /* Stat & absen lebih besar */
-  .sc-num{font-size:36px}
-  .sc{padding:16px 14px}
-  .ab-tx{font-size:15px}
-  .ab-sc{font-size:12px}
-  .ab-ic{width:54px;height:54px;font-size:28px}
-  .ab-btn{min-height:110px;padding:22px 20px;gap:16px}
-  #pct{font-size:22px!important}
+  /* Baris 1 & 2: full width */
+  #ayat-banner    {grid-column:1/-1;grid-row:1}
+  #jambar         {grid-column:1/-1;grid-row:2}
+  /* Baris 3: kiri=absen, kanan=terbaru */
+  #absen-grid     {grid-column:1;grid-row:3}
+  #list-recent-wrap{grid-column:2;grid-row:3 / span 2}
+  /* Baris 4: kiri=kehadiran, kanan=stats */
+  #keh-card       {grid-column:1;grid-row:4}
+  #sgrid          {grid-column:2;grid-row:5;grid-template-columns:repeat(3,1fr)}
+
+  /* ── Ukuran elemen ── */
+  .sc-num  {font-size:32px}
+  .sc      {padding:14px 16px}
+  .sc-lbl  {font-size:10px}
+  .ab-tx   {font-size:15px}
+  .ab-sc   {font-size:12px}
+  .ab-ic   {width:54px;height:54px;font-size:26px;border-radius:14px}
+  .ab-btn  {min-height:106px;padding:20px 18px;gap:14px}
+  #pct     {font-size:22px!important}
   .card-head{font-size:14px;padding:14px 18px}
+ .card-head{font-size:14px;padding:14px 18px}
+  #list-recent-wrap .card-head{border-bottom:1px solid var(--bdr)}
 }
 
 /* Desktop 1200px+ */
 @media(min-width:1200px){
   #content{max-width:1280px}
-  #tab-dash.on{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+  #tab-dash.on{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+  .sc-num{font-size:36px}
+  .ab-ic{width:58px;height:58px;font-size:28px}
 }
 
 </style>
@@ -457,15 +471,21 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 
 <!-- ─── TAB: DASHBOARD ─── -->
 <div class="tab on" id="tab-dash">
+
+  <!-- Baris 1: Ayat (full width) -->
   <div id="ayat-banner">
     <div class="ayat-arabic">اطْلُبُوا الْعِلْمَ مِنَ الْمَهْدِ إِلَى اللَّحْدِ</div>
     <div class="ayat-trans">Tuntutlah ilmu dari buaian hingga liang lahat</div>
-    <div class="ayat-src">Hadits Nabi Muhammad SAW · Sabtu/Minggu tampilkan jadwal</div>
+    <div class="ayat-src">Hadits Nabi Muhammad SAW</div>
   </div>
+
+  <!-- Baris 2: Jam Bar (full width) -->
   <div id="jambar">
     <div id="jb-head">
-      <span>⏰ Status Waktu Absen</span>
-      <span id="jb-txt" style="color:var(--or);font-size:11px">--</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600">
+        ⏰ Status Waktu Absen
+      </span>
+      <span id="jb-txt"></span>
     </div>
     <div id="jb-track">
       <div id="jb-fill" style="width:0"></div>
@@ -476,43 +496,81 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
     </div>
   </div>
 
+  <!-- Baris 3 Kiri: Tombol Absen -->
   <div id="absen-grid">
     <button class="ab-btn ab-off" id="btn-masuk" onclick="window._app.bukaAbsen('masuk')">
       <div class="ab-ic">🟢</div>
-      <div><span class="ab-tx">Absen Masuk</span><span class="ab-sc" id="info-masuk">Aktif 06:30</span></div>
+      <div>
+        <span class="ab-tx">Absen Masuk</span>
+        <span class="ab-sc" id="info-masuk">06:30 – 11:00</span>
+      </div>
     </button>
     <button class="ab-btn ab-off" id="btn-pulang" onclick="window._app.bukaAbsen('pulang')">
       <div class="ab-ic">🟣</div>
-      <div><span class="ab-tx">Absen Pulang</span><span class="ab-sc" id="info-pulang">Aktif 14:00</span></div>
+      <div>
+        <span class="ab-tx">Absen Pulang</span>
+        <span class="ab-sc" id="info-pulang">14:00 – 15:30</span>
+      </div>
     </button>
   </div>
 
-  <div id="sgrid">
-    <div class="sc" style="border-left-color:var(--or)"><div class="sc-lbl">Total</div><div class="sc-num" id="s-tot" style="color:var(--or)">0</div></div>
-    <div class="sc" style="border-left-color:var(--gn)"><div class="sc-lbl">Hadir</div><div class="sc-num" id="s-hdr" style="color:var(--gn)">0</div></div>
-    <div class="sc" style="border-left-color:var(--yl)"><div class="sc-lbl">Terlambat</div><div class="sc-num" id="s-tlt" style="color:var(--yl)">0</div></div>
-    <div class="sc" style="border-left-color:var(--bl)"><div class="sc-lbl">Izin/Sakit</div><div class="sc-num" id="s-izn" style="color:var(--bl)">0</div></div>
-    <div class="sc" style="border-left-color:var(--rd)"><div class="sc-lbl">Alpha</div><div class="sc-num" id="s-alph" style="color:var(--rd)">0</div></div>
-    <div class="sc" style="border-left-color:var(--tx3)"><div class="sc-lbl">Belum</div><div class="sc-num" id="s-alp" style="color:var(--tx2)">0</div></div>
-  </div>
-
+  <!-- Baris 4 Kiri: Kehadiran -->
   <div class="card cp" id="keh-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span style="font-size:12px;font-weight:700">📊 Kehadiran Hari Ini</span>
-      <span id="pct" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:900;color:var(--gn)">0%</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-size:13px;font-weight:700">📊 Kehadiran Hari Ini</span>
+      <span id="pct" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:900;color:var(--gn)">0%</span>
     </div>
-    <div class="pbar"><div class="pfill" id="pbar" style="width:0;background:var(--gn)"></div></div>
-    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:5px">
-      <span>0%</span><span style="color:var(--or);font-weight:700">Target ≥ 95%</span><span>100%</span>
+    <div class="pbar" style="height:8px">
+      <div class="pfill" id="pbar" style="width:0;background:var(--gn)"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:6px">
+      <span>0%</span>
+      <span style="color:var(--or);font-weight:700">🎯 Target ≥ 95%</span>
+      <span>100%</span>
     </div>
   </div>
 
-  <div class="card-head" style="margin-bottom:0;border-radius:14px 14px 0 0;border:1px solid var(--bdr);background:var(--card)">⏱ Absensi Terbaru</div>
-  <div class="card" id="list-recent">
-    <div class="empty"><div class="ei">📋</div><p>Belum ada absensi hari ini</p></div>
+  <!-- Baris 3-4 Kanan: Absensi Terbaru -->
+  <div class="card" id="list-recent-wrap">
+    <div class="card-head">⏱ Absensi Terbaru</div>
+    <div id="list-recent">
+      <div class="empty">
+        <div class="ei">📋</div>
+        <p style="font-size:13px;font-weight:600;margin-bottom:4px">Belum ada absensi</p>
+        <p style="font-size:11px;color:var(--tx3)">Absensi hari ini belum ada.<br>Scan QR atau input manual untuk mulai.</p>
+      </div>
+    </div>
   </div>
+
+  <!-- Baris 5 Kanan: Stat Cards -->
+  <div id="sgrid">
+    <div class="sc" style="border-left-color:var(--or)">
+      <div class="sc-lbl">Total Guru</div>
+      <div class="sc-num" id="s-tot" style="color:var(--or)">0</div>
+    </div>
+    <div class="sc" style="border-left-color:var(--gn)">
+      <div class="sc-lbl">Hadir</div>
+      <div class="sc-num" id="s-hdr" style="color:var(--gn)">0</div>
+    </div>
+    <div class="sc" style="border-left-color:var(--yl)">
+      <div class="sc-lbl">Terlambat</div>
+      <div class="sc-num" id="s-tlt" style="color:var(--yl)">0</div>
+    </div>
+    <div class="sc" style="border-left-color:var(--bl)">
+      <div class="sc-lbl">Izin/Sakit</div>
+      <div class="sc-num" id="s-izn" style="color:var(--bl)">0</div>
+    </div>
+    <div class="sc" style="border-left-color:var(--rd)">
+      <div class="sc-lbl">Alpha</div>
+      <div class="sc-num" id="s-alph" style="color:var(--rd)">0</div>
+    </div>
+    <div class="sc" style="border-left-color:var(--tx3)">
+      <div class="sc-lbl">Belum Absen</div>
+      <div class="sc-num" id="s-alp" style="color:var(--tx2)">0</div>
+    </div>
+  </div>
+
 </div>
-
 <!-- ─── TAB: SCAN QR ─── -->
 <div class="tab" id="tab-scan">
   <div style="max-width:440px;margin:0 auto">
