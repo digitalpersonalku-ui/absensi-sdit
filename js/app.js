@@ -2073,14 +2073,70 @@ function applyIdentitas() {
   if (d.logo) {
     const el = $('tb-logo');
     if (el) {
-      el.innerHTML = d.logo.startsWith('http')
+      el.innerHTML = d.logo.startsWith('http') || d.logo.startsWith('data:')
         ? `<img src="${esc(d.logo)}" style="width:28px;height:28px;border-radius:7px;object-fit:cover">`
         : `<span style="font-size:17px">${d.logo}</span>`;
     }
     const s = $('s-logo');
     if (s) s.value = d.logo;
+    // Update preview di setting
+    _updateLogoPreview(d.logo);
   }
   if (d.warna) applyColor(d.warna);
+}
+
+
+// ── LOGO UPLOAD ───────────────────────────────────────────
+function handleLogoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { toast('Logo maksimal 2MB', 'warn'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    // Update preview
+    _updateLogoPreview(dataUrl);
+    // Set ke input text juga supaya ikut tersimpan
+    const logoInput = $('s-logo');
+    if (logoInput) logoInput.value = dataUrl;
+    toast('✅ Logo siap — klik Simpan Identitas', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewLogo(val) {
+  if (!val) {
+    _updateLogoPreview('');
+    return;
+  }
+  _updateLogoPreview(val);
+}
+
+function _updateLogoPreview(val) {
+  const prev = $('logo-preview');
+  if (!prev) return;
+  if (!val) {
+    prev.innerHTML = '🏫';
+    return;
+  }
+  if (val.startsWith('data:') || val.startsWith('http')) {
+    prev.innerHTML = `<img src="${esc(val)}"
+      style="width:100%;height:100%;object-fit:cover;border-radius:14px"
+      onerror="this.parentElement.innerHTML='❌'">`; 
+  } else {
+    // Emoji atau teks
+    prev.innerHTML = `<span style="font-size:32px">${val}</span>`;
+  }
+  // Update topbar logo juga live
+  const tbLogo = $('tb-logo');
+  if (tbLogo) {
+    if (val.startsWith('data:') || val.startsWith('http')) {
+      tbLogo.innerHTML = `<img src="${esc(val)}"
+        style="width:28px;height:28px;border-radius:7px;object-fit:cover">`;
+    } else {
+      tbLogo.innerHTML = `<span style="font-size:17px">${val}</span>`;
+    }
+  }
 }
 
 function simpanIdentitas() {
@@ -2292,7 +2348,7 @@ window._app = {
   buatIDCard, renderQrGrid, pilihQR, cetakIDCard, unduhQR,
 
   // Setting
-  simpanIdentitas, simpanJam, gantiPassword,
+  handleLogoFile, previewLogo, simpanIdentitas, simpanJam, gantiPassword,
   saveColor, resetHariIni, eksporBackup,
 };
 
