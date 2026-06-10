@@ -10,16 +10,16 @@
 <meta name="apple-mobile-web-app-title" content="Absensi SDIT">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23FF6B35'/><text y='24' x='4' font-size='22'>🏫</text></svg>">
 <title>Absensi - SDIT Qudwatun Hasanah</title>
-
+ 
 <!-- Font -->
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+ 
 <!-- CSS -->
 <style>
 /* ─────────────────────────────────────────
    style.css — Semua gaya tampilan
    ───────────────────────────────────────── */
-
+ 
 /* ── VARIABEL & RESET ─────────────────── */
 :root {
   --or:#FF6B35; --or2:#fff0e8;
@@ -38,7 +38,7 @@
 }
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); min-height:100vh; overflow-x:hidden; }
-
+ 
 /* ── TOPBAR ───────────────────────────── */
 #topbar {
   height:56px; display:flex; align-items:center; justify-content:space-between;
@@ -55,7 +55,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); 
 #tb-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
 #tb-jam   { font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:800; color:#fff; line-height:1; text-align:right; }
 #tb-tgl   { font-size:9px; color:rgba(255,255,255,.8); text-align:right; }
-
+ 
 /* ── DROPDOWN USER ────────────────────── */
 #ud-btn {
   display:flex; align-items:center; gap:6px; padding:5px 10px 5px 5px;
@@ -66,7 +66,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); 
 #ud-av  { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
 #ud-nm  { font-size:11px; font-weight:700; color:#fff; max-width:80px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #ud-arr { font-size:9px; color:rgba(255,255,255,.7); flex-shrink:0; transition:transform .2s; }
-
+ 
 #ud-menu {
   position:fixed; top:64px; right:12px; min-width:220px;
   background:#fff; border-radius:14px; border:1px solid var(--bdr);
@@ -84,23 +84,23 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); 
 .ud-item.red   { color:var(--rd); }
 .ud-ic  { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
 .ud-hr  { height:1px; background:var(--bdr); margin:4px 0; }
-
+ 
 /* ── INFO BAR ─────────────────────────── */
 #info-bar { display:none; padding:7px 16px; text-align:center; font-size:11px; font-weight:600; color:#fff; }
-
+ 
 /* ── SESSION WARNING ──────────────────── */
 #sess-warn { display:none; position:fixed; top:0; left:0; right:0; background:#92400E; color:#fff; padding:10px 16px; font-size:12px; font-weight:700; text-align:center; z-index:600; }
-
+ 
 /* ── CONTENT & TABS ───────────────────── */
 #content { padding:14px 14px 72px; }
 .tab    { display:none; }
 .tab.on { display:block; }
-
+ 
 /* ── CARD ─────────────────────────────── */
 .card { background:var(--card); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--bdr); overflow:hidden; margin-bottom:12px; }
 .cp   { padding:14px 16px; }
 .ct   { font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:800; margin-bottom:12px; }
-
+ 
 /* ── JAM BAR ──────────────────────────── */
 #jambar { background:var(--card); border-radius:var(--r); padding:13px 14px; box-shadow:var(--sh); border:1px solid var(--bdr); margin-bottom:10px; position:relative; overflow:hidden; }
 #jambar::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--gn),var(--yl),var(--rd)); }
@@ -109,13 +109,13 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); 
 #jb-fill  { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--gn),var(--yl),var(--rd)); transition:width .5s; }
 #jb-ptr   { position:absolute; top:-4px; width:16px; height:16px; background:#fff; border:2px solid var(--or); border-radius:50%; transform:translateX(-50%); box-shadow:0 2px 6px rgba(0,0,0,.2); transition:left .5s; }
 #jb-lbl   { display:flex; justify-content:space-between; font-size:9px; color:var(--tx3); margin-top:5px; }
-
+ 
 /* ── STATS GRID ───────────────────────── */
 #sgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:12px; }
 .sc     { background:var(--card); border-radius:var(--r); padding:14px; box-shadow:var(--sh); border:1px solid var(--bdr); border-left:4px solid transparent; }
 .sc-lbl { font-size:10px; color:var(--tx2); font-weight:600; text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
 .sc-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:30px; font-weight:900; line-height:1; }
-
+ 
 /* ── ABSEN BUTTONS ────────────────────── */
 #absen-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
 .ab-btn { border:none; border-radius:var(--r); padding:18px 14px; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; transition:all .2s; width:100%; min-height:90px; }
@@ -127,11 +127,11 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); 
 .ab-off   { background:#f1f5f9; color:#94a3b8; cursor:not-allowed; border:2px dashed #e2e8f0; }
 .ab-btn:not(.ab-off):hover  { transform:translateY(-2px); }
 .ab-btn:not(.ab-off):active { transform:scale(.96); }
-
+ 
 /* ── PROGRESS BAR ─────────────────────── */
 .pbar  { height:5px; border-radius:3px; background:var(--bdr); margin-top:4px; overflow:hidden; }
 .pfill { height:100%; border-radius:3px; transition:width .5s; }
-
+ 
 /* ── LIST ITEM ────────────────────────── */
 .litem { display:flex; align-items:center; gap:10px; padding:11px 14px; border-bottom:1px solid var(--bdr); transition:background .15s; }
 .litem:last-child { border-bottom:none; }
@@ -143,7 +143,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); 
 .lsb  { font-size:10px; color:var(--tx2); }
 .lrt  { text-align:right; flex-shrink:0; }
 .ltm  { font-weight:700; font-size:11px; }
-
+ 
 /* ── BADGE ────────────────────────────── */
 .bdg { display:inline-block; padding:3px 9px; border-radius:20px; font-size:10px; font-weight:700; margin-top:2px; }
 .ok  { background:var(--gn2); color:#065F46; }
@@ -152,7 +152,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); 
 .sk  { background:var(--pi2); color:#9D174D; }
 .al  { background:var(--rd2); color:#9F1239; }
 .lb  { background:#f3f4f6;    color:#6B7280; }
-
+ 
 /* ── FORM ─────────────────────────────── */
 .fg  { margin-bottom:12px; }
 .fl  { display:block; font-size:11px; font-weight:700; color:var(--tx2); margin-bottom:5px; text-transform:uppercase; letter-spacing:.5px; }
@@ -171,18 +171,18 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--tx); 
 .pw-wr    { position:relative; }
 .pw-wr .fc{ padding-right:42px; }
 .pw-eye   { position:absolute; right:11px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:16px; background:none; border:none; padding:4px; }
-
+ 
 /* ── FOTO UPLOAD ──────────────────────── */
 .fpr { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
 .fpv { width:68px; height:68px; border-radius:14px; border:2px dashed var(--bdr); display:flex; align-items:center; justify-content:center; font-size:26px; background:var(--bg); overflow:hidden; flex-shrink:0; cursor:pointer; transition:border-color .2s; }
 .fpv:hover { border-color:var(--or); }
 .fpv img   { width:100%; height:100%; object-fit:cover; border-radius:12px; }
-
+ 
 /* ── SCAN ─────────────────────────────── */
 .sc-hdr    { padding:15px; text-align:center; }
 .sc-hdr h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:800; margin-bottom:3px; }
 .sc-hdr p  { font-size:11px; color:var(--tx2); }
-
+ 
 /* ── TABLE ────────────────────────────── */
 .tw      { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 table    { width:100%; border-collapse:collapse; }
@@ -190,13 +190,13 @@ thead th { background:var(--bg); padding:8px 10px; text-align:left; font-size:10
 tbody td { padding:9px 10px; font-size:12px; border-bottom:1px solid var(--bdr); vertical-align:middle; }
 tbody tr:last-child td { border-bottom:none; }
 tbody tr:hover { background:rgba(241,245,249,.4); }
-
+ 
 /* ── PERIOD TABS ──────────────────────── */
 .ptabs { display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; scrollbar-width:none; }
 .ptabs::-webkit-scrollbar { display:none; }
 .ptab    { padding:7px 16px; border-radius:20px; border:1.5px solid var(--bdr); background:var(--bg); font-size:11px; font-weight:600; color:var(--tx2); cursor:pointer; white-space:nowrap; transition:all .2s; }
 .ptab.on { background:var(--or); color:#fff; border-color:var(--or); box-shadow:0 3px 10px rgba(255,107,53,.3); }
-
+ 
 /* ── GURU GRID ────────────────────────── */
 .ggrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:10px; margin-bottom:12px; }
 .gc    { background:var(--card); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--bdr); padding:14px; text-align:center; transition:all .2s; }
@@ -207,7 +207,7 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
 .gcsb  { font-size:10px; color:var(--tx2); margin-bottom:6px; }
 .gc-acts { display:flex; gap:4px; justify-content:center; }
 .gbtn  { padding:4px 8px; font-size:10px; font-weight:700; border:none; border-radius:6px; cursor:pointer; font-family:'DM Sans',sans-serif; }
-
+ 
 /* ── ID CARD ──────────────────────────── */
 .idc { width:240px; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(14,100,160,.3); display:flex; flex-direction:column; }
 .idc-top { background:linear-gradient(135deg,#1565C0,#0897A7,#06B89A); padding:16px 16px 14px; text-align:center; position:relative; overflow:hidden; flex-shrink:0; }
@@ -234,21 +234,21 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
 .idc-ft   { background:linear-gradient(90deg,#1565C0,#0897A7,#06B89A); padding:8px 14px; display:flex; align-items:center; justify-content:center; gap:8px; flex-shrink:0; }
 .idc-ftt  { font-size:7.5px; font-weight:600; color:rgba(255,255,255,.88); text-transform:uppercase; letter-spacing:.6px; }
 .idc-fd   { width:4px; height:4px; border-radius:50%; background:#FF6B35; flex-shrink:0; }
-
+ 
 /* ── ALERT ────────────────────────────── */
 .alert { padding:11px 12px; border-radius:var(--rs); font-size:12px; font-weight:600; margin-bottom:10px; display:flex; align-items:flex-start; gap:8px; }
 .a-ok   { background:var(--gn2); color:#065F46; }
 .a-warn { background:var(--yl2); color:#92400E; }
 .a-info { background:var(--bl2); color:#1E40AF; }
 .a-err  { background:var(--rd2); color:#9F1239; }
-
+ 
 /* ── MODAL ────────────────────────────── */
 .mov  { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:400; display:none; align-items:flex-end; justify-content:center; }
 .mov.open { display:flex; }
 .modal { background:#fff; border-radius:20px 20px 0 0; padding:20px 16px 30px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; }
 .mdrag { width:36px; height:4px; background:var(--bdr); border-radius:2px; margin:0 auto 14px; }
 .mt    { font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:800; margin-bottom:12px; }
-
+ 
 /* ── LOGIN ────────────────────────────── */
 .lov  { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:500; display:none; align-items:center; justify-content:center; padding:20px; }
 .lov.open { display:flex; }
@@ -258,7 +258,7 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
 .ll h2    { font-family:'Plus Jakarta Sans',sans-serif; font-size:16px; font-weight:800; }
 .ll p     { font-size:11px; color:var(--tx2); margin-top:2px; }
 .lerr     { display:none; background:var(--rd2); color:#9F1239; border-radius:var(--rs); padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:10px; }
-
+ 
 /* ── TOAST ────────────────────────────── */
 .toast { position:fixed; bottom:70px; left:50%; transform:translateX(-50%) translateY(20px); opacity:0; background:var(--tx); color:#fff; padding:10px 20px; border-radius:30px; font-size:12px; font-weight:600; z-index:9999; transition:all .3s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,.3); }
 .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
@@ -266,11 +266,11 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
 .t-err  { background:var(--rd); }
 .t-warn { background:var(--yl); color:var(--tx); }
 .t-info { background:var(--pu); }
-
+ 
 /* ── SPINNER ──────────────────────────── */
 .spin { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite; }
 @keyframes sp { to { transform:rotate(360deg); } }
-
+ 
 /* ── MISC ─────────────────────────────── */
 .chip  { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:10px; font-weight:700; background:var(--bg); border:1px solid var(--bdr); }
 .empty { padding:32px; text-align:center; color:var(--tx3); }
@@ -279,13 +279,13 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
 .clr-sw { border-radius:var(--rs); padding:10px 6px; text-align:center; cursor:pointer; color:#fff; font-weight:700; transition:transform .2s; box-shadow:0 3px 10px rgba(0,0,0,.2); }
 .clr-sw:hover { transform:scale(1.08); }
 .clr-sw span  { display:block; font-size:10px; margin-top:3px; font-family:'DM Sans',sans-serif; }
-
+ 
 /* ── FAB ──────────────────────────────── */
 .fab { position:fixed; bottom:70px; right:16px; width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,var(--or),#ff8050); color:#fff; border:none; font-size:18px; cursor:pointer; box-shadow:0 4px 16px rgba(255,107,53,.4); z-index:90; display:none; align-items:center; justify-content:center; transition:all .2s; }
 .fab.on   { display:flex; }
 .fab:hover{ transform:scale(1.08); }
 .fab:active { transform:scale(.94); }
-
+ 
 /* ── BOTTOM NAV ───────────────────────── */
 #bnav { position:fixed; bottom:0; left:0; right:0; height:60px; background:rgba(255,255,255,.97); border-top:1px solid var(--bdr); display:flex; z-index:99; box-shadow:0 -2px 12px rgba(0,0,0,.07); }
 .bn   { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border:none; background:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:9px; font-weight:600; color:var(--tx3); transition:color .2s; padding:6px 2px; position:relative; }
@@ -294,7 +294,7 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
 .bn.on .bi { transform:scale(1.1); }
 .bn-ln  { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:20px; height:3px; background:var(--or); border-radius:3px 3px 0 0; opacity:0; transition:opacity .2s; }
 .bn.on .bn-ln { opacity:1; }
-
+ 
 /* ── PRINT ────────────────────────────── */
 #print-hdr, #print-ttd { display:none; }
 @media print {
@@ -312,15 +312,15 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
   #print-ttd  { display:flex  !important; }
   thead th    { -webkit-print-color-adjust:exact; print-color-adjust:exact; background:#FF6B35 !important; color:#fff !important; }
 }
-
+ 
 /* ── RESPONSIF ────────────────────────── */
 @media (min-width:480px) { #sgrid { grid-template-columns:repeat(3,1fr); } }
 @media (min-width:600px) { #sgrid { grid-template-columns:repeat(6,1fr); } #content { padding:16px 20px 74px; } }
-
+ 
 /* ═══ FIX DROPDOWN ════════════════════════════════════════ */
 /* TIDAK ada backdrop-filter di topbar - menyebabkan stacking context! */
 /* backdrop-filter hanya di modal overlay, bukan topbar */
-
+ 
 /* Dropdown fix: position fixed agar bebas dari parent stacking context */
 #ud-menu {
   position: fixed !important;
@@ -335,12 +335,12 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
   overflow: hidden;
   display: none;
 }
-
+ 
 /* ═══ UI IMPROVEMENTS ════════════════════════════════════== */
-
+ 
 /* Card hover */
 .card { transition: box-shadow .2s, transform .2s; }
-
+ 
 /* FAB pulse */
 @keyframes fabPulse {
   0%,100% { box-shadow: 0 4px 16px rgba(255,107,53,.4); }
@@ -348,7 +348,7 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
 }
 .fab.on { animation: fabPulse 2.5s ease infinite; }
 .fab.on:hover { animation: none; transform: scale(1.12); box-shadow: 0 6px 20px rgba(255,107,53,.5); }
-
+ 
 /* Absen button shine */
 .ab-masuk, .ab-pulang { position: relative; overflow: hidden; }
 .ab-masuk::before {
@@ -358,51 +358,51 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
   animation: shine 2.5s ease infinite;
 }
 @keyframes shine { 0%{left:-100%} 100%{left:200%} }
-
+ 
 /* Nav icon spring */
 .bn .bi { display:block; transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
 .bn.on .bi { transform: scale(1.15) translateY(-2px); }
-
+ 
 /* Toast */
 .toast { border-radius: 14px; font-size: 13px; padding: 12px 22px; }
-
+ 
 /* Modal blur */
 .mov.open { backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
 .lov.open  { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-
+ 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
-
+ 
 /* Input focus */
 .fc:focus { border-color: var(--or); box-shadow: 0 0 0 3px rgba(255,107,53,.12); }
-
+ 
 /* Tabel hover */
 tbody tr:hover { background: rgba(255,107,53,.04) !important; }
-
+ 
 /* ID Card hover */
 .idc { transition: transform .3s, box-shadow .3s; }
 .idc:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 28px 70px rgba(14,100,160,.4); }
-
+ 
 /* Logo preview */
 #logo-preview { transition: all .2s; }
 #logo-preview:hover { border-color: var(--or); background: var(--or2); transform: scale(1.04); }
-
+ 
 </style>
-
+ 
 <!-- Library eksternal (harus load sebelum module) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-
+ 
 <!-- Entry point — type="module" aktifkan ES6 import/export -->
 <script src="js/bundle.js"></script>
 </head>
 <body>
-
+ 
 <!-- ═══════════════════════════════════════
      SESSION WARNING
 ═══════════════════════════════════════ -->
@@ -414,7 +414,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     Perpanjang
   </button>
 </div>
-
+ 
 <!-- ═══════════════════════════════════════
      TOPBAR
 ═══════════════════════════════════════ -->
@@ -441,8 +441,8 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     </div>
   </div>
 </div>
-
-
+ 
+ 
 <!-- Dropdown di luar topbar: bebas dari stacking context -->
 <div id="ud-menu">
         <div class="ud-head"><p>Masuk sebagai</p><b id="ud-role">Guru</b></div>
@@ -464,15 +464,15 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
           <div class="ud-ic" style="background:var(--rd2)">🚪</div>Keluar
         </div>
       </div>
-
+ 
 <!-- INFO BAR -->
 <div id="info-bar"></div>
-
+ 
 <!-- ═══════════════════════════════════════
      KONTEN UTAMA
 ═══════════════════════════════════════ -->
 <div id="content">
-
+ 
 <!-- ─── TAB: DASHBOARD ─── -->
 <div class="tab on" id="tab-dash">
   <div id="jambar">
@@ -488,7 +488,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
       <span>06:30</span><span>08:00</span><span>11:00</span><span>14:00</span><span>15:30</span>
     </div>
   </div>
-
+ 
   <div id="absen-grid">
     <button class="ab-btn ab-off" id="btn-masuk" onclick="window._app.bukaAbsen('masuk')">
       <span class="ic">🟢</span>
@@ -501,7 +501,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
       <span class="sc2" id="info-pulang">Aktif 14:00</span>
     </button>
   </div>
-
+ 
   <div id="sgrid">
     <div class="sc" style="border-left-color:var(--or)"><div class="sc-lbl">Total</div><div class="sc-num" id="s-tot" style="color:var(--or)">0</div></div>
     <div class="sc" style="border-left-color:var(--gn)"><div class="sc-lbl">Hadir</div><div class="sc-num" id="s-hdr" style="color:var(--gn)">0</div></div>
@@ -510,7 +510,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     <div class="sc" style="border-left-color:var(--rd)"><div class="sc-lbl">Alpha</div><div class="sc-num" id="s-alph" style="color:var(--rd)">0</div></div>
     <div class="sc" style="border-left-color:var(--tx3)"><div class="sc-lbl">Belum</div><div class="sc-num" id="s-alp" style="color:var(--tx2)">0</div></div>
   </div>
-
+ 
   <div class="card cp" id="keh-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span style="font-size:12px;font-weight:700">📊 Kehadiran Hari Ini</span>
@@ -521,7 +521,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
       <span>0%</span><span style="color:var(--or);font-weight:700">Target ≥ 95%</span><span>100%</span>
     </div>
   </div>
-
+ 
   <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px">
     ⏱ Absensi Terbaru
   </div>
@@ -529,7 +529,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     <div class="empty"><div class="ei">📋</div><p>Belum ada absensi hari ini</p></div>
   </div>
 </div>
-
+ 
 <!-- ─── TAB: SCAN QR ─── -->
 <div class="tab" id="tab-scan">
   <div style="max-width:440px;margin:0 auto">
@@ -547,7 +547,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     </div>
   </div>
 </div>
-
+ 
 <!-- ─── TAB: MANUAL ─── -->
 <div class="tab" id="tab-manual">
   <div class="card cp">
@@ -603,7 +603,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     <div class="empty"><div class="ei">📋</div><p>Belum ada absensi</p></div>
   </div>
 </div>
-
+ 
 <!-- ─── TAB: ID CARD ─── -->
 <div class="tab" id="tab-qr">
   <div class="card cp" style="margin-bottom:12px">
@@ -653,7 +653,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
   </div>
   <div class="ggrid" id="qr-grid"></div>
 </div>
-
+ 
 <!-- ─── TAB: REKAP ─── -->
 <div class="tab" id="tab-rekap">
   <div class="ptabs">
@@ -665,7 +665,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
   <div style="margin-bottom:10px">
     <input type="text" class="fc" id="cari-rekap" placeholder="🔍 Cari nama guru..." oninput="window._app.filterRekap()">
   </div>
-
+ 
   <!-- HARIAN -->
   <div id="r-harian">
     <div class="card cp" style="padding-bottom:10px">
@@ -682,7 +682,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
       <tbody id="tbl-h"></tbody>
     </table></div></div>
   </div>
-
+ 
   <!-- BULANAN -->
   <div id="r-bulanan" style="display:none">
     <div class="card cp" style="padding-bottom:10px">
@@ -706,7 +706,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
       <tbody id="tbl-b"></tbody>
     </table></div></div>
   </div>
-
+ 
   <!-- SEMESTER -->
   <div id="r-semester" style="display:none">
     <div class="card cp" style="padding-bottom:10px">
@@ -726,7 +726,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
       <tbody id="tbl-s"></tbody>
     </table></div></div>
   </div>
-
+ 
   <!-- TAHUNAN -->
   <div id="r-tahunan" style="display:none">
     <div class="card cp" style="padding-bottom:10px">
@@ -744,7 +744,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     </table></div></div>
   </div>
 </div>
-
+ 
 <!-- ─── TAB: GURU ─── -->
 <div class="tab" id="tab-guru">
   <div style="display:flex;gap:8px;margin-bottom:10px">
@@ -752,7 +752,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     <button class="btn btn-p" style="width:auto" id="btn-tambah" onclick="window._app.showFormGuru(null)">+ Tambah</button>
   </div>
   <div class="ggrid" id="guru-grid"></div>
-
+ 
   <div id="form-guru" style="display:none">
     <div class="card cp">
       <div class="ct" id="fg-ttl">➕ Tambah Guru</div>
@@ -788,7 +788,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
       </div>
     </div>
   </div>
-
+ 
   <div class="card cp" id="import-sec" style="display:none">
     <div class="ct">📥 Import dari Google Sheets</div>
     <div class="alert a-info" style="margin-bottom:10px">
@@ -803,7 +803,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     </button>
   </div>
 </div>
-
+ 
 <!-- ─── TAB: SETTING ─── -->
 <div class="tab" id="tab-setting">
   <div class="card cp">
@@ -893,9 +893,9 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     <button class="btn btn-s" onclick="window._app.eksporBackup()" style="width:100%">📦 Export Backup JSON</button>
   </div>
 </div>
-
+ 
 </div><!-- /content -->
-
+ 
 <!-- ═══════════════════════════════════════
      BOTTOM NAV
 ═══════════════════════════════════════ -->
@@ -908,11 +908,11 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
   <button class="bn"    id="bn-guru"    onclick="window._app.goTab('guru')"    style="display:none"><span class="bi">👥</span>Guru     <div class="bn-ln"></div></button>
   <button class="bn"    id="bn-setting" onclick="window._app.goTab('setting')" style="display:none"><span class="bi">⚙️</span>Setting  <div class="bn-ln"></div></button>
 </nav>
-
+ 
 <!-- ═══════════════════════════════════════
      MODALS
 ═══════════════════════════════════════ -->
-
+ 
 <!-- Login -->
 <div class="lov" id="login-ov">
   <div class="lbox">
@@ -933,7 +933,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     </div>
   </div>
 </div>
-
+ 
 <!-- Konfirmasi -->
 <div class="mov" id="mov-konfirm">
   <div class="modal">
@@ -946,7 +946,7 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     </div>
   </div>
 </div>
-
+ 
 <!-- Edit Absensi -->
 <div class="mov" id="mov-edit">
   <div class="modal">
@@ -970,10 +970,11 @@ tbody tr:hover { background: rgba(255,107,53,.04) !important; }
     </div>
   </div>
 </div>
-
+ 
 <!-- Toast & FAB -->
 <div class="toast" id="toast"></div>
 <button class="fab on" id="fab" onclick="window._app.refreshDash()">🔄</button>
-
+ 
 </body>
 </html>
+ 
