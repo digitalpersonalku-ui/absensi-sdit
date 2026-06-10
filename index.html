@@ -12,7 +12,7 @@
 <title>Absensi - SDIT Qudwatun Hasanah</title>
 
 <!-- Font -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23FF6B35'/><text y='24' x='4' font-size='22'>🕌</text></svg>">
 
 <!-- CSS -->
@@ -230,7 +230,7 @@ body {
   width: 90px; height: 90px; border-radius: 50%;
   background: rgba(255,255,255,.07);
 }
-.ayat-arabic { font-size: 18px; margin-bottom: 5px; text-align: right; line-height: 1.9; font-family: serif; }
+.ayat-arabic { font-size: 20px; margin-bottom: 6px; text-align: right; line-height: 2; font-family: 'Noto Naskh Arabic',Georgia,serif; direction: rtl; unicode-bidi: embed; }
 .ayat-trans  { font-size: 11px; opacity: .88; line-height: 1.5; }
 .ayat-src    { font-size: 10px; opacity: .65; margin-top: 4px; }
 
@@ -279,7 +279,7 @@ body {
 .ab-sc  { font-size: 10px; color: rgba(255,255,255,.8); display: block; }
 .ab-masuk  { background: var(--grad-tl); box-shadow: 0 6px 20px rgba(10,186,181,.35); }
 .ab-pulang { background: var(--grad-bl); box-shadow: 0 6px 20px rgba(25,118,210,.35); }
-.ab-off    { background: var(--bg); border: 2px dashed var(--bdr2); cursor: not-allowed; }
+.ab-off    { background: var(--bg); border: 2px dashed var(--bdr2); cursor: not-allowed; min-height: 88px; }
 .ab-off .ab-tx { color: var(--tx2); font-size: 12px; }
 .ab-off .ab-sc { color: var(--tx3); }
 .ab-off .ab-ic { background: var(--bg2); font-size: 18px; }
@@ -499,9 +499,12 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 /* ── BOTTOM NAV ───────────────────────────────────────────── */
 #bnav {
   position: fixed; bottom: 0; left: 0; right: 0; height: 62px;
-  background: var(--card); border-top: 1px solid var(--bdr);
+  background: rgba(255,255,255,.97);
+  border-top: 1px solid var(--bdr);
   display: flex; z-index: 99;
   box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .bn  {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -532,7 +535,7 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 
 /* ── RESPONSIVE ───────────────────────────────────────────── */
 @media (min-width: 480px)  { #sgrid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 600px)  { #sgrid { grid-template-columns: repeat(6, 1fr); } #content { padding: 16px 20px 76px; } }
+@media (min-width: 600px)  { #content { padding: 16px 20px 76px; } }
 @media (min-width: 768px)  {
   /* Tablet & Desktop */
   #content { max-width: 960px; padding: 16px 20px 76px; }
@@ -546,7 +549,7 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 
 
 
-/* ── PULSE ANIMATION (stat update) ────────────── */
+/* ── ANIMASI ──────────────────────────────────── */
 @keyframes statPulse {
   0%   { transform: scale(1); }
   40%  { transform: scale(1.12); }
@@ -554,19 +557,31 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 }
 .sc-num.pulse { animation: statPulse .4s cubic-bezier(.4,0,.2,1); }
 
-/* ── DESKTOP DASHBOARD LAYOUT ──────────────────────────────── */
+/* ── LAYOUT DESKTOP ─────────────────────────────── */
+/* 900px+: dashboard 2 kolom */
 @media (min-width: 900px) {
-  /* Dashboard 2 kolom */
-  #tab-dash { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-  #ayat-banner  { grid-column: 1 / -1; }
-  #jambar       { grid-column: 1 / -1; }
-  #absen-grid   { grid-column: 1; }
-  #sgrid        { grid-column: 2; grid-template-columns: repeat(3, 1fr); }
-  #keh-card     { grid-column: 1; }
-  #list-recent-wrap { grid-column: 2; grid-row: 3; }
+  #content  { max-width: 1100px; padding: 20px 24px 76px; margin: 0 auto; }
+  #tab-dash {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  /* Full width: ayat, jambar */
+  #ayat-banner      { grid-column: 1 / -1; }
+  #jambar           { grid-column: 1 / -1; }
+  /* Kolom kiri: tombol absen + kehadiran */
+  #absen-grid       { grid-column: 1; }
+  #keh-card         { grid-column: 1; }
+  /* Kolom kanan: stat cards + absensi terbaru */
+  #sgrid            { grid-column: 2; grid-template-columns: repeat(3, 1fr); }
+  #list-recent-wrap { grid-column: 2; }
 }
-@media (min-width: 1100px) {
-  #tab-dash { grid-template-columns: 1.2fr 1fr; }
+
+/* 1200px+: proporsi lebih lebar kiri */
+@media (min-width: 1200px) {
+  #content  { max-width: 1280px; }
+  #tab-dash { grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); }
   #sgrid    { grid-template-columns: repeat(3, 1fr); }
 }
 
