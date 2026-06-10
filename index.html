@@ -212,7 +212,7 @@ body {
 .card  { background: var(--card); border-radius: var(--r); box-shadow: var(--sh); border: 1px solid var(--bdr); overflow: hidden; margin-bottom: 12px; }
 .cp    { padding: 14px 16px; }
 .ct    { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 800; margin-bottom: 12px; color: var(--tx); }
-.card-head { padding: 12px 16px; border-bottom: 1px solid var(--bdr); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.card-head { padding: 12px 16px; border-bottom: 1px solid var(--bdr); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--tx); }
 
 /* ── AYAT BANNER ──────────────────────────────────────────── */
 #ayat-banner {
@@ -427,7 +427,8 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 /* ── MODAL ────────────────────────────────────────────────── */
 .mov  { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 400; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
 .mov.open { display: flex; }
-.modal { background: var(--card); border-radius: 20px 20px 0 0; padding: 20px 16px 32px; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; }
+.modal { background: var(--card); border-radius: 20px 20px 0 0; padding: 20px 16px 32px; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; animation: modalIn .25s cubic-bezier(.4,0,.2,1); }
+@keyframes modalIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .mdrag { width: 36px; height: 4px; background: var(--bdr); border-radius: 2px; margin: 0 auto 16px; }
 .mt    { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800; margin-bottom: 14px; }
 
@@ -439,7 +440,9 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
   width: 100%; max-width: 340px;
   box-shadow: 0 24px 80px rgba(0,0,0,.25);
   border: 1px solid var(--bdr);
+  animation: lboxIn .3s cubic-bezier(.34,1.56,.64,1);
 }
+@keyframes lboxIn { from { transform: scale(.92) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
 .ll     { text-align: center; margin-bottom: 20px; }
 .ll .le { font-size: 40px; margin-bottom: 8px; }
 .ll h2  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; }
@@ -1490,8 +1493,17 @@ function updateAbsenBtns() {
 
   if (bM) bM.className = 'ab-btn ' + (canM ? 'ab-masuk' : 'ab-off');
   if (bP) bP.className = 'ab-btn ' + (canP ? 'ab-pulang' : 'ab-off');
-  if (iM) iM.textContent = lib ? '🏖️ Hari Libur' : canM ? '✅ Aktif sekarang' : `⏰ ${JAM.mulai}–${JAM.maxmasuk}`;
-  if (iP) iP.textContent = lib ? '🏖️ Hari Libur' : canP ? '✅ Aktif sekarang' : `⏰ ${JAM.pulang}–${JAM.maxpulang}`;
+  // Hitung berapa menit lagi
+  const minsToM = toMin(JAM.mulai) - now;
+  const minsToP = toMin(JAM.pulang) - now;
+  if (iM) iM.textContent = lib ? '🏖️ Hari Libur' :
+    canM ? '✅ Aktif sekarang' :
+    (now < toMin(JAM.mulai) && minsToM <= 60) ? `⏰ ${minsToM} menit lagi` :
+    `⏰ ${JAM.mulai}–${JAM.maxmasuk}`;
+  if (iP) iP.textContent = lib ? '🏖️ Hari Libur' :
+    canP ? '✅ Aktif sekarang' :
+    (now < toMin(JAM.pulang) && minsToP <= 60 && minsToP > 0) ? `⏰ ${minsToP} menit lagi` :
+    `⏰ ${JAM.pulang}–${JAM.maxpulang}`;
 }
 
 // ── DARK MODE ─────────────────────────────
@@ -1830,7 +1842,7 @@ function applyRole() {
   sdf('bn-dash',    'flex');
   sdf('bn-scan',    isYay   ? 'none' : 'flex');
   sdf('bn-manual',  isYay   ? 'none' : 'flex');
-  sdf('bn-qr',      isAdmin ? 'flex' : 'none');
+  sdf('bn-qr',      (isAdmin || role==='kepsek') ? 'flex' : 'none');
   sdf('bn-guru',    isGuru  ? 'none' : 'flex');
   sdf('bn-rekap',   isGuru  ? 'none' : 'flex');
   sdf('bn-setting', isAdmin ? 'flex' : 'none');
@@ -2262,7 +2274,7 @@ function renderRecent() {
   c.innerHTML = items.map(d => `
     <div class="litem">
       <div class="lav" style="background:${avColor(d.nama)}22;color:${avColor(d.nama)}">
-        ${statusIcon(d.status)}
+        ${d.foto ? `<img src="${esc(d.foto)}" alt="">` : statusIcon(d.status)}
       </div>
       <div class="linf">
         <div class="lnm">${esc(d.nama)}</div>
