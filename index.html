@@ -592,6 +592,28 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
   #absen-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .ab-btn { min-height: 110px; padding: 22px 20px; gap: 16px; }
 }
+
+/* ── POLESAN DESKTOP ─────────────────────────────── */
+@media (min-width: 900px) {
+  /* Stat cards lebih besar */
+  .sc-num { font-size: 36px; }
+  .sc     { padding: 16px 14px; }
+  
+  /* Absen tombol lebih proporsional */
+  .ab-tx  { font-size: 15px; }
+  .ab-sc  { font-size: 11px; }
+  .ab-ic  { width: 54px; height: 54px; font-size: 28px; }
+  
+  /* Kehadiran card lebih tebal */
+  #keh-card .cp { padding: 16px 18px; }
+  #pct { font-size: 22px !important; }
+  
+  /* Card head lebih besar */
+  .card-head { font-size: 14px; padding: 14px 18px; }
+  
+  /* Margin bottom card lebih besar */
+  .card { margin-bottom: 14px; }
+}
 /* ── PRINT ────────────────────────────────────────────────── */
 #print-hdr, #print-ttd { display: none; }
 @media print {
