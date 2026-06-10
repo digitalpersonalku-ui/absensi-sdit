@@ -320,6 +320,137 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
  
 /* Default visibility bottom nav - JS akan override */
 #bn-qr, #bn-rekap, #bn-guru, #bn-setting { display: none; }
+ 
+/* ── UI/UX IMPROVEMENTS ─────────────────────────────────── */
+ 
+/* Glassmorphism topbar pada scroll */
+#topbar {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+ 
+/* Card hover lift effect */
+.card { transition: box-shadow .2s, transform .2s; }
+.card:hover { box-shadow: 0 4px 24px rgba(0,0,0,.1); }
+ 
+/* Stats card pulse animation saat angka berubah */
+@keyframes statPulse {
+  0%  { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100%{ transform: scale(1); }
+}
+.sc-num.pulse { animation: statPulse .4s ease; }
+ 
+/* Button ripple effect */
+.btn::after, .ab-btn::after {
+  content:'';position:absolute;border-radius:50%;
+  background:rgba(255,255,255,.3);
+  width:0;height:0;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  transition:width .4s,height .4s,opacity .4s;
+  opacity:0;pointer-events:none;
+}
+.btn:active::after, .ab-btn:active::after {
+  width:200px;height:200px;opacity:0;
+}
+.btn { position:relative; overflow:hidden; }
+.ab-btn { position:relative; overflow:hidden; }
+ 
+/* Bottom nav label animasi */
+.bn .bi { display:block; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+.bn.on .bi { transform: scale(1.15) translateY(-2px); }
+ 
+/* Absen button shine effect */
+.ab-masuk { position:relative; overflow:hidden; }
+.ab-masuk::before {
+  content:'';position:absolute;top:-50%;left:-50%;
+  width:50%;height:200%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  transform:skewX(-20deg);
+  animation:shine 3s infinite;
+}
+@keyframes shine {
+  0%  { left:-50%; }
+  100%{ left:150%; }
+}
+ 
+/* Toast lebih smooth */
+.toast {
+  border-radius: 14px;
+  letter-spacing: .2px;
+  font-size: 13px;
+  padding: 12px 22px;
+}
+ 
+/* Jam bar pointer glow */
+#jb-ptr {
+  box-shadow: 0 0 0 3px rgba(255,107,53,.2), 0 2px 8px rgba(0,0,0,.2);
+}
+ 
+/* Modal backdrop blur */
+.mov.open {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.lov.open {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+ 
+/* Logo preview hover */
+#logo-preview:hover {
+  border-color: var(--or);
+  background: var(--or2);
+  transform: scale(1.04);
+}
+ 
+/* Rekap tabel zebra lebih halus */
+tbody tr:nth-child(even) { background: rgba(241,245,249,.4); }
+tbody tr:hover { background: rgba(255,107,53,.05) !important; }
+ 
+/* ID Card shadow lebih dalam */
+.idc { 
+  transition: transform .3s, box-shadow .3s;
+}
+.idc:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 28px 70px rgba(14,100,160,.4), 0 8px 24px rgba(0,0,0,.15);
+}
+ 
+/* Guru card hover border color */
+.gc { transition: all .2s cubic-bezier(.4,0,.2,1); }
+ 
+/* Scrollbar custom */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--tx3); }
+ 
+/* Input focus ring lebih halus */
+.fc:focus {
+  border-color: var(--or);
+  box-shadow: 0 0 0 3px rgba(255,107,53,.12);
+  background: #fff;
+}
+ 
+/* FAB pulse */
+@keyframes fabPulse {
+  0%,100% { box-shadow: 0 4px 16px rgba(255,107,53,.4); }
+  50%      { box-shadow: 0 4px 24px rgba(255,107,53,.6), 0 0 0 6px rgba(255,107,53,.1); }
+}
+.fab.on { animation: fabPulse 2s ease infinite; }
+.fab.on:hover { animation: none; transform: scale(1.12); }
+ 
+/* Progress bar stripes animasi */
+.pfill {
+  background-size: 20px 20px;
+  animation: progressStripe 1s linear infinite;
+}
+@keyframes progressStripe {
+  0%   { background-position: 0 0; }
+  100% { background-position: 20px 0; }
+}
+ 
 </style>
  
 <!-- Library eksternal (harus load sebelum module) -->
@@ -738,7 +869,29 @@ tbody tr:hover { background:rgba(241,245,249,.4); }
     <div class="ct">🏫 Identitas Sekolah</div>
     <div class="fg"><label class="fl">Nama Sekolah</label><input type="text" class="fc" id="s-nama" placeholder="Nama sekolah"></div>
     <div class="fg"><label class="fl">Tagline / Motto</label><input type="text" class="fc" id="s-tag" placeholder="Tagline atau motto"></div>
-    <div class="fg"><label class="fl">Logo (URL atau Emoji)</label><input type="text" class="fc" id="s-logo" placeholder="https://... atau 🏫"></div>
+    <div class="fg">
+      <label class="fl">Logo Sekolah</label>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div id="logo-preview" onclick="document.getElementById('logo-file').click()"
+          style="width:72px;height:72px;border-radius:16px;border:2px dashed var(--bdr);
+                 display:flex;align-items:center;justify-content:center;font-size:32px;
+                 background:var(--bg);overflow:hidden;cursor:pointer;transition:all .2s;flex-shrink:0"
+          title="Klik untuk ganti logo">🏫</div>
+        <div style="flex:1">
+          <input type="file" id="logo-file" accept="image/*" style="display:none"
+            onchange="window._app.handleLogoFile(this)">
+          <button class="btn btn-s" style="width:100%;margin-bottom:6px;font-size:11px"
+            onclick="document.getElementById('logo-file').click()">
+            📷 Upload Foto Logo
+          </button>
+          <input type="text" class="fc" id="s-logo" placeholder="atau ketik URL / Emoji 🏫"
+            oninput="window._app.previewLogo(this.value)" style="font-size:12px">
+          <div style="font-size:10px;color:var(--tx3);margin-top:4px">
+            JPG/PNG maks 2MB · atau URL gambar · atau emoji
+          </div>
+        </div>
+      </div>
+    </div>
     <button class="btn btn-p" onclick="window._app.simpanIdentitas()" style="width:100%">💾 Simpan Identitas</button>
   </div>
   <div class="card cp">
@@ -2964,14 +3117,70 @@ function applyIdentitas() {
   if (d.logo) {
     const el = $('tb-logo');
     if (el) {
-      el.innerHTML = d.logo.startsWith('http')
+      el.innerHTML = d.logo.startsWith('http') || d.logo.startsWith('data:')
         ? `<img src="${esc(d.logo)}" style="width:28px;height:28px;border-radius:7px;object-fit:cover">`
         : `<span style="font-size:17px">${d.logo}</span>`;
     }
     const s = $('s-logo');
     if (s) s.value = d.logo;
+    // Update preview di setting
+    _updateLogoPreview(d.logo);
   }
   if (d.warna) applyColor(d.warna);
+}
+ 
+ 
+// ── LOGO UPLOAD ───────────────────────────────────────────
+function handleLogoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { toast('Logo maksimal 2MB', 'warn'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    // Update preview
+    _updateLogoPreview(dataUrl);
+    // Set ke input text juga supaya ikut tersimpan
+    const logoInput = $('s-logo');
+    if (logoInput) logoInput.value = dataUrl;
+    toast('✅ Logo siap — klik Simpan Identitas', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+ 
+function previewLogo(val) {
+  if (!val) {
+    _updateLogoPreview('');
+    return;
+  }
+  _updateLogoPreview(val);
+}
+ 
+function _updateLogoPreview(val) {
+  const prev = $('logo-preview');
+  if (!prev) return;
+  if (!val) {
+    prev.innerHTML = '🏫';
+    return;
+  }
+  if (val.startsWith('data:') || val.startsWith('http')) {
+    prev.innerHTML = `<img src="${esc(val)}"
+      style="width:100%;height:100%;object-fit:cover;border-radius:14px"
+      onerror="this.parentElement.innerHTML='❌'">`; 
+  } else {
+    // Emoji atau teks
+    prev.innerHTML = `<span style="font-size:32px">${val}</span>`;
+  }
+  // Update topbar logo juga live
+  const tbLogo = $('tb-logo');
+  if (tbLogo) {
+    if (val.startsWith('data:') || val.startsWith('http')) {
+      tbLogo.innerHTML = `<img src="${esc(val)}"
+        style="width:28px;height:28px;border-radius:7px;object-fit:cover">`;
+    } else {
+      tbLogo.innerHTML = `<span style="font-size:17px">${val}</span>`;
+    }
+  }
 }
  
 function simpanIdentitas() {
@@ -3183,7 +3392,7 @@ window._app = {
   buatIDCard, renderQrGrid, pilihQR, cetakIDCard, unduhQR,
  
   // Setting
-  simpanIdentitas, simpanJam, gantiPassword,
+  handleLogoFile, previewLogo, simpanIdentitas, simpanJam, gantiPassword,
   saveColor, resetHariIni, eksporBackup,
 };
  
