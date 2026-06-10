@@ -640,9 +640,9 @@ function applyRole() {
   // Manual form - null-safe
   if (isYay) {
     sd('info-admin', 'none'); sd('info-guru', 'none');
-    sd('info-yayasan', 'flex'); sd('frm-manual', 'none');
+    sd('info-yay', 'flex'); sd('frm-manual', 'none');
   } else {
-    sd('info-yayasan', 'none'); sd('frm-manual', 'block');
+    sd('info-yay', 'none'); sd('frm-manual', 'block');
     sd('info-admin', isGuru ? 'none' : 'flex');
     sd('info-guru',  isGuru ? 'flex' : 'none');
     // Opsi Alpha: hanya admin & kepsek
@@ -2080,6 +2080,7 @@ function applyIdentitas() {
     }
     const s = $('s-logo');
     if (s) s.value = d.logo;
+    _setLogoPreview(d.logo);
     // Update preview di setting
     _updateLogoPreview(d.logo);
   }
@@ -2317,6 +2318,42 @@ function refreshDash() {
 
 // ── Expose ke window._app ─────────────────
 // Semua fungsi yang dipanggil dari onclick di HTML
+
+// ── LOGO UPLOAD ─────────────────────────────────────────
+function handleLogoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2*1024*1024) { toast('Foto maks 2MB','warn'); return; }
+  const rd = new FileReader();
+  rd.onload = e => {
+    const url = e.target.result;
+    _setLogoPreview(url);
+    const si = $('s-logo');
+    if (si) si.value = url;
+    toast('✅ Logo siap — klik Simpan','ok');
+  };
+  rd.readAsDataURL(file);
+}
+function previewLogo(val) { _setLogoPreview(val||''); }
+function _setLogoPreview(val) {
+  const p = $('logo-preview');
+  if (!p) return;
+  if (!val) { p.innerHTML='🏫'; return; }
+  if (val.startsWith('data:')||val.startsWith('http')) {
+    p.innerHTML=`<img src="${esc(val)}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.parentElement.innerHTML='❌'">`;
+  } else {
+    p.innerHTML=`<span style="font-size:28px">${val}</span>`;
+  }
+  // Live update topbar
+  const tb=$('tb-logo');
+  if (tb) {
+    if (val.startsWith('data:')||val.startsWith('http'))
+      tb.innerHTML=`<img src="${esc(val)}" style="width:28px;height:28px;border-radius:7px;object-fit:cover">`;
+    else
+      tb.innerHTML=`<span style="font-size:17px">${val}</span>`;
+  }
+}
+
 window._app = {
   // UI & nav
   toggleUD, closeUD, toggleDark, goTab, refreshDash,
