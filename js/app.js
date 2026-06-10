@@ -1466,6 +1466,395 @@ function eksporExcel() {
   XLSX.writeFile(wb, `absensi_harian_${tgl}.xlsx`);
   toast('✅ Excel berhasil diunduh', 'ok');
 }
+// ─── EXPORT EXCEL BULANAN (format laporan seperti gambar) ───
+function eksporExcelBulanan() {
+  const bln = parseInt($('r-bln')?.value || new Date().getMonth() + 1);
+  const thn = parseInt($('r-thn-b')?.value || new Date().getFullYear());
+  const gl  = guruAktif();
+  if (!gl.length) { toast('Belum ada data guru', 'warn'); return; }
+
+  const namaBln = ['','Januari','Februari','Maret','April','Mei','Juni',
+    'Juli','Agustus','September','Oktober','November','Desember'];
+  const hariSingkat = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+
+  // Hitung hari dalam bulan
+  const jumlahHari = new Date(thn, bln, 0).getDate();
+
+  toast('📊 Membuat Excel bulanan...', 'info', 3000);
+
+  // Kumpulkan data semua tanggal dalam bulan
+  const promises = [];
+  for (let d = 1; d <= jumlahHari; d++) {
+    const tgl = `${thn}-${String(bln).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    promises.push(
+      firebase.database().ref('absensi/' + tgl).once('value').then(snap => {
+        const data = {};
+        snap.forEach(ch => { data[ch.key] = ch.val(); });
+        return { tgl, d, data };
+      })
+    );
+  }
+
+  Promise.all(promises).then(allData => {
+    const wb = XLSX.utils.book_new();
+    const ws = {};
+    const merges = [];
+
+    // Helper encode cell
+    function ec(r, c) { return XLSX.utils.encode_cell({ r, c }); }
+    function setCell(r, c, v, s) {
+      const ref = ec(r, c);
+      ws[ref] = { v, t: typeof v === 'number' ? 'n' : 's', s: s || {} };
+    }
+
+    // Warna
+    const CLR = {
+      hd:  { patternType:'solid', fgColor:{ rgb:'1565C0' } },
+      hm:  { patternType:'solid', fgColor:{ rgb:'1976D2' } },
+      hl:  { patternType:'solid', fgColor:{ rgb:'E3F2FD' } },
+      hml: { patternType:'solid', fgColor:{ rgb:'0897A7' } },
+      gb:  { patternType:'solid', fgColor:{ rgb:'FFF8E1' } },
+      lb:  { patternType:'solid', fgColor:{ rgb:'F5F5F5' } },
+      tb:  { patternType:'solid', fgColor:{ rgb:'F3E5F5' } },
+      we:  { patternType:'solid', fgColor:{ rgb:'EF9A9A' } },  // weekend
+      h:   { patternType:'solid', fgColor:{ rgb:'C8E6C9' } },
+      tl:  { patternType:'solid', fgColor:{ rgb:'FFF9C4' } },
+      iz:  { patternType:'solid', fgColor:{ rgb:'BBDEFB' } },
+      sk:  { patternType:'solid', fgColor:{ rgb:'F8BBD0' } },
+      al:  { patternType:'solid', fgColor:{ rgb:'FFCDD2' } },
+      lbr: { patternType:'solid', fgColor:{ rgb:'EEEEEE' } },
+      ko:  { patternType:'solid', fgColor:{ rgb:'FAFAFA' } },
+    };
+
+    const STATUS_CLR = {
+      hadir:     { bg: CLR.h,   txt: { rgb:'1B5E20' }, lbl:'H'   },
+      terlambat: { bg: CLR.tl,  txt: { rgb:'F57F17' }, lbl:'TL'  },
+      izin:      { bg: CLR.iz,  txt: { rgb:'0D47A1' }, lbl:'I'   },
+      sakit:     { bg: CLR.sk,  txt: { rgb:'880E4F' }, lbl:'S'   },
+      alpha:     { bg: CLR.al,  txt: { rgb:'B71C1C' }, lbl:'A'   },
+      libur:     { bg: CLR.lbr, txt: { rgb:'616161' }, lbl:'LBR' },
+    };
+
+    // Border helpers
+    const bThin = { style:'thin', color:{ rgb:'CCCCCC' } };
+    const bMed  = { style:'medium', color:{ rgb:'666666' } };
+    const bHd   = { style:'medium', color:{ rgb:'1565C0' } };
+    function mkBorder(t,b,l,r) {
+      return { top:t||bThin, bottom:b||bThin, left:l||bThin, right:r||bThin };
+    }
+
+    // Font helpers
+    function fnt(bold, sz, color) {
+      return { bold: bold||false, sz: sz||9, color: { rgb: color||'000000' }, name:'Calibri' };
+    }
+    function aln(h, v, wrap) {
+      return { horizontal: h||'center', vertical: v||'center', wrapText: wrap!==false };
+    }
+
+    // Style presets
+    const S = {
+      hdrTitle:  { font:fnt(true,15,'FFFFFF'), fill:CLR.hd, alignment:aln(), border:mkBorder(bHd,bThin,bHd,bHd) },
+      hdrTag:    { font:fnt(false,8,'FFFFFF'), fill:CLR.hml, alignment:aln() },
+      hdrRpt:    { font:fnt(true,12,'1565C0'), fill:CLR.hl, alignment:aln(), border:mkBorder(bThin,bMed,bMed,bMed) },
+      colHdr:    { font:fnt(true,8,'FFFFFF'),  fill:CLR.hd,  alignment:aln(), border:mkBorder() },
+      colHdrMid: { font:fnt(true,8,'FFFFFF'),  fill:CLR.hm,  alignment:aln(), border:mkBorder() },
+      colDate:   { font:fnt(true,8,'FFFFFF'),  fill:CLR.hml, alignment:aln(), border:mkBorder() },
+      colWE:     { font:fnt(true,8,'FFFFFF'),  fill:CLR.we,  alignment:aln(), border:mkBorder() },
+      guruNo:    { font:fnt(true,9,'1565C0'),  fill:CLR.gb,  alignment:aln(), border:mkBorder(bMed,bMed,bMed,bThin) },
+      guruNama:  { font:fnt(true,9,'1565C0'),  fill:CLR.gb,  alignment:aln('left','center'), border:mkBorder(bMed,bMed,bThin,bMed) },
+      labelSt:   { font:fnt(true,8,'424242'),  fill:CLR.lb,  alignment:aln('left','center'), border:mkBorder(bThin,bThin,bThin,bMed) },
+      labelRow:  { font:fnt(false,8,'424242'), fill:CLR.lb,  alignment:aln('left','center'), border:mkBorder(bThin,bThin,bThin,bMed) },
+      labelTtd:  { font:fnt(false,8,'424242'), fill:CLR.tb,  alignment:aln('left','center'), border:mkBorder(bThin,bMed,bThin,bMed) },
+      sumMerge:  { font:fnt(true,11,'1B5E20'), fill:CLR.h,   alignment:aln(), border:mkBorder(bMed,bMed,bThin,bMed) },
+    };
+
+    // Layout kolom
+    // 0=No, 1=Nama, 2=Label, 3..3+jumlahHari-1=tanggal, lalu ringkasan
+    const CO = 0; // No
+    const CN = 1; // Nama
+    const CL = 2; // Label
+    const CD = 3; // Tanggal mulai (index 0-based)
+    const CD_LAST = CD + jumlahHari - 1;
+    const CH  = CD_LAST + 1;  // Hadir
+    const CTL = CH + 1;
+    const CI  = CTL + 1;
+    const CS  = CI + 1;
+    const CA  = CS + 1;
+    const CLBR= CA + 1;
+    const CPCT= CLBR + 1;
+    const TCOL = CPCT; // total kolom (0-based index terakhir)
+
+    // Lebar kolom (dalam karakter)
+    const colWidths = [];
+    colWidths[CO] = 4;
+    colWidths[CN] = 27;
+    colWidths[CL] = 11;
+    for (let d = 0; d < jumlahHari; d++) colWidths[CD + d] = 3.6;
+    colWidths[CH]   = 5;
+    colWidths[CTL]  = 5;
+    colWidths[CI]   = 5;
+    colWidths[CS]   = 5;
+    colWidths[CA]   = 5;
+    colWidths[CLBR] = 5.5;
+    colWidths[CPCT] = 8;
+
+    ws['!cols'] = colWidths.map(w => ({ wpx: Math.round(w * 7.5) }));
+
+    // Helper merge
+    function addMerge(rs, cs, re, ce) {
+      merges.push({ s:{ r:rs, c:cs }, e:{ r:re, c:ce } });
+    }
+
+    let row = 0; // 0-based
+
+    // ROW 0: Judul Sekolah
+    setCell(row, CO, state.identitasData.nama || 'SDIT Qudwatun Hasanah', S.hdrTitle);
+    addMerge(row, CO, row, TCOL);
+    row++;
+
+    // ROW 1: Tagline
+    setCell(row, CO, state.identitasData.tagline || '', S.hdrTag);
+    addMerge(row, CO, row, TCOL);
+    row++;
+
+    // ROW 2: Judul Laporan
+    setCell(row, CO, `LAPORAN ABSENSI BULANAN — ${namaBln[bln].toUpperCase()} ${thn}`, S.hdrRpt);
+    addMerge(row, CO, row, TCOL);
+    row++;
+
+    // ROW 3: Spacer
+    ws[ec(row, CO)] = { v:'', t:'s' };
+    addMerge(row, CO, row, TCOL);
+    row++;
+
+    const ROW_H1 = row;     // Header row 1
+    const ROW_H2 = row + 1; // Header row 2
+    row += 2;
+
+    // Header: No, Nama, Label (merge 2 baris)
+    ['No', 'Nama Guru', 'Keterangan'].forEach((v, i) => {
+      setCell(ROW_H1, i, v, S.colHdr);
+      addMerge(ROW_H1, i, ROW_H2, i);
+    });
+
+    // Header: "Bulan Mei 2026" (merge semua tanggal, row H1)
+    setCell(ROW_H1, CD, `Bulan ${namaBln[bln]} ${thn}`, S.colHdrMid);
+    addMerge(ROW_H1, CD, ROW_H1, CD_LAST);
+
+    // Header: tanggal 1-31 (row H2) + nama hari
+    for (let d = 1; d <= jumlahHari; d++) {
+      const dow = new Date(thn, bln - 1, d).getDay(); // 0=Min
+      const isWE = dow === 0 || dow === 6;
+      const col = CD + d - 1;
+      setCell(ROW_H2, col, d, isWE ? S.colWE : S.colDate);
+    }
+
+    // Header: Ringkasan (row H1 merge, row H2 per kolom)
+    setCell(ROW_H1, CH, 'Ringkasan', S.colHdr);
+    addMerge(ROW_H1, CH, ROW_H1, TCOL);
+
+    const sumHdrs = [
+      { c:CH,   v:'H',      fill:CLR.h,   tx:'1B5E20' },
+      { c:CTL,  v:'TL',     fill:CLR.tl,  tx:'F57F17' },
+      { c:CI,   v:'I',      fill:CLR.iz,  tx:'0D47A1' },
+      { c:CS,   v:'S',      fill:CLR.sk,  tx:'880E4F' },
+      { c:CA,   v:'A',      fill:CLR.al,  tx:'B71C1C' },
+      { c:CLBR, v:'Libur',  fill:CLR.lbr, tx:'616161' },
+      { c:CPCT, v:'% Hadir',fill:CLR.hl,  tx:'1565C0' },
+    ];
+    sumHdrs.forEach(h => {
+      setCell(ROW_H2, h.c, h.v, {
+        font: fnt(true, 8, h.tx), fill: h.fill,
+        alignment: aln(), border: mkBorder()
+      });
+    });
+
+    // DATA GURU
+    const LABELS = ['Status', 'Jam Masuk', 'Jam Pulang', 'TTD'];
+
+    gl.forEach(([id, g], idx) => {
+      const rs = row;       // row start
+      const re = row + 3;   // row end (4 baris: Status, JM, JP, TTD)
+
+      // No (merge 4 baris)
+      setCell(rs, CO, idx + 1, S.guruNo);
+      addMerge(rs, CO, re, CO);
+
+      // Nama (merge 4 baris)
+      setCell(rs, CN, `${g.nama}
+${g.mapel||''}`, S.guruNama);
+      addMerge(rs, CN, re, CN);
+
+      // Label baris
+      LABELS.forEach((lbl, i) => {
+        const r = rs + i;
+        const sStyle = i === 0 ? S.labelSt : (i === 3 ? S.labelTtd : S.labelRow);
+        setCell(r, CL, lbl, sStyle);
+      });
+
+      // Data per tanggal
+      const cnt = { hadir:0, terlambat:0, izin:0, sakit:0, alpha:0, libur:0 };
+
+      for (let d = 1; d <= jumlahHari; d++) {
+        const col = CD + d - 1;
+        const tgl = `${thn}-${String(bln).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dow  = new Date(thn, bln - 1, d).getDay();
+        const isWE = dow === 0 || dow === 6;
+
+        const dayData  = allData.find(x => x.d === d)?.data || {};
+        const masukKey = `${id}_masuk`;
+        const izinKey  = `${id}_izin`;
+        const sakitKey = `${id}_sakit`;
+        const alphaKey = `${id}_alpha`;
+        const pulangKey= `${id}_pulang`;
+
+        let st  = isWE ? 'libur' : '';
+        let jm  = '', jp = '';
+
+        if (!isWE) {
+          if (dayData[alphaKey])      { st = 'alpha'; }
+          else if (dayData[izinKey])  { st = 'izin'; }
+          else if (dayData[sakitKey]) { st = 'sakit'; }
+          else if (dayData[masukKey]) {
+            st = dayData[masukKey].status || 'hadir';
+            jm = dayData[masukKey].waktu || '';
+            if (dayData[pulangKey]) jp = dayData[pulangKey].waktu || '';
+          }
+        }
+
+        if (st) cnt[st] = (cnt[st]||0) + 1;
+
+        const sc = STATUS_CLR[st] || { bg: CLR.ko, txt:{ rgb:'000000' }, lbl:'' };
+
+        // Status row
+        setCell(rs, col, sc.lbl, {
+          font: fnt(true, 8, sc.txt.rgb), fill: sc.bg,
+          alignment: aln(), border: mkBorder()
+        });
+        // Jam Masuk row
+        setCell(rs+1, col, jm, {
+          font: fnt(false, 7, '424242'),
+          fill: (st && !isWE) ? sc.bg : CLR.ko,
+          alignment: aln(), border: mkBorder(bThin, bThin, bThin, bThin)
+        });
+        // Jam Pulang row
+        setCell(rs+2, col, jp, {
+          font: fnt(false, 7, '424242'),
+          fill: (st && !isWE) ? sc.bg : CLR.ko,
+          alignment: aln(), border: mkBorder(bThin, bThin, bThin, bThin)
+        });
+        // TTD row
+        setCell(re, col, '', {
+          fill: CLR.tb,
+          border: mkBorder(bThin, bMed, bThin, bThin)
+        });
+      }
+
+      // Kolom ringkasan (merge 4 baris)
+      const totHadir = cnt.hadir + cnt.terlambat;
+      const hariKerja = jumlahHari - cnt.libur;
+      const pct = hariKerja > 0 ? Math.round(totHadir / hariKerja * 100) : 0;
+      const pctStr = pct + '%';
+      const pctFill = pct >= 95 ? CLR.h : (pct >= 80 ? CLR.tl : CLR.al);
+      const pctTx   = pct >= 95 ? '1B5E20' : (pct >= 80 ? 'F57F17' : 'B71C1C');
+
+      [
+        { c:CH,   v:cnt.hadir,     fill:CLR.h,   tx:'1B5E20' },
+        { c:CTL,  v:cnt.terlambat, fill:CLR.tl,  tx:'F57F17' },
+        { c:CI,   v:cnt.izin,      fill:CLR.iz,  tx:'0D47A1' },
+        { c:CS,   v:cnt.sakit,     fill:CLR.sk,  tx:'880E4F' },
+        { c:CA,   v:cnt.alpha,     fill:CLR.al,  tx:'B71C1C' },
+        { c:CLBR, v:cnt.libur,     fill:CLR.lbr, tx:'616161' },
+        { c:CPCT, v:pctStr,        fill:pctFill, tx:pctTx   },
+      ].forEach(h => {
+        setCell(rs, h.c, h.v, {
+          font: fnt(true, 11, h.tx), fill: h.fill,
+          alignment: aln(), border: mkBorder(bMed, bMed, bThin, bMed)
+        });
+        addMerge(rs, h.c, re, h.c);
+      });
+
+      row = re + 1;
+    });
+
+    // Legenda
+    row++;
+    const legRow = row;
+    setCell(legRow, CO, 'Keterangan:', { font:fnt(true,8,'1565C0'), alignment:aln('left') });
+    addMerge(legRow, CO, legRow, CL);
+
+    const legs = [
+      ['H = Hadir', CLR.h, '1B5E20'], ['TL = Terlambat', CLR.tl, 'F57F17'],
+      ['I = Izin', CLR.iz, '0D47A1'], ['S = Sakit', CLR.sk, '880E4F'],
+      ['A = Alpha', CLR.al, 'B71C1C'], ['Libur = Sabtu/Minggu', CLR.lbr, '616161'],
+    ];
+    legs.forEach((l, i) => {
+      const col = CD + i * 5;
+      if (col + 4 > TCOL) return;
+      setCell(legRow, col, l[0], {
+        font: fnt(true,8,l[2]), fill: l[1],
+        alignment: aln(), border: mkBorder()
+      });
+      addMerge(legRow, col, legRow, col + 4);
+    });
+
+    // Tanda Tangan
+    const ttdRow = legRow + 2;
+    const tglStr = `${namaBln[bln]} ${thn}`;
+    // Kiri
+    [
+      [ttdRow,   'Mengetahui,'],
+      [ttdRow+1, 'Pengawas Sekolah'],
+      [ttdRow+2, '(________________________)'],
+    ].forEach(([r, v]) => {
+      setCell(r, CO, v, { font:fnt(r===ttdRow+2,9,'424242'), alignment:aln('center') });
+      addMerge(r, CO, r, CO+7);
+    });
+    // Kanan
+    const tcol = CD_LAST - 7;
+    [
+      [ttdRow,   tglStr,             false],
+      [ttdRow+1, 'Kepala Sekolah',   false],
+      [ttdRow+2, state.identitasData.nama||'SDIT Qudwatun Hasanah', true],
+      [ttdRow+3, '(________________________)', false],
+    ].forEach(([r, v, bold]) => {
+      setCell(r, tcol, v, { font:fnt(bold,9,bold?'1565C0':'424242'), alignment:aln('center') });
+      addMerge(r, tcol, r, TCOL);
+    });
+
+    // Set merges dan range
+    ws['!merges'] = merges;
+    ws['!ref'] = XLSX.utils.encode_range(
+      { r:0, c:0 },
+      { r: ttdRow+3, c: TCOL }
+    );
+
+    // Tinggi baris
+    const rowH = [];
+    rowH[0] = { hpx: 36 };  // Judul
+    rowH[1] = { hpx: 16 };  // Tagline
+    rowH[2] = { hpx: 26 };  // Laporan
+    rowH[3] = { hpx: 6  };  // Spacer
+    rowH[ROW_H1] = { hpx: 24 };
+    rowH[ROW_H2] = { hpx: 20 };
+    for (let g = 0; g < gl.length; g++) {
+      const baseRow = 6 + g * 4;
+      rowH[baseRow]   = { hpx: 16 };
+      rowH[baseRow+1] = { hpx: 16 };
+      rowH[baseRow+2] = { hpx: 16 };
+      rowH[baseRow+3] = { hpx: 22 };
+    }
+    ws['!rows'] = rowH;
+
+    XLSX.utils.book_append_sheet(wb, ws, `${namaBln[bln]} ${thn}`);
+    XLSX.writeFile(wb, `rekap_absensi_${namaBln[bln]}_${thn}.xlsx`);
+    toast(`✅ Rekap ${namaBln[bln]} ${thn} berhasil diunduh`, 'ok', 3000);
+  }).catch(e => {
+    console.error(e);
+    toast('❌ Gagal membuat Excel', 'err');
+  });
+}
+
 
 // ── CETAK PDF ─────────────────────────────
 function cetakPDF() {
@@ -1897,7 +2286,7 @@ window._app = {
 
   // Rekap
   setPeriod, loadHarian, loadBulanan, loadSemester, loadTahunan,
-  filterRekap, eksporCSV, eksporExcel, cetakPDF,
+  filterRekap, eksporCSV, eksporExcel, eksporExcelBulanan, cetakPDF,
 
   // ID Card
   buatIDCard, renderQrGrid, pilihQR, cetakIDCard, unduhQR,
