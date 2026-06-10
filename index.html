@@ -280,9 +280,9 @@ body {
 .ab-masuk  { background: var(--grad-tl); box-shadow: 0 6px 20px rgba(10,186,181,.35); }
 .ab-pulang { background: var(--grad-bl); box-shadow: 0 6px 20px rgba(25,118,210,.35); }
 .ab-off    { background: var(--bg); border: 2px dashed var(--bdr2); cursor: not-allowed; }
-.ab-off .ab-tx { color: var(--tx3); }
+.ab-off .ab-tx { color: var(--tx2); font-size: 12px; }
 .ab-off .ab-sc { color: var(--tx3); }
-.ab-off .ab-ic { background: var(--bdr); }
+.ab-off .ab-ic { background: var(--bg2); font-size: 18px; }
 
 /* Shine animation untuk ab-masuk */
 .ab-masuk::before {
@@ -534,17 +534,40 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 @media (min-width: 480px)  { #sgrid { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 600px)  { #sgrid { grid-template-columns: repeat(6, 1fr); } #content { padding: 16px 20px 76px; } }
 @media (min-width: 768px)  {
-  /* Tablet: sidebar minimal */
-  body { display: flex; flex-direction: column; }
-  #bnav { display: none; }
-  #content { padding-bottom: 24px; max-width: 960px; }
-  .fab { bottom: 20px; }
-  .toast { bottom: 20px; }
+  /* Tablet & Desktop */
+  #content { max-width: 960px; padding: 16px 20px 76px; }
 }
 @media (min-width: 1024px) {
-  /* Desktop: layout 2 kolom */
-  #content { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1200px; padding: 20px 24px; align-items: start; }
-  .tab.on { display: contents; }
+  /* Desktop: max width centered */
+  #content { max-width: 1100px; padding: 20px 24px 76px; }
+  #sgrid { grid-template-columns: repeat(6, 1fr); }
+  .fab { bottom: 24px; }
+}
+
+
+
+/* ── PULSE ANIMATION (stat update) ────────────── */
+@keyframes statPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.sc-num.pulse { animation: statPulse .4s cubic-bezier(.4,0,.2,1); }
+
+/* ── DESKTOP DASHBOARD LAYOUT ──────────────────────────────── */
+@media (min-width: 900px) {
+  /* Dashboard 2 kolom */
+  #tab-dash { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  #ayat-banner  { grid-column: 1 / -1; }
+  #jambar       { grid-column: 1 / -1; }
+  #absen-grid   { grid-column: 1; }
+  #sgrid        { grid-column: 2; grid-template-columns: repeat(3, 1fr); }
+  #keh-card     { grid-column: 1; }
+  #list-recent-wrap { grid-column: 2; grid-row: 3; }
+}
+@media (min-width: 1100px) {
+  #tab-dash { grid-template-columns: 1.2fr 1fr; }
+  #sgrid    { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* ── PRINT ────────────────────────────────────────────────── */
@@ -606,7 +629,7 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
       <div id="tb-tgl">--</div>
     </div>
     <div style="position:relative">
-      <div id="ud-btn" onclick="window._app.toggleUD()">
+      <div id="ud-btn" onclick="window._app.toggleUD(event)">
         <div id="ud-av">👩‍🏫</div>
         <span id="ud-nm">Guru</span>
         <span id="ud-arr">▼</span>
@@ -622,20 +645,20 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 <div id="ud-menu">
         <div class="ud-head"><p>Masuk sebagai</p><b id="ud-role">Guru</b></div>
         <div class="ud-sep">Ganti Akses</div>
-        <div class="ud-item" id="udi-guru"    onclick="window._app.switchRole('guru')">   <div class="ud-ic" style="background:var(--gn2)">👩‍🏫</div>Guru</div>
-        <div class="ud-item" id="udi-admin"   onclick="window._app.switchRole('admin')">  <div class="ud-ic" style="background:var(--or2)">👨‍💼</div>Admin</div>
-        <div class="ud-item" id="udi-kepsek"  onclick="window._app.switchRole('kepsek')"> <div class="ud-ic" style="background:var(--pu2)">🏫</div>Kepala Sekolah</div>
-        <div class="ud-item" id="udi-yayasan" onclick="window._app.switchRole('yayasan')"><div class="ud-ic" style="background:var(--tl2)">🏛️</div>Ketua Yayasan</div>
+        <div class="ud-item" id="udi-guru"    onclick="event.stopPropagation();window._app.switchRole('guru')">   <div class="ud-ic" style="background:var(--gn2)">👩‍🏫</div>Guru</div>
+        <div class="ud-item" id="udi-admin"   onclick="event.stopPropagation();window._app.switchRole('admin')">  <div class="ud-ic" style="background:var(--or2)">👨‍💼</div>Admin</div>
+        <div class="ud-item" id="udi-kepsek"  onclick="event.stopPropagation();window._app.switchRole('kepsek')"> <div class="ud-ic" style="background:var(--pu2)">🏫</div>Kepala Sekolah</div>
+        <div class="ud-item" id="udi-yayasan" onclick="event.stopPropagation();window._app.switchRole('yayasan')"><div class="ud-ic" style="background:var(--tl2)">🏛️</div>Ketua Yayasan</div>
         <div class="ud-hr"></div>
-        <div class="ud-item" onclick="window._app.syncNow()">
+        <div class="ud-item" onclick="event.stopPropagation();window._app.syncNow()">
           <div class="ud-ic" style="background:var(--bl2)">🔄</div>Sinkronisasi
           <span id="sync-dot" style="margin-left:auto;color:var(--gn)">●</span>
         </div>
-        <div class="ud-item" onclick="window._app.toggleDark()">
+        <div class="ud-item" onclick="event.stopPropagation();window._app.toggleDark()">
           <div class="ud-ic" style="background:#1e293b">🌙</div>
           <span id="dm-lbl">Mode Gelap</span>
         </div>
-        <div class="ud-item red" id="udi-out" onclick="window._app.doLogout()" style="display:none">
+        <div class="ud-item red" id="udi-out" onclick="event.stopPropagation();window._app.doLogout()" style="display:none">
           <div class="ud-ic" style="background:var(--rd2)">🚪</div>Keluar
         </div>
       </div>
@@ -699,10 +722,12 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
     </div>
   </div>
 
-  <div class="card-head" style="margin-bottom:0;border-radius:14px 14px 0 0;border:1px solid var(--bdr);background:var(--card)">⏱ Absensi Terbaru</div>
-  <div class="card" id="list-recent">
+  <div class="card" id="list-recent-wrap">
+  <div class="card-head">⏱ Absensi Terbaru</div>
+  <div id="list-recent">
     <div class="empty"><div class="ei">📋</div><p>Belum ada absensi hari ini</p></div>
   </div>
+</div>
 </div>
 
 <!-- ─── TAB: SCAN QR ─── -->
@@ -1046,7 +1071,7 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
       <span style="font-size:12px;font-weight:600" id="fb-st">Memeriksa koneksi...</span>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:8px">
-      <button class="btn btn-s" onclick="window._app.syncNow()"      style="flex:1">🔄 Sinkronisasi</button>
+      <button class="btn btn-s" onclick="event.stopPropagation();window._app.syncNow()"      style="flex:1">🔄 Sinkronisasi</button>
       <button class="btn btn-d" onclick="window._app.resetHariIni()" style="flex:1">🗑 Reset Hari Ini</button>
     </div>
     <button class="btn btn-s" onclick="window._app.eksporBackup()" style="width:100%">📦 Export Backup JSON</button>
@@ -1417,8 +1442,8 @@ function updateAbsenBtns() {
 
   if (bM) bM.className = 'ab-btn ' + (canM ? 'ab-masuk' : 'ab-off');
   if (bP) bP.className = 'ab-btn ' + (canP ? 'ab-pulang' : 'ab-off');
-  if (iM) iM.textContent = lib ? 'Hari Libur' : canM ? 'Aktif sekarang' : `${JAM.mulai}–${JAM.maxmasuk}`;
-  if (iP) iP.textContent = lib ? 'Hari Libur' : canP ? 'Aktif sekarang' : `${JAM.pulang}–${JAM.maxpulang}`;
+  if (iM) iM.textContent = lib ? '🏖️ Hari Libur' : canM ? '✅ Aktif sekarang' : `⏰ ${JAM.mulai}–${JAM.maxmasuk}`;
+  if (iP) iP.textContent = lib ? '🏖️ Hari Libur' : canP ? '✅ Aktif sekarang' : `⏰ ${JAM.pulang}–${JAM.maxpulang}`;
 }
 
 // ── DARK MODE ─────────────────────────────
@@ -2154,7 +2179,15 @@ function loadStats() {
 
   [['s-tot',total],['s-hdr',hadir],['s-tlt',tlmbt],
    ['s-izn',izn],['s-alph',alpha],['s-alp',belum]].forEach(([id,v]) => {
-    const el = $(id); if (el) el.textContent = v;
+    const el = $(id);
+    if (el && el.textContent !== String(v)) {
+      el.textContent = v;
+      // Pulse animation saat nilai berubah
+      el.classList.remove('pulse');
+      void el.offsetWidth; // trigger reflow
+      el.classList.add('pulse');
+      setTimeout(() => el.classList.remove('pulse'), 400);
+    }
   });
 
   const pctEl = $('pct'), pbarEl = $('pbar');
@@ -2171,7 +2204,11 @@ function renderRecent() {
   const items = Object.values(state.absensiData)
     .sort((a, b) => b.createdAt - a.createdAt).slice(0, 10);
   if (!items.length) {
-    c.innerHTML = '<div class="empty"><div class="ei">📋</div><p>Belum ada absensi hari ini</p></div>';
+    c.innerHTML = `<div class="empty">
+      <div class="ei">📋</div>
+      <p style="font-size:13px;font-weight:600;margin-bottom:4px">Belum ada absensi</p>
+      <p style="font-size:11px">Absensi hari ini belum ada.<br>Scan QR atau input manual untuk mulai.</p>
+    </div>`;
     return;
   }
   c.innerHTML = items.map(d => `
