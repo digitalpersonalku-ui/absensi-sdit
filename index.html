@@ -218,11 +218,12 @@ body {
 #ayat-banner {
   background: var(--grad-tl);
   border-radius: var(--r);
-  padding: 20px 24px;
+  padding: 22px 28px 18px;
   color: #fff;
   margin-bottom: 12px;
   position: relative;
   overflow: hidden;
+  min-height: 110px;
 }
 #ayat-banner::after {
   content: '';
@@ -230,7 +231,18 @@ body {
   width: 90px; height: 90px; border-radius: 50%;
   background: rgba(255,255,255,.07);
 }
-.ayat-arabic { font-size: 22px; margin-bottom: 8px; text-align: right; line-height: 2.2; font-family: 'Noto Naskh Arabic',Georgia,serif; direction: rtl; unicode-bidi: embed; font-weight: 600; letter-spacing: .5px; }
+.ayat-arabic {
+  font-size: 24px;
+  margin-bottom: 10px;
+  text-align: right;
+  line-height: 2.4;
+  font-family: 'Noto Naskh Arabic', 'Arabic Typesetting', 'Traditional Arabic', Arial Unicode MS, serif;
+  direction: rtl;
+  unicode-bidi: bidi-override;
+  font-weight: 700;
+  letter-spacing: 0;
+  word-spacing: 4px;
+}
 .ayat-trans  { font-size: 13px; opacity: .92; line-height: 1.6; font-weight: 500; }
 .ayat-src    { font-size: 11px; opacity: .72; margin-top: 6px; }
 
@@ -250,18 +262,18 @@ body {
   background: linear-gradient(90deg, var(--tl), var(--or), var(--bl));
 }
 #jb-head   { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; margin-bottom: 10px; }
-#jb-txt    { font-size: 10px; font-weight: 600; color: var(--or); background: var(--or2); padding: 3px 10px; border-radius: 20px; }
+#jb-txt    { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; border: 1px solid currentColor; }
 #jb-track  { height: 7px; background: var(--bg); border-radius: 4px; position: relative; }
-#jb-fill   { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--tl), var(--or)); transition: width .5s; }
+#jb-fill   { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--tl) 0%, var(--or) 60%, var(--rd) 100%); transition: width .6s cubic-bezier(.4,0,.2,1); }
 #jb-ptr    { position: absolute; top: -5px; width: 17px; height: 17px; background: var(--card); border: 2.5px solid var(--or); border-radius: 50%; transform: translateX(-50%); box-shadow: 0 0 0 3px rgba(255,107,53,.2), 0 2px 8px rgba(0,0,0,.15); transition: left .5s; }
 #jb-lbl    { display: flex; justify-content: space-between; font-size: 9px; color: var(--tx3); margin-top: 6px; }
 
 /* ── STATS GRID ───────────────────────────────────────────── */
 #sgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
 .sc    { background: var(--card); border-radius: var(--r2); padding: 14px; box-shadow: var(--sh); border: 1px solid var(--bdr); border-left: 3.5px solid transparent; transition: transform .2s; }
-.sc:hover { transform: translateY(-1px); }
+.sc:hover { transform: translateY(-2px); box-shadow: var(--sh2); }
 .sc-lbl { font-size: 9px; color: var(--tx2); font-weight: 700; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
-.sc-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 900; line-height: 1; }
+.sc-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 34px; font-weight: 900; line-height: 1; }
 
 /* ── ABSEN BUTTONS ────────────────────────────────────────── */
 #absen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
@@ -277,7 +289,12 @@ body {
 .ab-ic  { width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
 .ab-tx  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 800; color: #fff; display: block; margin-bottom: 4px; }
 .ab-sc  { font-size: 10px; color: rgba(255,255,255,.8); display: block; }
-.ab-masuk  { background: var(--grad-tl); box-shadow: 0 6px 20px rgba(10,186,181,.35); }
+.ab-masuk  { background: var(--grad-tl); box-shadow: 0 8px 24px rgba(10,186,181,.45); }
+.ab-masuk.active-pulse { animation: activePulse 2s ease infinite; }
+@keyframes activePulse {
+  0%,100% { box-shadow: 0 8px 24px rgba(10,186,181,.45); }
+  50%      { box-shadow: 0 8px 32px rgba(10,186,181,.7), 0 0 0 8px rgba(10,186,181,.1); }
+}
 .ab-pulang { background: var(--grad-bl); box-shadow: 0 6px 20px rgba(25,118,210,.35); }
 .ab-off    { background: var(--bg); border: 2px dashed var(--bdr2); cursor: not-allowed; min-height: 88px; }
 .ab-off .ab-tx { color: var(--tx2); font-size: 12px; }
@@ -295,7 +312,7 @@ body {
 
 /* ── PROGRESS BAR ─────────────────────────────────────────── */
 .pbar  { height: 6px; border-radius: 3px; background: var(--bg2); margin-top: 6px; overflow: hidden; }
-.pfill { height: 100%; border-radius: 3px; transition: width .6s; }
+.pfill { height: 100%; border-radius: 3px; transition: width .8s cubic-bezier(.4,0,.2,1), background .5s; }
 
 /* ── LIST ITEM ────────────────────────────────────────────── */
 .litem { display: flex; align-items: center; gap: 11px; padding: 12px 14px; border-bottom: 1px solid var(--bdr); transition: background .15s; }
@@ -568,7 +585,7 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
   #content  { max-width: 1100px; padding: 20px 24px 76px; margin: 0 auto; }
   #tab-dash {
     display: grid;
-    grid-template-columns: minmax(0,420px) minmax(0,1fr);
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
     gap: 16px;
     align-items: start;
   }
@@ -586,7 +603,7 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 /* 1200px+: layout lebih luas */
 @media (min-width: 1200px) {
   #content  { max-width: 1280px; }
-  #tab-dash { grid-template-columns: minmax(0,460px) minmax(0,1fr); }
+  #tab-dash { grid-template-columns: minmax(0,1.05fr) minmax(0,1fr); }
   #sgrid    { grid-template-columns: repeat(3, 1fr); }
 }
 
@@ -603,9 +620,10 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
   .sc     { padding: 16px 14px; }
   
   /* Absen tombol lebih proporsional */
-  .ab-tx  { font-size: 15px; }
-  .ab-sc  { font-size: 11px; }
-  .ab-ic  { width: 54px; height: 54px; font-size: 28px; }
+  .ab-tx  { font-size: 16px; }
+  .ab-sc  { font-size: 12px; }
+  .ab-ic  { width: 56px; height: 56px; font-size: 30px; }
+  .ab-btn { min-height: 100px; }
   
   /* Kehadiran card lebih tebal */
   #keh-card .cp { padding: 16px 18px; }
@@ -670,7 +688,7 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
       <div id="tb-sub">Sistem Absensi Digital</div>
     </div>
   </div>
-  <div id="tb-right">
+  <div id="tb-right" style="display:flex;align-items:center;gap:12px">
     <div>
       <div id="tb-jam">--:--</div>
       <div id="tb-tgl">--</div>
@@ -720,6 +738,8 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 <!-- ─── TAB: DASHBOARD ─── -->
 <div class="tab on" id="tab-dash">
   <div id="ayat-banner">
+    <div style="position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:80px;opacity:.06;pointer-events:none;line-height:1">☽</div>
+    <div style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:40px;opacity:.08;pointer-events:none">✦</div>
     <div class="ayat-arabic">اطْلُبُوا الْعِلْمَ مِنَ الْمَهْدِ إِلَى اللَّحْدِ</div>
     <div class="ayat-trans">Tuntutlah ilmu dari buaian hingga liang lahat</div>
     <div class="ayat-src">Hadits Nabi Muhammad SAW · Sabtu/Minggu tampilkan jadwal</div>
@@ -1464,16 +1484,19 @@ function updateJamBar() {
   if (fill) fill.style.width = pct + '%';
   if (ptr)  ptr.style.left  = pct + '%';
 
-  let status = '';
-  if      (now < toMin(JAM.mulai))    status = '⏳ Belum waktunya';
-  else if (now <= toMin(JAM.batas))   status = '🟢 Tepat waktu';
-  else if (now <= toMin(JAM.maxmasuk))status = '⚠️ Masa terlambat';
-  else if (now < toMin(JAM.pulang))   status = '☕ Jam mengajar';
-  else if (now <= toMin(JAM.maxpulang))status = '🟣 Waktu pulang';
-  else                                 status = '🏁 Selesai';
+  let label = '', bg = '', clr = '', bdr = '';
+  if      (now < toMin(JAM.mulai))     { label = '⏳ Belum waktunya';  bg='var(--bg2)';  clr='var(--tx3)';  bdr='var(--bdr)'; }
+  else if (now <= toMin(JAM.batas))    { label = '🟢 Tepat Waktu';    bg='var(--tl2)';  clr='var(--tl3)';  bdr='var(--tl)'; }
+  else if (now <= toMin(JAM.maxmasuk)) { label = '⚠️ Terlambat';      bg='var(--yl2)';  clr='var(--yl3)';  bdr='var(--yl)'; }
+  else if (now < toMin(JAM.pulang))    { label = '☕ Jam Mengajar';   bg='var(--bl2)';  clr='var(--bl3)';  bdr='var(--bl)'; }
+  else if (now <= toMin(JAM.maxpulang)){ label = '🟣 Waktu Pulang';   bg='#eee9ff';     clr='#6C47FF';     bdr='#6C47FF'; }
+  else                                  { label = '🏁 Selesai';        bg='var(--bg2)';  clr='var(--tx3)';  bdr='var(--bdr)'; }
 
   const txt = $('jb-txt');
-  if (txt) txt.textContent = status;
+  if (txt) {
+    txt.textContent = label;
+    txt.style.cssText = `background:${bg};color:${clr};border:1px solid ${bdr};padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700`;
+  }
 
   updateAbsenBtns();
 }
@@ -1491,7 +1514,7 @@ function updateAbsenBtns() {
   const bM = $('btn-masuk'), bP = $('btn-pulang');
   const iM = $('info-masuk'), iP = $('info-pulang');
 
-  if (bM) bM.className = 'ab-btn ' + (canM ? 'ab-masuk' : 'ab-off');
+  if (bM) bM.className = 'ab-btn ' + (canM ? 'ab-masuk active-pulse' : 'ab-off');
   if (bP) bP.className = 'ab-btn ' + (canP ? 'ab-pulang' : 'ab-off');
   // Hitung berapa menit lagi
   const minsToM = toMin(JAM.mulai) - now;
@@ -2281,8 +2304,8 @@ function renderRecent() {
         <div class="lsb">${esc(d.mapel || '')} · ${esc(d.tipe)}</div>
       </div>
       <div class="lrt">
-        <div class="ltm">${d.waktu || '-'}</div>
-        <span class="bdg ${statusBadge(d.status)}">${esc(d.status)}</span>
+        <div class="ltm" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800">${d.waktu || '-'}</div>
+        <span class="bdg ${statusBadge(d.status)}" style="margin-top:3px">${statusIcon(d.status)} ${esc(d.status)}</span>
       </div>
     </div>`).join('');
 }
