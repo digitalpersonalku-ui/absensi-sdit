@@ -206,7 +206,7 @@ body {
 /* ── CONTENT & TABS ───────────────────────────────────────── */
 #content  { padding: 14px 14px 76px; max-width: 680px; margin: 0 auto; }
 .tab      { display: none; }
-.tab.on   { display: block; }
+
 
 /* ── CARDS ────────────────────────────────────────────────── */
 .card  { background: var(--card); border-radius: var(--r); box-shadow: var(--sh); border: 1px solid var(--bdr); overflow: hidden; margin-bottom: 12px; }
@@ -583,8 +583,8 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 /* 900px+: dashboard 2 kolom */
 @media (min-width: 900px) {
   #content  { max-width: 1100px; padding: 20px 24px 76px; margin: 0 auto; }
-  #tab-dash {
-    display: grid;
+  #tab-dash.on {
+    display: grid !important;
     grid-template-columns: minmax(0,1fr) minmax(0,1fr);
     gap: 16px;
     align-items: start;
@@ -603,7 +603,7 @@ tbody tr:hover { background: rgba(255,107,53,.03); }
 /* 1200px+: layout lebih luas */
 @media (min-width: 1200px) {
   #content  { max-width: 1280px; }
-  #tab-dash { grid-template-columns: minmax(0,1.05fr) minmax(0,1fr); }
+  #tab-dash.on { grid-template-columns: minmax(0,1.05fr) minmax(0,1fr); }
   #sgrid    { grid-template-columns: repeat(3, 1fr); }
 }
 
