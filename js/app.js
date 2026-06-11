@@ -2147,12 +2147,33 @@ function simpanIdentitas() {
   if (!checkRole(['admin'])) return;
   const nama = san($('s-nama').value);
   if (!nama) { toast('Nama sekolah wajib diisi', 'warn'); return; }
+
+  // Logo TIDAK boleh pakai san() karena:
+  // 1. san() memotong string ke 300 karakter → base64 terpotong
+  // 2. base64 tidak mengandung karakter berbahaya (<>"'`)
+  const logoVal = $('s-logo')?.value || '';
+  // Validasi: hanya izinkan data:, http:/https:, emoji, atau kosong
+  const logoSafe = logoVal.startsWith('data:image/')
+    ? logoVal                           // base64 image — simpan langsung
+    : logoVal.startsWith('http')
+      ? esc(logoVal)                    // URL external — escape XSS
+      : san(logoVal).slice(0, 20);      // emoji/teks — batasi pendek
+
   DB.ref('identitas').update({
     nama,
-    tagline: san($('s-tag').value),
-    logo:    san($('s-logo').value),
-  }).then(() => toast('✅ Identitas disimpan', 'ok'))
-    .catch(() => toast('❌ Gagal menyimpan', 'err'));
+    tagline: san($('s-tag').value).slice(0, 100),
+    logo:    logoSafe,
+  }).then(() => {
+    toast('✅ Identitas berhasil disimpan', 'ok');
+    // Apply langsung tanpa perlu reload
+    state.identitasData.logo = logoSafe;
+    state.identitasData.nama = nama;
+    state.identitasData.tagline = san($('s-tag').value).slice(0, 100);
+    applyIdentitas();
+  }).catch(e => {
+    console.error('Simpan identitas gagal:', e);
+    toast('❌ Gagal menyimpan: ' + e.message, 'err');
+  });
 }
 
 // ── Konfigurasi Jam ───────────────────────
