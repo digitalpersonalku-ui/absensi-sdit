@@ -350,19 +350,21 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
   #tab-dash.on{
     display:grid!important;
     grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    grid-template-rows:auto auto auto auto;
     gap:14px;
     align-items:start;
   }
-  /* Baris 1 & 2: full width */
-  #ayat-banner    {grid-column:1/-1;grid-row:1}
-  #jambar         {grid-column:1/-1;grid-row:2}
-  /* Baris 3: kiri=absen, kanan=terbaru */
-  #absen-grid     {grid-column:1;grid-row:3}
-  #list-recent-wrap{grid-column:2;grid-row:3 / span 2}
-  /* Baris 4: kiri=kehadiran, kanan=stats */
-  #keh-card       {grid-column:1;grid-row:4}
-  #sgrid          {grid-column:2;grid-row:5;grid-template-columns:repeat(3,1fr)}
+  /* Baris 1: Ayat (full width) */
+  #ayat-banner     {grid-column:1/-1;grid-row:1}
+  /* Baris 2: Jam Bar (full width) */
+  #jambar          {grid-column:1/-1;grid-row:2}
+  /* Baris 3: Tombol Absen (full width) */
+  #absen-grid      {grid-column:1/-1;grid-row:3}
+  /* Baris 4 kiri: Kehadiran */
+  #keh-card        {grid-column:1;grid-row:4}
+  /* Baris 5 kiri: 6 Stat Cards */
+  #sgrid           {grid-column:1;grid-row:5;grid-template-columns:repeat(3,1fr)}
+  /* Baris 4-5 kanan: Absensi Terbaru (span 2 baris) */
+  #list-recent-wrap{grid-column:2;grid-row:4 / span 2}
 
   /* ── Ukuran elemen ── */
   .sc-num  {font-size:32px}
@@ -370,6 +372,8 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
   .sc-lbl  {font-size:10px}
   .ab-tx   {font-size:15px}
   .ab-sc   {font-size:12px}
+  /* Absen grid full width → 2 kolom horizontal di desktop */
+  #absen-grid{grid-template-columns:1fr 1fr;gap:14px}
   .ab-ic   {width:54px;height:54px;font-size:26px;border-radius:14px}
   .ab-btn  {min-height:106px;padding:20px 18px;gap:14px}
   #pct     {font-size:22px!important}
@@ -472,7 +476,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 <!-- ─── TAB: DASHBOARD ─── -->
 <div class="tab on" id="tab-dash">
 
-  <!-- Baris 1: Ayat (full width) -->
+  <!-- Baris 1: Ayat Hadits (full width) -->
   <div id="ayat-banner">
     <div class="ayat-arabic">اطْلُبُوا الْعِلْمَ مِنَ الْمَهْدِ إِلَى اللَّحْدِ</div>
     <div class="ayat-trans">Tuntutlah ilmu dari buaian hingga liang lahat</div>
@@ -496,7 +500,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
     </div>
   </div>
 
-  <!-- Baris 3 Kiri: Tombol Absen -->
+  <!-- Baris 3: Tombol Absen (full width) -->
   <div id="absen-grid">
     <button class="ab-btn ab-off" id="btn-masuk" onclick="window._app.bukaAbsen('masuk')">
       <div class="ab-ic">🟢</div>
@@ -530,19 +534,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
     </div>
   </div>
 
-  <!-- Baris 3-4 Kanan: Absensi Terbaru -->
-  <div class="card" id="list-recent-wrap">
-    <div class="card-head">⏱ Absensi Terbaru</div>
-    <div id="list-recent">
-      <div class="empty">
-        <div class="ei">📋</div>
-        <p style="font-size:13px;font-weight:600;margin-bottom:4px">Belum ada absensi</p>
-        <p style="font-size:11px;color:var(--tx3)">Absensi hari ini belum ada.<br>Scan QR atau input manual untuk mulai.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Baris 5 Kanan: Stat Cards -->
+  <!-- Baris 5 Kiri: 6 Stat Cards 3x2 -->
   <div id="sgrid">
     <div class="sc" style="border-left-color:var(--or)">
       <div class="sc-lbl">Total Guru</div>
@@ -567,6 +559,18 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
     <div class="sc" style="border-left-color:var(--tx3)">
       <div class="sc-lbl">Belum Absen</div>
       <div class="sc-num" id="s-alp" style="color:var(--tx2)">0</div>
+    </div>
+  </div>
+
+  <!-- Baris 4-5 Kanan: Absensi Terbaru (span 2 baris di desktop) -->
+  <div class="card" id="list-recent-wrap">
+    <div class="card-head">⏱ Absensi Terbaru</div>
+    <div id="list-recent">
+      <div class="empty">
+        <div class="ei">📋</div>
+        <p style="font-size:13px;font-weight:600;margin-bottom:4px">Belum ada absensi</p>
+        <p style="font-size:11px;color:var(--tx3)">Absensi hari ini belum ada.<br>Scan QR atau input manual untuk mulai.</p>
+      </div>
     </div>
   </div>
 
