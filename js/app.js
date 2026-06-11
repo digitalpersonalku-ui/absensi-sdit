@@ -2072,16 +2072,20 @@ function applyIdentitas() {
     if (s) s.value = d.tagline;
   }
   if (d.logo) {
+    // Topbar logo — data: tidak boleh di-esc() (rusak base64)
     const el = $('tb-logo');
     if (el) {
-      el.innerHTML = d.logo.startsWith('http') || d.logo.startsWith('data:')
-        ? `<img src="${esc(d.logo)}" style="width:28px;height:28px;border-radius:7px;object-fit:cover">`
-        : `<span style="font-size:17px">${d.logo}</span>`;
+      if (d.logo.startsWith('data:') || d.logo.startsWith('http')) {
+        const safeUrl = d.logo.startsWith('data:') ? d.logo : esc(d.logo);
+        el.innerHTML = `<img src="${safeUrl}"
+          style="width:30px;height:30px;border-radius:9px;object-fit:cover"
+          onerror="if(this.parentElement){this.parentElement.innerHTML='🕌'}">`;
+      } else {
+        el.innerHTML = `<span style="font-size:18px">${san(d.logo)}</span>`;
+      }
     }
     const s = $('s-logo');
     if (s) s.value = d.logo;
-    _setLogoPreview(d.logo);
-    // Update preview di setting
     _updateLogoPreview(d.logo);
   }
   if (d.warna) applyColor(d.warna);
@@ -2117,26 +2121,24 @@ function previewLogo(val) {
 function _updateLogoPreview(val) {
   const prev = $('logo-preview');
   if (!prev) return;
-  if (!val) {
-    prev.innerHTML = '🏫';
-    return;
-  }
+  if (!val) { prev.innerHTML = '🕌'; return; }
   if (val.startsWith('data:') || val.startsWith('http')) {
-    prev.innerHTML = `<img src="${esc(val)}"
+    const su = val.startsWith('data:') ? val : esc(val);
+    prev.innerHTML = `<img src="${su}"
       style="width:100%;height:100%;object-fit:cover;border-radius:14px"
-      onerror="this.parentElement.innerHTML='❌'">`; 
+      onerror="if(this.parentElement)this.parentElement.innerHTML='❌'">`;
   } else {
-    // Emoji atau teks
-    prev.innerHTML = `<span style="font-size:32px">${val}</span>`;
+    prev.innerHTML = `<span style="font-size:32px">${san(val)}</span>`;
   }
-  // Update topbar logo juga live
-  const tbLogo = $('tb-logo');
-  if (tbLogo) {
+  const tb = $('tb-logo');
+  if (tb) {
     if (val.startsWith('data:') || val.startsWith('http')) {
-      tbLogo.innerHTML = `<img src="${esc(val)}"
-        style="width:28px;height:28px;border-radius:7px;object-fit:cover">`;
+      const su2 = val.startsWith('data:') ? val : esc(val);
+      tb.innerHTML = `<img src="${su2}"
+        style="width:30px;height:30px;border-radius:9px;object-fit:cover"
+        onerror="if(this.parentElement)this.parentElement.innerHTML='🕌'">`;
     } else {
-      tbLogo.innerHTML = `<span style="font-size:17px">${val}</span>`;
+      tb.innerHTML = `<span style="font-size:18px">${san(val)}</span>`;
     }
   }
 }
@@ -2336,22 +2338,7 @@ function handleLogoFile(input) {
 }
 function previewLogo(val) { _setLogoPreview(val||''); }
 function _setLogoPreview(val) {
-  const p = $('logo-preview');
-  if (!p) return;
-  if (!val) { p.innerHTML='🏫'; return; }
-  if (val.startsWith('data:')||val.startsWith('http')) {
-    p.innerHTML=`<img src="${esc(val)}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.parentElement.innerHTML='❌'">`;
-  } else {
-    p.innerHTML=`<span style="font-size:28px">${val}</span>`;
-  }
-  // Live update topbar
-  const tb=$('tb-logo');
-  if (tb) {
-    if (val.startsWith('data:')||val.startsWith('http'))
-      tb.innerHTML=`<img src="${esc(val)}" style="width:28px;height:28px;border-radius:7px;object-fit:cover">`;
-    else
-      tb.innerHTML=`<span style="font-size:17px">${val}</span>`;
-  }
+  _updateLogoPreview(val);
 }
 
 window._app = {
