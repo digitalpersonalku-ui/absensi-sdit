@@ -406,7 +406,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 
 
 
-/* Absensi SDIT Qudwatun Hasanah - bundle.js */
+/* Absensi SDIT Qudwatun Hasanah v3 */
 "use strict";
 
 
@@ -2531,10 +2531,9 @@ function _updateLogoPreview(val) {
   if (!prev) return;
   if (!val) { prev.innerHTML = '🕌'; return; }
   if (val.startsWith('data:') || val.startsWith('http')) {
+    // data: URL TIDAK di-esc (akan merusak base64), http URL di-esc untuk XSS
     const su = val.startsWith('data:') ? val : esc(val);
-    prev.innerHTML = `<img src="${su}"
-      style="width:100%;height:100%;object-fit:cover;border-radius:14px"
-      onerror="if(this.parentElement)this.parentElement.innerHTML='❌'">`;
+    prev.innerHTML = `<img src="${su}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="if(this.parentElement)this.parentElement.innerHTML='❌'">`;
   } else {
     prev.innerHTML = `<span style="font-size:32px">${san(val)}</span>`;
   }
@@ -2542,9 +2541,7 @@ function _updateLogoPreview(val) {
   if (tb) {
     if (val.startsWith('data:') || val.startsWith('http')) {
       const su2 = val.startsWith('data:') ? val : esc(val);
-      tb.innerHTML = `<img src="${su2}"
-        style="width:30px;height:30px;border-radius:9px;object-fit:cover"
-        onerror="if(this.parentElement)this.parentElement.innerHTML='🕌'">`;
+      tb.innerHTML = `<img src="${su2}" style="width:30px;height:30px;border-radius:9px;object-fit:cover" onerror="if(this.parentElement)this.parentElement.innerHTML='🕌'">`;
     } else {
       tb.innerHTML = `<span style="font-size:18px">${san(val)}</span>`;
     }
@@ -3148,6 +3145,7 @@ if (document.readyState === 'loading') {
         <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadBulanan()">🔄</button>
         <button class="btn btn-s" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.eksporCSV()">CSV</button>
         <button class="btn btn-d" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.cetakPDF()">📄 PDF</button>
+        <button style="width:auto;padding:9px 12px;flex:none;background:#1D6F42;color:#fff;border:none;border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer" onclick="window._app.eksporExcelBulanan()">📊 Excel</button>
       </div>
     </div>
     <div class="card"><div class="tw"><table>
