@@ -406,7 +406,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 
 
 
-/* Absensi SDIT Qudwatun Hasanah v3 */
+/* Absensi SDIT Qudwatun Hasanah - bundle.js */
 "use strict";
 
 
@@ -2531,9 +2531,10 @@ function _updateLogoPreview(val) {
   if (!prev) return;
   if (!val) { prev.innerHTML = '🕌'; return; }
   if (val.startsWith('data:') || val.startsWith('http')) {
-    // data: URL TIDAK di-esc (akan merusak base64), http URL di-esc untuk XSS
     const su = val.startsWith('data:') ? val : esc(val);
-    prev.innerHTML = `<img src="${su}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="if(this.parentElement)this.parentElement.innerHTML='❌'">`;
+    prev.innerHTML = `<img src="${su}"
+      style="width:100%;height:100%;object-fit:cover;border-radius:14px"
+      onerror="if(this.parentElement)this.parentElement.innerHTML='❌'">`;
   } else {
     prev.innerHTML = `<span style="font-size:32px">${san(val)}</span>`;
   }
@@ -2541,7 +2542,9 @@ function _updateLogoPreview(val) {
   if (tb) {
     if (val.startsWith('data:') || val.startsWith('http')) {
       const su2 = val.startsWith('data:') ? val : esc(val);
-      tb.innerHTML = `<img src="${su2}" style="width:30px;height:30px;border-radius:9px;object-fit:cover" onerror="if(this.parentElement)this.parentElement.innerHTML='🕌'">`;
+      tb.innerHTML = `<img src="${su2}"
+        style="width:30px;height:30px;border-radius:9px;object-fit:cover"
+        onerror="if(this.parentElement)this.parentElement.innerHTML='🕌'">`;
     } else {
       tb.innerHTML = `<span style="font-size:18px">${san(val)}</span>`;
     }
@@ -2552,12 +2555,33 @@ function simpanIdentitas() {
   if (!checkRole(['admin'])) return;
   const nama = san($('s-nama').value);
   if (!nama) { toast('Nama sekolah wajib diisi', 'warn'); return; }
+
+  // Logo TIDAK boleh pakai san() karena:
+  // 1. san() memotong string ke 300 karakter → base64 terpotong
+  // 2. base64 tidak mengandung karakter berbahaya (<>"'`)
+  const logoVal = $('s-logo')?.value || '';
+  // Validasi: hanya izinkan data:, http:/https:, emoji, atau kosong
+  const logoSafe = logoVal.startsWith('data:image/')
+    ? logoVal                           // base64 image — simpan langsung
+    : logoVal.startsWith('http')
+      ? esc(logoVal)                    // URL external — escape XSS
+      : san(logoVal).slice(0, 20);      // emoji/teks — batasi pendek
+
   DB.ref('identitas').update({
     nama,
-    tagline: san($('s-tag').value),
-    logo:    san($('s-logo').value),
-  }).then(() => toast('✅ Identitas disimpan', 'ok'))
-    .catch(() => toast('❌ Gagal menyimpan', 'err'));
+    tagline: san($('s-tag').value).slice(0, 100),
+    logo:    logoSafe,
+  }).then(() => {
+    toast('✅ Identitas berhasil disimpan', 'ok');
+    // Apply langsung tanpa perlu reload
+    state.identitasData.logo = logoSafe;
+    state.identitasData.nama = nama;
+    state.identitasData.tagline = san($('s-tag').value).slice(0, 100);
+    applyIdentitas();
+  }).catch(e => {
+    console.error('Simpan identitas gagal:', e);
+    toast('❌ Gagal menyimpan: ' + e.message, 'err');
+  });
 }
 
 // ── Konfigurasi Jam ───────────────────────
