@@ -17,6 +17,7 @@
 
 <!-- CSS -->
 <style>
+
 /* ═══════════════════════════════════════════════════
    ABSENSI SDIT - CSS BERSIH (rebuild dari nol)
    Tidak ada duplikat, tidak ada konflik
@@ -390,6 +391,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
   .ab-ic{width:58px;height:58px;font-size:28px}
 }
 
+
 </style>
 
 <!-- Library eksternal (harus load sebelum module) -->
@@ -400,652 +402,11 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <!-- Entry point — type="module" aktifkan ES6 import/export -->
-
-</head>
-<body>
-
-<!-- ═══════════════════════════════════════
-     SESSION WARNING
-═══════════════════════════════════════ -->
-<div id="sess-warn">
-  ⚠️ Sesi berakhir dalam <span id="sess-cd">5</span> menit
-  <button onclick="window._app.renewSession()"
-    style="margin-left:8px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);
-           color:#fff;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer">
-    Perpanjang
-  </button>
-</div>
-
-<!-- ═══════════════════════════════════════
-     TOPBAR
-═══════════════════════════════════════ -->
-<div id="topbar">
-  <div id="tb-left">
-    <div id="tb-logo">🕌</div>
-    <div id="tb-texts">
-      <div id="tb-nama">SDIT Qudwatun Hasanah</div>
-      <div id="tb-sub">Sistem Absensi Digital</div>
-    </div>
-  </div>
-  <div id="tb-right">
-    <div>
-      <div id="tb-jam">--:--</div>
-      <div id="tb-tgl">--</div>
-    </div>
-    <div style="position:relative">
-      <div id="ud-btn" onclick="window._app.toggleUD(event)">
-        <div id="ud-av">👩‍🏫</div>
-        <span id="ud-nm">Guru</span>
-        <span id="ud-arr">▼</span>
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<!-- INFO BAR -->
-<!-- Dropdown: DI LUAR topbar -->
-<div id="ud-menu">
-        <div class="ud-head"><p>Masuk sebagai</p><b id="ud-role">Guru</b></div>
-        <div class="ud-sep">Ganti Akses</div>
-        <div class="ud-item" id="udi-guru"    onclick="event.stopPropagation();window._app.switchRole('guru')">   <div class="ud-ic" style="background:var(--gn2)">👩‍🏫</div>Guru</div>
-        <div class="ud-item" id="udi-admin"   onclick="event.stopPropagation();window._app.switchRole('admin')">  <div class="ud-ic" style="background:var(--or2)">👨‍💼</div>Admin</div>
-        <div class="ud-item" id="udi-kepsek"  onclick="event.stopPropagation();window._app.switchRole('kepsek')"> <div class="ud-ic" style="background:var(--pu2)">🏫</div>Kepala Sekolah</div>
-        <div class="ud-item" id="udi-yayasan" onclick="event.stopPropagation();window._app.switchRole('yayasan')"><div class="ud-ic" style="background:var(--tl2)">🏛️</div>Ketua Yayasan</div>
-        <div class="ud-hr"></div>
-        <div class="ud-item" onclick="event.stopPropagation();window._app.syncNow()">
-          <div class="ud-ic" style="background:var(--bl2)">🔄</div>Sinkronisasi
-          <span id="sync-dot" style="margin-left:auto;color:var(--gn)">●</span>
-        </div>
-        <div class="ud-item" onclick="event.stopPropagation();window._app.toggleDark()">
-          <div class="ud-ic" style="background:#1e293b">🌙</div>
-          <span id="dm-lbl">Mode Gelap</span>
-        </div>
-        <div class="ud-item red" id="udi-out" onclick="event.stopPropagation();window._app.doLogout()" style="display:none">
-          <div class="ud-ic" style="background:var(--rd2)">🚪</div>Keluar
-        </div>
-      </div>
-
-<div id="info-bar"></div>
-
-<!-- ═══════════════════════════════════════
-     KONTEN UTAMA
-═══════════════════════════════════════ -->
-<div id="content">
-
-<!-- ─── TAB: DASHBOARD ─── -->
-<div class="tab on" id="tab-dash">
-
-  <!-- Baris 1: Ayat Hadits (full width) -->
-  <div id="ayat-banner">
-    <div class="ayat-arabic">اطْلُبُوا الْعِلْمَ مِنَ الْمَهْدِ إِلَى اللَّحْدِ</div>
-    <div class="ayat-trans">Tuntutlah ilmu dari buaian hingga liang lahat</div>
-    <div class="ayat-src">Hadits Nabi Muhammad SAW</div>
-  </div>
-
-  <!-- Baris 2: Jam Bar (full width) -->
-  <div id="jambar">
-    <div id="jb-head">
-      <span style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600">
-        ⏰ Status Waktu Absen
-      </span>
-      <span id="jb-txt"></span>
-    </div>
-    <div id="jb-track">
-      <div id="jb-fill" style="width:0"></div>
-      <div id="jb-ptr"  style="left:0"></div>
-    </div>
-    <div id="jb-lbl">
-      <span>06:30</span><span>08:00</span><span>11:00</span><span>14:00</span><span>15:30</span>
-    </div>
-  </div>
-
-  <!-- Baris 3: Tombol Absen (full width) -->
-  <div id="absen-grid">
-    <button class="ab-btn ab-off" id="btn-masuk" onclick="window._app.bukaAbsen('masuk')">
-      <div class="ab-ic">🟢</div>
-      <div>
-        <span class="ab-tx">Absen Masuk</span>
-        <span class="ab-sc" id="info-masuk">06:30 – 11:00</span>
-      </div>
-    </button>
-    <button class="ab-btn ab-off" id="btn-pulang" onclick="window._app.bukaAbsen('pulang')">
-      <div class="ab-ic">🟣</div>
-      <div>
-        <span class="ab-tx">Absen Pulang</span>
-        <span class="ab-sc" id="info-pulang">14:00 – 15:30</span>
-      </div>
-    </button>
-  </div>
-
-  <!-- Baris 4 Kiri: Kehadiran -->
-  <div class="card cp" id="keh-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <span style="font-size:13px;font-weight:700">📊 Kehadiran Hari Ini</span>
-      <span id="pct" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:900;color:var(--gn)">0%</span>
-    </div>
-    <div class="pbar" style="height:8px">
-      <div class="pfill" id="pbar" style="width:0;background:var(--gn)"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:6px">
-      <span>0%</span>
-      <span style="color:var(--or);font-weight:700">🎯 Target ≥ 95%</span>
-      <span>100%</span>
-    </div>
-  </div>
-
-  <!-- Baris 5 Kiri: 6 Stat Cards 3x2 -->
-  <div id="sgrid">
-    <div class="sc" style="border-left-color:var(--or)">
-      <div class="sc-lbl">Total Guru</div>
-      <div class="sc-num" id="s-tot" style="color:var(--or)">0</div>
-    </div>
-    <div class="sc" style="border-left-color:var(--gn)">
-      <div class="sc-lbl">Hadir</div>
-      <div class="sc-num" id="s-hdr" style="color:var(--gn)">0</div>
-    </div>
-    <div class="sc" style="border-left-color:var(--yl)">
-      <div class="sc-lbl">Terlambat</div>
-      <div class="sc-num" id="s-tlt" style="color:var(--yl)">0</div>
-    </div>
-    <div class="sc" style="border-left-color:var(--bl)">
-      <div class="sc-lbl">Izin/Sakit</div>
-      <div class="sc-num" id="s-izn" style="color:var(--bl)">0</div>
-    </div>
-    <div class="sc" style="border-left-color:var(--rd)">
-      <div class="sc-lbl">Alpha</div>
-      <div class="sc-num" id="s-alph" style="color:var(--rd)">0</div>
-    </div>
-    <div class="sc" style="border-left-color:var(--tx3)">
-      <div class="sc-lbl">Belum Absen</div>
-      <div class="sc-num" id="s-alp" style="color:var(--tx2)">0</div>
-    </div>
-  </div>
-
-  <!-- Baris 4-5 Kanan: Absensi Terbaru (span 2 baris di desktop) -->
-  <div class="card" id="list-recent-wrap">
-    <div class="card-head">⏱ Absensi Terbaru</div>
-    <div id="list-recent">
-      <div class="empty">
-        <div class="ei">📋</div>
-        <p style="font-size:13px;font-weight:600;margin-bottom:4px">Belum ada absensi</p>
-        <p style="font-size:11px;color:var(--tx3)">Absensi hari ini belum ada.<br>Scan QR atau input manual untuk mulai.</p>
-      </div>
-    </div>
-  </div>
-
-</div>
-<!-- ─── TAB: SCAN QR ─── -->
-<div class="tab" id="tab-scan">
-  <div style="max-width:440px;margin:0 auto">
-    <div class="card">
-      <div class="sc-hdr">
-        <h2 id="scan-ttl">📷 Scan QR Code</h2>
-        <p  id="scan-sub">Pilih absen di dashboard</p>
-      </div>
-      <div id="qr-reader"></div>
-      <div id="scan-res" style="display:none;padding:10px 14px;border-top:1px solid var(--bdr)"></div>
-    </div>
-    <div class="card cp" style="font-size:11px;color:var(--tx2);line-height:2">
-      ✅ <b>Masuk:</b> 06:30–11:00 &nbsp;|&nbsp; ⚠️ <b>Terlambat</b> &gt; 08:01<br>
-      🟣 <b>Pulang:</b> 14:00–15:30 &nbsp;|&nbsp; 📅 <b>Sabtu/Minggu:</b> Libur
-    </div>
-  </div>
-</div>
-
-<!-- ─── TAB: MANUAL ─── -->
-<div class="tab" id="tab-manual">
-  <div class="card cp">
-    <div class="ct">✏️ Input Absensi Manual</div>
-    <div class="alert a-info" id="info-admin"><span>ℹ️</span><span>Input Izin, Sakit, Alpha dan koreksi data absensi.</span></div>
-    <div class="alert a-ok"   id="info-guru"  style="display:none"><span>📝</span><span>Input Masuk, Pulang, Izin, atau Sakit. Keterangan wajib untuk Izin/Sakit.</span></div>
-    <div class="alert a-err"  id="info-yay" style="display:none"><span>🚫</span><span>Ketua Yayasan tidak dapat mengisi absensi.</span></div>
-    <div id="frm-manual">
-      <div class="fg">
-        <label class="fl">Pilih Guru</label>
-        <select class="fc" id="mg-guru" onchange="window._app.onGuruPilih()">
-          <option value="">-- Pilih Guru --</option>
-        </select>
-        <div id="guru-status-info"
-          style="display:none;margin-top:6px;padding:7px 10px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--tx2)">
-        </div>
-      </div>
-      <div class="fg">
-        <label class="fl">Jenis Absensi</label>
-        <select class="fc" id="mg-tipe" onchange="window._app.onTipeChange()">
-          <option value="masuk">🟢 Absen Masuk</option>
-          <option value="pulang">🟣 Absen Pulang</option>
-          <option value="izin">📝 Izin</option>
-          <option value="sakit">🏥 Sakit</option>
-          <option value="alpha">❌ Alpha</option>
-        </select>
-      </div>
-      <div class="fg" id="wrap-status">
-        <label class="fl">Status</label>
-        <select class="fc" id="mg-status">
-          <option value="hadir">Hadir Tepat Waktu</option>
-          <option value="terlambat">Terlambat</option>
-        </select>
-      </div>
-      <div class="fg" id="wrap-ket" style="display:none">
-        <label class="fl" id="ket-lbl">Keterangan *</label>
-        <textarea class="fc" id="mg-ket" rows="2" placeholder="Isi keterangan..."></textarea>
-      </div>
-      <div class="fg">
-        <label class="fl">Tanggal</label>
-        <input type="date" class="fc" id="mg-tgl">
-      </div>
-      <div class="brow">
-        <button class="btn btn-s" onclick="window._app.resetManual()">Reset</button>
-        <button class="btn btn-p" onclick="window._app.simpanManual()">✅ Simpan</button>
-      </div>
-    </div>
-  </div>
-  <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px">
-    📋 Log Hari Ini
-  </div>
-  <div class="card" id="list-manual">
-    <div class="empty"><div class="ei">📋</div><p>Belum ada absensi</p></div>
-  </div>
-</div>
-
-<!-- ─── TAB: ID CARD ─── -->
-<div class="tab" id="tab-qr">
-  <div class="card cp" style="margin-bottom:12px">
-    <div class="ct">🔲 ID Card &amp; QR Absensi</div>
-    <div class="fg" style="margin-bottom:0">
-      <label class="fl">Pilih Guru</label>
-      <select class="fc" id="qr-sel" onchange="window._app.buatIDCard()">
-        <option value="">-- Pilih Guru --</option>
-      </select>
-    </div>
-  </div>
-  <div id="qr-disp" style="display:none;flex-direction:column;align-items:center;margin-top:4px">
-    <div class="idc" id="idcard-el">
-      <div class="idc-top">
-        <div class="idc-ti">
-          <div class="idc-logo" id="idc-logo">🏫</div>
-          <div class="idc-sn"  id="idc-sn">SDIT Qudwatun Hasanah</div>
-          <div class="idc-tag" id="idc-tag">Sistem Absensi Digital</div>
-        </div>
-      </div>
-      <div class="idc-body">
-        <div class="idc-fc"><div class="idc-foto" id="idc-foto">👤</div></div>
-        <div class="idc-inf">
-          <div class="idc-nm"  id="idc-nm">Nama Guru</div>
-          <div class="idc-jb">
-            <div class="idc-dot"></div>
-            <span class="idc-jbt" id="idc-jbt">Jabatan</span>
-          </div>
-          <div class="idc-div"></div>
-          <div class="idc-ql">Scan Absensi</div>
-          <div class="idc-qb" id="qr-out"></div>
-        </div>
-      </div>
-      <div class="idc-ft">
-        <span class="idc-ftt" id="idc-ft-sn">SDIT Qudwatun Hasanah</span>
-        <div class="idc-fd"></div>
-        <span class="idc-ftt">Kartu Absensi Guru</span>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:14px;width:100%;max-width:300px">
-      <button class="btn btn-p" onclick="window._app.cetakIDCard()" style="flex:1">🖨️ Cetak</button>
-      <button class="btn btn-s" onclick="window._app.unduhQR()"     style="flex:1">💾 Unduh QR</button>
-    </div>
-  </div>
-  <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin:14px 0 10px">
-    👥 Pilih Guru
-  </div>
-  <div class="ggrid" id="qr-grid"></div>
-</div>
-
-<!-- ─── TAB: REKAP ─── -->
-<div class="tab" id="tab-rekap">
-  <div class="ptabs">
-    <button class="ptab on" id="pt-harian"   onclick="window._app.setPeriod('harian',this)">📅 Harian</button>
-    <button class="ptab"    id="pt-bulanan"  onclick="window._app.setPeriod('bulanan',this)">📆 Bulanan</button>
-    <button class="ptab"    id="pt-semester" onclick="window._app.setPeriod('semester',this)">📚 Semester</button>
-    <button class="ptab"    id="pt-tahunan"  onclick="window._app.setPeriod('tahunan',this)" style="display:none">📊 Tahunan</button>
-  </div>
-  <div style="margin-bottom:10px">
-    <input type="text" class="fc" id="cari-rekap" placeholder="🔍 Cari nama guru..." oninput="window._app.filterRekap()">
-  </div>
-
-  <!-- HARIAN -->
-  <div id="r-harian">
-    <div class="card cp" style="padding-bottom:10px">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <input type="date" class="fc" id="r-tgl" style="flex:1;min-width:130px" onchange="window._app.loadHarian()">
-        <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadHarian()">🔄</button>
-        <button class="btn btn-s" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.eksporCSV()">CSV</button>
-                <button class="btn btn-d" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.cetakPDF()">📄 PDF</button>
-        <button class="btn"       style="width:auto;padding:9px 10px;flex:none;background:#1D6F42;color:#fff" onclick="window._app.eksporExcel()">📊 Excel</button>
-      </div>
-    </div>
-    <div class="card"><div class="tw"><table>
-      <thead><tr><th>#</th><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Ket</th></tr></thead>
-      <tbody id="tbl-h"></tbody>
-    </table></div></div>
-  </div>
-
-  <!-- BULANAN -->
-  <div id="r-bulanan" style="display:none">
-    <div class="card cp" style="padding-bottom:10px">
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select class="fc" id="r-bln" style="flex:1;min-width:110px">
-          <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
-          <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
-          <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
-          <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
-        </select>
-        <select class="fc" id="r-thn-b" style="flex:1;min-width:80px">
-          <option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option>
-        </select>
-        <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadBulanan()">🔄</button>
-        <button class="btn btn-s" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.eksporCSV()">CSV</button>
-        <button style="width:auto;padding:9px 12px;flex:none;background:#1D6F42;color:#fff;border:none;border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px" onclick="window._app.eksporExcelBulanan()">📊 Excel</button>
-        <button class="btn btn-d" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.cetakPDF()">📄 PDF</button>
-      </div>
-    </div>
-    <div class="card"><div class="tw"><table>
-      <thead><tr><th>#</th><th>Nama</th><th>Mapel</th><th>Hadir</th><th>Tlmbt</th><th>Izin</th><th>Sakit</th><th>Alpha</th><th>%</th></tr></thead>
-      <tbody id="tbl-b"></tbody>
-    </table></div></div>
-  </div>
-
-  <!-- SEMESTER -->
-  <div id="r-semester" style="display:none">
-    <div class="card cp" style="padding-bottom:10px">
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select class="fc" id="r-sem" style="flex:1">
-          <option value="1">Semester 1 (Jul–Des)</option><option value="2">Semester 2 (Jan–Jun)</option>
-        </select>
-        <select class="fc" id="r-thn-s" style="flex:1;min-width:80px">
-          <option value="2025">2025</option><option value="2026" selected>2026</option>
-        </select>
-        <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadSemester()">🔄</button>
-        <button class="btn btn-d" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.cetakPDF()">📄 PDF</button>
-      </div>
-    </div>
-    <div class="card"><div class="tw"><table>
-      <thead><tr><th>#</th><th>Nama</th><th>Mapel</th><th>Hadir</th><th>Tlmbt</th><th>Izin</th><th>Sakit</th><th>Alpha</th><th>%</th></tr></thead>
-      <tbody id="tbl-s"></tbody>
-    </table></div></div>
-  </div>
-
-  <!-- TAHUNAN -->
-  <div id="r-tahunan" style="display:none">
-    <div class="card cp" style="padding-bottom:10px">
-      <div style="display:flex;gap:8px">
-        <select class="fc" id="r-thn-t" style="flex:1">
-          <option value="2025">2025</option><option value="2026" selected>2026</option>
-        </select>
-        <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadTahunan()">🔄</button>
-        <button class="btn btn-s" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.eksporCSV()">CSV</button>
-      </div>
-    </div>
-    <div class="card"><div class="tw"><table>
-      <thead><tr><th>#</th><th>Nama</th><th>Mapel</th><th>Hadir</th><th>Tlmbt</th><th>Izin</th><th>Sakit</th><th>Alpha</th><th>%</th></tr></thead>
-      <tbody id="tbl-t"></tbody>
-    </table></div></div>
-  </div>
-</div>
-
-<!-- ─── TAB: GURU ─── -->
-<div class="tab" id="tab-guru">
-  <div style="display:flex;gap:8px;margin-bottom:10px">
-    <input type="text" class="fc" id="cari-guru" placeholder="🔍 Cari..." oninput="window._app.renderGuru()" style="flex:1">
-    <button class="btn btn-p" style="width:auto" id="btn-tambah" onclick="window._app.showFormGuru(null)">+ Tambah</button>
-  </div>
-  <div class="ggrid" id="guru-grid"></div>
-
-  <div id="form-guru" style="display:none">
-    <div class="card cp">
-      <div class="ct" id="fg-ttl">➕ Tambah Guru</div>
-      <div class="fpr">
-        <div class="fpv" id="foto-prev" onclick="document.getElementById('foto-input').click()">👤</div>
-        <div>
-          <input type="file" id="foto-input" accept="image/*" style="display:none"
-            onchange="window._app.handleFoto(this)">
-          <button class="btn btn-s" style="width:auto;font-size:11px"
-            onclick="document.getElementById('foto-input').click()">📷 Pilih Foto</button>
-          <div style="font-size:10px;color:var(--tx3);margin-top:4px">JPG/PNG maks 2MB</div>
-        </div>
-      </div>
-      <div class="fg"><label class="fl">Nama Lengkap *</label><input type="text" class="fc" id="g-nama" placeholder="Nama lengkap guru"></div>
-      <div class="fg"><label class="fl">Mata Pelajaran / Jabatan</label><input type="text" class="fc" id="g-mapel" placeholder="Contoh: Matematika"></div>
-      <div class="fg"><label class="fl">NIP / NIY</label><input type="text" class="fc" id="g-nip" placeholder="Opsional"></div>
-      <div class="fg"><label class="fl">Jenis Guru</label>
-        <select class="fc" id="g-jenis">
-          <option value="umum">Guru Umum</option>
-          <option value="quran">Guru Al Quran (07:00–08:10)</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Status</label>
-        <select class="fc" id="g-status">
-          <option value="aktif">Aktif</option>
-          <option value="nonaktif">Non-Aktif</option>
-        </select>
-      </div>
-      <input type="hidden" id="g-id">
-      <div class="brow">
-        <button class="btn btn-s" onclick="window._app.hideFormGuru()">Batal</button>
-        <button class="btn btn-p" onclick="window._app.simpanGuru()">💾 Simpan</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card cp" id="import-sec" style="display:none">
-    <div class="ct">📥 Import dari Google Sheets</div>
-    <div class="alert a-info" style="margin-bottom:10px">
-      <span>ℹ️</span><span>Format kolom: Nama | Mapel | NIP | Jenis (umum/quran)</span>
-    </div>
-    <div class="fg">
-      <label class="fl">URL Google Sheets (CSV export)</label>
-      <input type="text" class="fc" id="sheets-url" placeholder="https://docs.google.com/spreadsheets/...">
-    </div>
-    <button class="btn btn-t" onclick="window._app.importSheets()" style="width:100%">
-      <span id="imp-spin"></span>📊 Import Sekarang
-    </button>
-  </div>
-</div>
-
-<!-- ─── TAB: SETTING ─── -->
-<div class="tab" id="tab-setting">
-  <div class="card cp">
-    <div class="ct">🏫 Identitas Sekolah</div>
-    <div class="fg"><label class="fl">Nama Sekolah</label><input type="text" class="fc" id="s-nama" placeholder="Nama sekolah"></div>
-    <div class="fg"><label class="fl">Tagline / Motto</label><input type="text" class="fc" id="s-tag" placeholder="Tagline atau motto"></div>
-    <div class="fg">
-      <label class="fl">Logo Sekolah</label>
-      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:10px">
-        <!-- Preview -->
-        <div id="logo-preview" onclick="document.getElementById('logo-file-input').click()"
-          style="width:72px;height:72px;border-radius:16px;border:2px dashed var(--bdr2);
-                 display:flex;align-items:center;justify-content:center;font-size:28px;
-                 background:var(--bg);overflow:hidden;cursor:pointer;flex-shrink:0;transition:all .2s"
-          title="Klik untuk upload logo">🕌</div>
-        <!-- Controls -->
-        <div style="flex:1">
-          <input type="file" id="logo-file-input" accept="image/*" capture="environment"
-            style="display:none" onchange="window._app.handleLogoFile(this)">
-          <button type="button" class="btn btn-s" style="width:100%;margin-bottom:8px"
-            onclick="document.getElementById('logo-file-input').click()">
-            📷 Upload Foto / Gambar
-          </button>
-          <input type="text" class="fc" id="s-logo" placeholder="atau ketik URL gambar / emoji 🏫"
-            oninput="window._app.previewLogoText(this.value)"
-            style="font-size:12px">
-          <p style="font-size:10px;color:var(--tx3);margin-top:4px">JPG/PNG maks 2MB • atau URL • atau emoji</p>
-        </div>
-      </div>
-    </div>
-    <button class="btn btn-p" onclick="window._app.simpanIdentitas()" style="width:100%">💾 Simpan Identitas</button>
-  </div>
-  <div class="card cp">
-    <div class="ct">⏰ Konfigurasi Jam Absen</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fg"><label class="fl">Mulai Masuk</label>   <input type="time" class="fc" id="j-mulai" value="06:30"></div>
-      <div class="fg"><label class="fl">Batas Tepat</label>   <input type="time" class="fc" id="j-batas" value="08:00"></div>
-      <div class="fg"><label class="fl">Maks Masuk</label>    <input type="time" class="fc" id="j-maxm"  value="11:00"></div>
-      <div class="fg"><label class="fl">Jam Alpha</label>     <input type="time" class="fc" id="j-alpha" value="10:30"></div>
-      <div class="fg"><label class="fl">Mulai Pulang</label>  <input type="time" class="fc" id="j-pulang" value="14:00"></div>
-      <div class="fg"><label class="fl">Maks Pulang</label>   <input type="time" class="fc" id="j-maxp"  value="15:30"></div>
-      <div class="fg"><label class="fl">Quran Mulai</label>   <input type="time" class="fc" id="j-qm"    value="07:00"></div>
-      <div class="fg"><label class="fl">Quran Batas</label>   <input type="time" class="fc" id="j-qb"    value="08:10"></div>
-    </div>
-    <button class="btn btn-p" onclick="window._app.simpanJam()" style="width:100%">💾 Simpan Jam</button>
-  </div>
-  <div class="card cp">
-    <div class="ct">🎨 Tema Warna</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px" id="clr-grid"></div>
-    <div class="fg" style="margin-bottom:0">
-      <label class="fl">Warna Kustom</label>
-      <input type="color" class="fc" id="clr-custom" value="#FF6B35"
-        oninput="window._app.applyColor(this.value)"
-        style="height:44px;padding:4px;cursor:pointer">
-    </div>
-  </div>
-  <div class="card cp" id="sec-security" style="display:none">
-    <div class="ct">🔐 Keamanan</div>
-    <div class="fg">
-      <label class="fl">Durasi Sesi Auto-Logout</label>
-      <select class="fc" id="s-sess">
-        <option value="30">30 menit</option>
-        <option value="60" selected>1 jam</option>
-        <option value="120">2 jam</option>
-        <option value="0">Tidak pernah</option>
-      </select>
-    </div>
-    <div class="fg">
-      <label class="fl">Ganti Password Admin</label>
-      <div class="pw-wr">
-        <input type="password" class="fc" id="s-pw1" placeholder="Password baru (min 8 karakter)">
-        <button class="pw-eye" onclick="window._app.togglePw('s-pw1')">👁</button>
-      </div>
-    </div>
-    <div class="fg">
-      <label class="fl">Konfirmasi Password</label>
-      <div class="pw-wr">
-        <input type="password" class="fc" id="s-pw2" placeholder="Ulangi password baru">
-        <button class="pw-eye" onclick="window._app.togglePw('s-pw2')">👁</button>
-      </div>
-    </div>
-    <button class="btn btn-p" onclick="window._app.gantiPassword()" style="width:100%">🔒 Simpan Password</button>
-  </div>
-  <div class="card cp">
-    <div class="ct">🔄 Firebase &amp; Data</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <div style="width:10px;height:10px;border-radius:50%;background:var(--gn)" id="fb-dot"></div>
-      <span style="font-size:12px;font-weight:600" id="fb-st">Memeriksa koneksi...</span>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <button class="btn btn-s" onclick="event.stopPropagation();window._app.syncNow()"      style="flex:1">🔄 Sinkronisasi</button>
-      <button class="btn btn-d" onclick="window._app.resetHariIni()" style="flex:1">🗑 Reset Hari Ini</button>
-    </div>
-    <button class="btn btn-s" onclick="window._app.eksporBackup()" style="width:100%">📦 Export Backup JSON</button>
-  </div>
-</div>
-
-</div><!-- /content -->
-
-<!-- ═══════════════════════════════════════
-     BOTTOM NAV
-═══════════════════════════════════════ -->
-<nav id="bnav">
-  <button class="bn on" id="bn-dash"    onclick="window._app.goTab('dash')">
-    <span class="bi">🏠</span>Dashboard<div class="bn-ln"></div>
-  </button>
-  <button class="bn"    id="bn-scan"    onclick="window._app.goTab('scan')">
-    <span class="bi">📷</span>Scan QR<div class="bn-ln"></div>
-  </button>
-  <button class="bn"    id="bn-manual"  onclick="window._app.goTab('manual')">
-    <span class="bi">✏️</span>Manual<div class="bn-ln"></div>
-  </button>
-  <button class="bn"    id="bn-guru"    onclick="window._app.goTab('guru')" style="display:none">
-    <span class="bi">👥</span>Guru<div class="bn-ln"></div>
-  </button>
-  <button class="bn"    id="bn-qr"      onclick="window._app.goTab('qr')" style="display:none">
-    <span class="bi">🪪</span>ID Card<div class="bn-ln"></div>
-  </button>
-  <button class="bn"    id="bn-rekap"   onclick="window._app.goTab('rekap')" style="display:none">
-    <span class="bi">📊</span>Rekap<div class="bn-ln"></div>
-  </button>
-  <button class="bn"    id="bn-setting" onclick="window._app.goTab('setting')" style="display:none"><span class="bi">⚙️</span>Setting  <div class="bn-ln"></div></button>
-</nav>
-
-<!-- ═══════════════════════════════════════
-     MODALS
-═══════════════════════════════════════ -->
-
-<!-- Login -->
-<div class="lov" id="login-ov">
-  <div class="lbox">
-    <div class="ll"><div class="le" id="l-emoji">🔐</div><h2>Login Diperlukan</h2><p id="l-desc">Masukkan kredensial</p></div>
-    <div class="lerr"      id="l-err"></div>
-    <div class="alert a-warn" id="l-warn" style="display:none"><span>⚠️</span><span id="l-warn-txt"></span></div>
-    <div class="fg"><label class="fl">Username</label><input type="text" class="fc" id="l-user" autocomplete="username"></div>
-    <div class="fg"><label class="fl">Password</label>
-      <div class="pw-wr">
-        <input type="password" class="fc" id="l-pw" autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')window._app.doLogin()">
-        <button class="pw-eye" onclick="window._app.togglePw('l-pw')">👁</button>
-      </div>
-    </div>
-    <div class="brow">
-      <button class="btn btn-s" onclick="window._app.cancelLogin()">Batal</button>
-      <button class="btn btn-p" onclick="window._app.doLogin()">🔓 Masuk</button>
-    </div>
-  </div>
-</div>
-
-<!-- Konfirmasi -->
-<div class="mov" id="mov-konfirm">
-  <div class="modal">
-    <div class="mdrag"></div>
-    <div class="mt" id="kf-ttl">Konfirmasi</div>
-    <p id="kf-msg" style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.6"></p>
-    <div class="brow">
-      <button class="btn btn-s" onclick="window._app.closeKonfirm()">Batal</button>
-      <button class="btn btn-p" id="kf-ok">Ya, Lanjutkan</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Absensi -->
-<div class="mov" id="mov-edit">
-  <div class="modal">
-    <div class="mdrag"></div>
-    <div class="mt">✏️ Edit Absensi</div>
-    <div class="fg"><label class="fl">Nama Guru</label><input type="text" class="fc" id="e-nama" readonly></div>
-    <div class="fg"><label class="fl">Status</label>
-      <select class="fc" id="e-status">
-        <option value="hadir">Hadir</option><option value="terlambat">Terlambat</option>
-        <option value="izin">Izin</option><option value="sakit">Sakit</option><option value="alpha">Alpha</option>
-      </select>
-    </div>
-    <div class="fg"><label class="fl">Waktu</label><input type="time" class="fc" id="e-waktu"></div>
-    <div class="fg"><label class="fl">Keterangan</label><textarea class="fc" id="e-ket" rows="2"></textarea></div>
-    <input type="hidden" id="e-key">
-    <input type="hidden" id="e-tgl">
-    <div class="brow">
-      <button class="btn btn-s" onclick="window._app.closeModal('mov-edit')">Batal</button>
-      <button class="btn btn-d" onclick="window._app.hapusAbsensi()">🗑 Hapus</button>
-      <button class="btn btn-p" onclick="window._app.simpanEditAbsensi()">💾 Simpan</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast & FAB -->
-<div class="toast" id="toast"></div>
-<button class="fab on" id="fab" onclick="window._app.refreshDash()" title="Refresh">🔄</button>
-
 <script>
 
 
 
-
-/* Absensi SDIT Qudwatun Hasanah - app.js v3.0 */
+/* Absensi SDIT Qudwatun Hasanah - bundle.js */
 "use strict";
 
 
@@ -1295,19 +656,16 @@ function updateJamBar() {
   if (fill) fill.style.width = pct + '%';
   if (ptr)  ptr.style.left  = pct + '%';
 
-  let label = '', bg = '', clr = '', bdr = '';
-  if      (now < toMin(JAM.mulai))     { label = '⏳ Belum waktunya';  bg='var(--bg2)';  clr='var(--tx3)';  bdr='var(--bdr)'; }
-  else if (now <= toMin(JAM.batas))    { label = '🟢 Tepat Waktu';    bg='var(--tl2)';  clr='var(--tl3)';  bdr='var(--tl)'; }
-  else if (now <= toMin(JAM.maxmasuk)) { label = '⚠️ Terlambat';      bg='var(--yl2)';  clr='var(--yl3)';  bdr='var(--yl)'; }
-  else if (now < toMin(JAM.pulang))    { label = '☕ Jam Mengajar';   bg='var(--bl2)';  clr='var(--bl3)';  bdr='var(--bl)'; }
-  else if (now <= toMin(JAM.maxpulang)){ label = '🟣 Waktu Pulang';   bg='#eee9ff';     clr='#6C47FF';     bdr='#6C47FF'; }
-  else                                  { label = '🏁 Selesai';        bg='var(--bg2)';  clr='var(--tx3)';  bdr='var(--bdr)'; }
+  let status = '';
+  if      (now < toMin(JAM.mulai))    status = '⏳ Belum waktunya';
+  else if (now <= toMin(JAM.batas))   status = '🟢 Tepat waktu';
+  else if (now <= toMin(JAM.maxmasuk))status = '⚠️ Masa terlambat';
+  else if (now < toMin(JAM.pulang))   status = '☕ Jam mengajar';
+  else if (now <= toMin(JAM.maxpulang))status = '🟣 Waktu pulang';
+  else                                 status = '🏁 Selesai';
 
   const txt = $('jb-txt');
-  if (txt) {
-    txt.textContent = label;
-    txt.style.cssText = `background:${bg};color:${clr};border:1px solid ${bdr};padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700`;
-  }
+  if (txt) txt.textContent = status;
 
   updateAbsenBtns();
 }
@@ -1325,19 +683,10 @@ function updateAbsenBtns() {
   const bM = $('btn-masuk'), bP = $('btn-pulang');
   const iM = $('info-masuk'), iP = $('info-pulang');
 
-  if (bM) bM.className = 'ab-btn ' + (canM ? 'ab-masuk active-pulse' : 'ab-off');
+  if (bM) bM.className = 'ab-btn ' + (canM ? 'ab-masuk' : 'ab-off');
   if (bP) bP.className = 'ab-btn ' + (canP ? 'ab-pulang' : 'ab-off');
-  // Hitung berapa menit lagi
-  const minsToM = toMin(JAM.mulai) - now;
-  const minsToP = toMin(JAM.pulang) - now;
-  if (iM) iM.textContent = lib ? '🏖️ Hari Libur' :
-    canM ? '✅ Aktif sekarang' :
-    (now < toMin(JAM.mulai) && minsToM <= 60) ? `⏰ ${minsToM} menit lagi` :
-    `⏰ ${JAM.mulai}–${JAM.maxmasuk}`;
-  if (iP) iP.textContent = lib ? '🏖️ Hari Libur' :
-    canP ? '✅ Aktif sekarang' :
-    (now < toMin(JAM.pulang) && minsToP <= 60 && minsToP > 0) ? `⏰ ${minsToP} menit lagi` :
-    `⏰ ${JAM.pulang}–${JAM.maxpulang}`;
+  if (iM) iM.textContent = lib ? 'Hari Libur' : canM ? 'Aktif sekarang' : `${JAM.mulai}–${JAM.maxmasuk}`;
+  if (iP) iP.textContent = lib ? 'Hari Libur' : canP ? 'Aktif sekarang' : `${JAM.pulang}–${JAM.maxpulang}`;
 }
 
 // ── DARK MODE ─────────────────────────────
@@ -1668,18 +1017,18 @@ function applyRole() {
     const e = $(id);
     if (e) e.setAttribute('style', 'display:' + val + ' !important');
   }
-  // ── Nav Menu per Role ──────────────────────────────────────
-  // Guru    : Dashboard → Scan QR → Manual
-  // Kepsek  : Dashboard → Scan QR → Manual → Guru → Rekap
-  // Yayasan : Dashboard → Guru → Rekap
-  // Admin   : Dashboard → Scan QR → Manual → Guru → IDCard → Rekap → Setting
+  // Nav sesuai role
+  // Guru    : Dashboard, Scan, Manual
+  // Admin   : Dashboard, Scan, Manual, ID Card, Guru, Rekap, Setting
+  // Kepsek  : Dashboard, Scan, Manual, Guru, Rekap
+  // Yayasan : Dashboard, Guru, Rekap
   sdf('bn-dash',    'flex');
-  sdf('bn-scan',    isYay            ? 'none' : 'flex');  // semua kecuali yayasan
-  sdf('bn-manual',  isYay            ? 'none' : 'flex');  // semua kecuali yayasan
-  sdf('bn-qr',      isAdmin          ? 'flex' : 'none');  // ID Card: hanya admin
-  sdf('bn-guru',    isGuru           ? 'none' : 'flex');  // semua kecuali guru
-  sdf('bn-rekap',   isGuru           ? 'none' : 'flex');  // semua kecuali guru
-  sdf('bn-setting', isAdmin          ? 'flex' : 'none');  // hanya admin
+  sdf('bn-scan',    isYay   ? 'none' : 'flex');
+  sdf('bn-manual',  isYay   ? 'none' : 'flex');
+  sdf('bn-qr',      isAdmin ? 'flex' : 'none');
+  sdf('bn-guru',    isGuru  ? 'none' : 'flex');
+  sdf('bn-rekap',   isGuru  ? 'none' : 'flex');
+  sdf('bn-setting', isAdmin ? 'flex' : 'none');
 
   // Tahunan tab
   sd('pt-tahunan', isPriv ? 'block' : 'none');
@@ -2073,15 +1422,7 @@ function loadStats() {
 
   [['s-tot',total],['s-hdr',hadir],['s-tlt',tlmbt],
    ['s-izn',izn],['s-alph',alpha],['s-alp',belum]].forEach(([id,v]) => {
-    const el = $(id);
-    if (el && el.textContent !== String(v)) {
-      el.textContent = v;
-      // Pulse animation saat nilai berubah
-      el.classList.remove('pulse');
-      void el.offsetWidth; // trigger reflow
-      el.classList.add('pulse');
-      setTimeout(() => el.classList.remove('pulse'), 400);
-    }
+    const el = $(id); if (el) el.textContent = v;
   });
 
   const pctEl = $('pct'), pbarEl = $('pbar');
@@ -2098,25 +1439,21 @@ function renderRecent() {
   const items = Object.values(state.absensiData)
     .sort((a, b) => b.createdAt - a.createdAt).slice(0, 10);
   if (!items.length) {
-    c.innerHTML = `<div class="empty">
-      <div class="ei">📋</div>
-      <p style="font-size:13px;font-weight:600;margin-bottom:4px">Belum ada absensi</p>
-      <p style="font-size:11px">Absensi hari ini belum ada.<br>Scan QR atau input manual untuk mulai.</p>
-    </div>`;
+    c.innerHTML = '<div class="empty"><div class="ei">📋</div><p>Belum ada absensi hari ini</p></div>';
     return;
   }
   c.innerHTML = items.map(d => `
     <div class="litem">
       <div class="lav" style="background:${avColor(d.nama)}22;color:${avColor(d.nama)}">
-        ${d.foto ? `<img src="${esc(d.foto)}" alt="">` : statusIcon(d.status)}
+        ${statusIcon(d.status)}
       </div>
       <div class="linf">
         <div class="lnm">${esc(d.nama)}</div>
         <div class="lsb">${esc(d.mapel || '')} · ${esc(d.tipe)}</div>
       </div>
       <div class="lrt">
-        <div class="ltm" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800">${d.waktu || '-'}</div>
-        <span class="bdg ${statusBadge(d.status)}" style="margin-top:3px">${statusIcon(d.status)} ${esc(d.status)}</span>
+        <div class="ltm">${d.waktu || '-'}</div>
+        <span class="bdg ${statusBadge(d.status)}">${esc(d.status)}</span>
       </div>
     </div>`).join('');
 }
@@ -2538,270 +1875,392 @@ function eksporExcel() {
   XLSX.writeFile(wb, `absensi_harian_${tgl}.xlsx`);
   toast('✅ Excel berhasil diunduh', 'ok');
 }
-
-// ─── EXPORT EXCEL BULANAN ─────────────────────────────────
+// ─── EXPORT EXCEL BULANAN (format laporan seperti gambar) ───
 function eksporExcelBulanan() {
-  const blnEl = $('r-bln');
-  const thnEl = $('r-thn-b');
-  if (!blnEl || !thnEl) { toast('Pilih bulan dan tahun terlebih dahulu', 'warn'); return; }
-
-  const bln  = parseInt(blnEl.value);
-  const thn  = parseInt(thnEl.value);
-  const gl   = guruAktif();
+  const bln = parseInt($('r-bln')?.value || new Date().getMonth() + 1);
+  const thn = parseInt($('r-thn-b')?.value || new Date().getFullYear());
+  const gl  = guruAktif();
   if (!gl.length) { toast('Belum ada data guru', 'warn'); return; }
 
   const namaBln = ['','Januari','Februari','Maret','April','Mei','Juni',
     'Juli','Agustus','September','Oktober','November','Desember'];
+  const hariSingkat = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+
+  // Hitung hari dalam bulan
   const jumlahHari = new Date(thn, bln, 0).getDate();
 
-  toast('📊 Menyiapkan Excel...', 'info', 4000);
+  toast('📊 Membuat Excel bulanan...', 'info', 3000);
 
-  // Fetch data semua tanggal dalam bulan
+  // Kumpulkan data semua tanggal dalam bulan
   const promises = [];
   for (let d = 1; d <= jumlahHari; d++) {
     const tgl = `${thn}-${String(bln).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     promises.push(
-      firebase.database().ref('absensi/' + tgl).once('value')
-        .then(snap => { const data={}; snap.forEach(ch => { data[ch.key]=ch.val(); }); return {d, tgl, data}; })
+      firebase.database().ref('absensi/' + tgl).once('value').then(snap => {
+        const data = {};
+        snap.forEach(ch => { data[ch.key] = ch.val(); });
+        return { tgl, d, data };
+      })
     );
   }
 
-  Promise.all(promises).then(allDayData => {
+  Promise.all(promises).then(allData => {
     const wb = XLSX.utils.book_new();
     const ws = {};
     const merges = [];
 
-    const C = {
-      hadir:     { bg:'C8E6C9', tx:'1B5E20', lb:'H'   },
-      terlambat: { bg:'FFF9C4', tx:'F57F17', lb:'TL'  },
-      izin:      { bg:'BBDEFB', tx:'0D47A1', lb:'I'   },
-      sakit:     { bg:'F8BBD0', tx:'880E4F', lb:'S'   },
-      alpha:     { bg:'FFCDD2', tx:'B71C1C', lb:'A'   },
-      libur:     { bg:'EEEEEE', tx:'616161', lb:'LBR' },
+    // Helper encode cell
+    function ec(r, c) { return XLSX.utils.encode_cell({ r, c }); }
+    function setCell(r, c, v, s) {
+      const ref = ec(r, c);
+      ws[ref] = { v, t: typeof v === 'number' ? 'n' : 's', s: s || {} };
+    }
+
+    // Warna
+    const CLR = {
+      hd:  { patternType:'solid', fgColor:{ rgb:'1565C0' } },
+      hm:  { patternType:'solid', fgColor:{ rgb:'1976D2' } },
+      hl:  { patternType:'solid', fgColor:{ rgb:'E3F2FD' } },
+      hml: { patternType:'solid', fgColor:{ rgb:'0897A7' } },
+      gb:  { patternType:'solid', fgColor:{ rgb:'FFF8E1' } },
+      lb:  { patternType:'solid', fgColor:{ rgb:'F5F5F5' } },
+      tb:  { patternType:'solid', fgColor:{ rgb:'F3E5F5' } },
+      we:  { patternType:'solid', fgColor:{ rgb:'EF9A9A' } },  // weekend
+      h:   { patternType:'solid', fgColor:{ rgb:'C8E6C9' } },
+      tl:  { patternType:'solid', fgColor:{ rgb:'FFF9C4' } },
+      iz:  { patternType:'solid', fgColor:{ rgb:'BBDEFB' } },
+      sk:  { patternType:'solid', fgColor:{ rgb:'F8BBD0' } },
+      al:  { patternType:'solid', fgColor:{ rgb:'FFCDD2' } },
+      lbr: { patternType:'solid', fgColor:{ rgb:'EEEEEE' } },
+      ko:  { patternType:'solid', fgColor:{ rgb:'FAFAFA' } },
     };
 
-    function fill(rgb)  { return { patternType:'solid', fgColor:{ rgb } }; }
-    function font(bold, sz, rgb) { return { bold:!!bold, sz:sz||9, color:{rgb:rgb||'000000'}, name:'Calibri' }; }
-    function aln(h,v,w) { return { horizontal:h||'center', vertical:v||'center', wrapText:!!w }; }
-    function bdr(t,b,l,r) {
-      const s = { style:'thin', color:{ rgb:'CCCCCC' } };
-      return { top:t||s, bottom:b||s, left:l||s, right:r||s };
-    }
-    function cell(r,c,v,s) {
-      ws[XLSX.utils.encode_cell({r,c})] = { v, t:typeof v==='number'?'n':'s', s:s||{} };
-    }
-    function merge(r1,c1,r2,c2) { merges.push({s:{r:r1,c:c1},e:{r:r2,c:c2}}); }
+    const STATUS_CLR = {
+      hadir:     { bg: CLR.h,   txt: { rgb:'1B5E20' }, lbl:'H'   },
+      terlambat: { bg: CLR.tl,  txt: { rgb:'F57F17' }, lbl:'TL'  },
+      izin:      { bg: CLR.iz,  txt: { rgb:'0D47A1' }, lbl:'I'   },
+      sakit:     { bg: CLR.sk,  txt: { rgb:'880E4F' }, lbl:'S'   },
+      alpha:     { bg: CLR.al,  txt: { rgb:'B71C1C' }, lbl:'A'   },
+      libur:     { bg: CLR.lbr, txt: { rgb:'616161' }, lbl:'LBR' },
+    };
 
-    const bHd = { style:'medium', color:{rgb:'1565C0'} };
-    const bTh = { style:'thin',   color:{rgb:'CCCCCC'} };
+    // Border helpers
+    const bThin = { style:'thin', color:{ rgb:'CCCCCC' } };
+    const bMed  = { style:'medium', color:{ rgb:'666666' } };
+    const bHd   = { style:'medium', color:{ rgb:'1565C0' } };
+    function mkBorder(t,b,l,r) {
+      return { top:t||bThin, bottom:b||bThin, left:l||bThin, right:r||bThin };
+    }
 
-    // Kolom: 0=No, 1=Nama/Mapel, 2=Label, 3..3+jumlahHari-1=tgl, lalu ringkasan
-    const CO=0, CN=1, CL=2, CD=3;
+    // Font helpers
+    function fnt(bold, sz, color) {
+      return { bold: bold||false, sz: sz||9, color: { rgb: color||'000000' }, name:'Calibri' };
+    }
+    function aln(h, v, wrap) {
+      return { horizontal: h||'center', vertical: v||'center', wrapText: wrap!==false };
+    }
+
+    // Style presets
+    const S = {
+      hdrTitle:  { font:fnt(true,15,'FFFFFF'), fill:CLR.hd, alignment:aln(), border:mkBorder(bHd,bThin,bHd,bHd) },
+      hdrTag:    { font:fnt(false,8,'FFFFFF'), fill:CLR.hml, alignment:aln() },
+      hdrRpt:    { font:fnt(true,12,'1565C0'), fill:CLR.hl, alignment:aln(), border:mkBorder(bThin,bMed,bMed,bMed) },
+      colHdr:    { font:fnt(true,8,'FFFFFF'),  fill:CLR.hd,  alignment:aln(), border:mkBorder() },
+      colHdrMid: { font:fnt(true,8,'FFFFFF'),  fill:CLR.hm,  alignment:aln(), border:mkBorder() },
+      colDate:   { font:fnt(true,8,'FFFFFF'),  fill:CLR.hml, alignment:aln(), border:mkBorder() },
+      colWE:     { font:fnt(true,8,'FFFFFF'),  fill:CLR.we,  alignment:aln(), border:mkBorder() },
+      guruNo:    { font:fnt(true,9,'1565C0'),  fill:CLR.gb,  alignment:aln(), border:mkBorder(bMed,bMed,bMed,bThin) },
+      guruNama:  { font:fnt(true,9,'1565C0'),  fill:CLR.gb,  alignment:aln('left','center'), border:mkBorder(bMed,bMed,bThin,bMed) },
+      labelSt:   { font:fnt(true,8,'424242'),  fill:CLR.lb,  alignment:aln('left','center'), border:mkBorder(bThin,bThin,bThin,bMed) },
+      labelRow:  { font:fnt(false,8,'424242'), fill:CLR.lb,  alignment:aln('left','center'), border:mkBorder(bThin,bThin,bThin,bMed) },
+      labelTtd:  { font:fnt(false,8,'424242'), fill:CLR.tb,  alignment:aln('left','center'), border:mkBorder(bThin,bMed,bThin,bMed) },
+      sumMerge:  { font:fnt(true,11,'1B5E20'), fill:CLR.h,   alignment:aln(), border:mkBorder(bMed,bMed,bThin,bMed) },
+    };
+
+    // Layout kolom
+    // 0=No, 1=Nama, 2=Label, 3..3+jumlahHari-1=tanggal, lalu ringkasan
+    const CO = 0; // No
+    const CN = 1; // Nama
+    const CL = 2; // Label
+    const CD = 3; // Tanggal mulai (index 0-based)
     const CD_LAST = CD + jumlahHari - 1;
-    const CH=CD_LAST+1, CTL=CH+1, CI=CTL+1, CS=CI+1, CA=CS+1, CLBR=CA+1, CPCT=CLBR+1, TCOL=CPCT;
+    const CH  = CD_LAST + 1;  // Hadir
+    const CTL = CH + 1;
+    const CI  = CTL + 1;
+    const CS  = CI + 1;
+    const CA  = CS + 1;
+    const CLBR= CA + 1;
+    const CPCT= CLBR + 1;
+    const TCOL = CPCT; // total kolom (0-based index terakhir)
 
-    // Lebar kolom
-    const cols = [];
-    cols[CO]=5; cols[CN]=26; cols[CL]=11;
-    for(let d=0;d<jumlahHari;d++) cols[CD+d]=3.8;
-    cols[CH]=5; cols[CTL]=5; cols[CI]=5; cols[CS]=5; cols[CA]=5; cols[CLBR]=5.5; cols[CPCT]=8;
-    ws['!cols'] = cols.map(w=>({wpx:Math.round(w*7.5)}));
+    // Lebar kolom (dalam karakter)
+    const colWidths = [];
+    colWidths[CO] = 4;
+    colWidths[CN] = 27;
+    colWidths[CL] = 11;
+    for (let d = 0; d < jumlahHari; d++) colWidths[CD + d] = 3.6;
+    colWidths[CH]   = 5;
+    colWidths[CTL]  = 5;
+    colWidths[CI]   = 5;
+    colWidths[CS]   = 5;
+    colWidths[CA]   = 5;
+    colWidths[CLBR] = 5.5;
+    colWidths[CPCT] = 8;
 
-    let row = 0;
+    ws['!cols'] = colWidths.map(w => ({ wpx: Math.round(w * 7.5) }));
 
-    // ROW 0: Judul
-    cell(0, CO, state.identitasData.nama||'SDIT Qudwatun Hasanah', {
-      font:font(true,15,'FFFFFF'), fill:fill('1565C0'), alignment:aln(), border:bdr(bHd,bTh,bHd,bHd)
-    });
-    merge(0,CO,0,TCOL);
+    // Helper merge
+    function addMerge(rs, cs, re, ce) {
+      merges.push({ s:{ r:rs, c:cs }, e:{ r:re, c:ce } });
+    }
+
+    let row = 0; // 0-based
+
+    // ROW 0: Judul Sekolah
+    setCell(row, CO, state.identitasData.nama || 'SDIT Qudwatun Hasanah', S.hdrTitle);
+    addMerge(row, CO, row, TCOL);
+    row++;
 
     // ROW 1: Tagline
-    cell(1, CO, state.identitasData.tagline||'', {
-      font:font(false,8,'FFFFFF'), fill:fill('0897A7'), alignment:aln()
-    });
-    merge(1,CO,1,TCOL);
+    setCell(row, CO, state.identitasData.tagline || '', S.hdrTag);
+    addMerge(row, CO, row, TCOL);
+    row++;
 
     // ROW 2: Judul Laporan
-    cell(2, CO, `LAPORAN ABSENSI BULANAN — ${namaBln[bln].toUpperCase()} ${thn}`, {
-      font:font(true,12,'1565C0'), fill:fill('E3F2FD'), alignment:aln(), border:bdr(bTh,bHd,bHd,bHd)
-    });
-    merge(2,CO,2,TCOL);
+    setCell(row, CO, `LAPORAN ABSENSI BULANAN — ${namaBln[bln].toUpperCase()} ${thn}`, S.hdrRpt);
+    addMerge(row, CO, row, TCOL);
+    row++;
 
     // ROW 3: Spacer
-    cell(3, CO, ''); merge(3,CO,3,TCOL);
+    ws[ec(row, CO)] = { v:'', t:'s' };
+    addMerge(row, CO, row, TCOL);
+    row++;
 
-    const RH1=4, RH2=5; // Header rows
-    row = 6; // Data mulai
+    const ROW_H1 = row;     // Header row 1
+    const ROW_H2 = row + 1; // Header row 2
+    row += 2;
 
-    // Header row 1
-    function hdr(r,c,v,bg,tc,sp) {
-      const s={font:font(true,9,tc||'FFFFFF'),fill:fill(bg||'1565C0'),alignment:aln(),border:bdr()};
-      cell(r,c,v,s); if(sp) merge(r,c,r+1,c);
-    }
-    hdr(RH1,CO,'No',    '1565C0','FFFFFF',true);
-    hdr(RH1,CN,'Nama Guru','1565C0','FFFFFF',true);
-    hdr(RH1,CL,'Keterangan','1565C0','FFFFFF',true);
-    cell(RH1,CD,`Bulan ${namaBln[bln]} ${thn}`,{
-      font:font(true,9,'FFFFFF'),fill:fill('1976D2'),alignment:aln(),border:bdr()
+    // Header: No, Nama, Label (merge 2 baris)
+    ['No', 'Nama Guru', 'Keterangan'].forEach((v, i) => {
+      setCell(ROW_H1, i, v, S.colHdr);
+      addMerge(ROW_H1, i, ROW_H2, i);
     });
-    merge(RH1,CD,RH1,CD_LAST);
-    cell(RH1,CH,'Ringkasan',{
-      font:font(true,9,'FFFFFF'),fill:fill('1565C0'),alignment:aln(),border:bdr()
-    });
-    merge(RH1,CH,RH1,TCOL);
 
-    // Header row 2: tanggal + ringkasan label
-    for(let d=1;d<=jumlahHari;d++){
-      const dow=new Date(thn,bln-1,d).getDay();
-      const isWE=dow===0||dow===6;
-      cell(RH2,CD+d-1,d,{
-        font:font(true,8,'FFFFFF'),fill:fill(isWE?'EF9A9A':'1976D2'),alignment:aln(),border:bdr()
-      });
+    // Header: "Bulan Mei 2026" (merge semua tanggal, row H1)
+    setCell(ROW_H1, CD, `Bulan ${namaBln[bln]} ${thn}`, S.colHdrMid);
+    addMerge(ROW_H1, CD, ROW_H1, CD_LAST);
+
+    // Header: tanggal 1-31 (row H2) + nama hari
+    for (let d = 1; d <= jumlahHari; d++) {
+      const dow = new Date(thn, bln - 1, d).getDay(); // 0=Min
+      const isWE = dow === 0 || dow === 6;
+      const col = CD + d - 1;
+      setCell(ROW_H2, col, d, isWE ? S.colWE : S.colDate);
     }
-    const sumHdrs=[
-      {c:CH,v:'H',bg:C.hadir.bg,tc:C.hadir.tx},
-      {c:CTL,v:'TL',bg:C.terlambat.bg,tc:C.terlambat.tx},
-      {c:CI,v:'I',bg:C.izin.bg,tc:C.izin.tx},
-      {c:CS,v:'S',bg:C.sakit.bg,tc:C.sakit.tx},
-      {c:CA,v:'A',bg:C.alpha.bg,tc:C.alpha.tx},
-      {c:CLBR,v:'Libur',bg:C.libur.bg,tc:C.libur.tx},
-      {c:CPCT,v:'% Hadir',bg:'E3F2FD',tc:'1565C0'},
+
+    // Header: Ringkasan (row H1 merge, row H2 per kolom)
+    setCell(ROW_H1, CH, 'Ringkasan', S.colHdr);
+    addMerge(ROW_H1, CH, ROW_H1, TCOL);
+
+    const sumHdrs = [
+      { c:CH,   v:'H',      fill:CLR.h,   tx:'1B5E20' },
+      { c:CTL,  v:'TL',     fill:CLR.tl,  tx:'F57F17' },
+      { c:CI,   v:'I',      fill:CLR.iz,  tx:'0D47A1' },
+      { c:CS,   v:'S',      fill:CLR.sk,  tx:'880E4F' },
+      { c:CA,   v:'A',      fill:CLR.al,  tx:'B71C1C' },
+      { c:CLBR, v:'Libur',  fill:CLR.lbr, tx:'616161' },
+      { c:CPCT, v:'% Hadir',fill:CLR.hl,  tx:'1565C0' },
     ];
-    sumHdrs.forEach(h=>{
-      cell(RH2,h.c,h.v,{font:font(true,8,h.tc),fill:fill(h.bg),alignment:aln(),border:bdr()});
+    sumHdrs.forEach(h => {
+      setCell(ROW_H2, h.c, h.v, {
+        font: fnt(true, 8, h.tx), fill: h.fill,
+        alignment: aln(), border: mkBorder()
+      });
     });
 
     // DATA GURU
-    const LBLS=['Status','Jam Masuk','Jam Pulang','TTD'];
+    const LABELS = ['Status', 'Jam Masuk', 'Jam Pulang', 'TTD'];
 
-    gl.forEach(([id,g], idx2) => {
-      const rs=row, re=row+3;
+    gl.forEach(([id, g], idx) => {
+      const rs = row;       // row start
+      const re = row + 3;   // row end (4 baris: Status, JM, JP, TTD)
 
-      // No
-      cell(rs,CO,idx2+1,{
-        font:font(true,9,'1565C0'),fill:fill('FFF8E1'),alignment:aln(),border:bdr()
-      });
-      merge(rs,CO,re,CO);
+      // No (merge 4 baris)
+      setCell(rs, CO, idx + 1, S.guruNo);
+      addMerge(rs, CO, re, CO);
 
-      // Nama
-      cell(rs,CN,`${g.nama}
-${g.mapel||''}`,{
-        font:font(true,9,'1565C0'),fill:fill('FFF8E1'),
-        alignment:aln('left','center',true),border:bdr()
-      });
-      merge(rs,CN,re,CN);
+      // Nama (merge 4 baris)
+      setCell(rs, CN, `${g.nama}
+${g.mapel||''}`, S.guruNama);
+      addMerge(rs, CN, re, CN);
 
       // Label baris
-      LBLS.forEach((lbl,i)=>{
-        const isLast=i===3;
-        cell(rs+i,CL,lbl,{
-          font:font(i===0,8,'424242'),
-          fill:fill(isLast?'F3E5F5':'F5F5F5'),
-          alignment:aln('left','center'),border:bdr()
-        });
+      LABELS.forEach((lbl, i) => {
+        const r = rs + i;
+        const sStyle = i === 0 ? S.labelSt : (i === 3 ? S.labelTtd : S.labelRow);
+        setCell(r, CL, lbl, sStyle);
       });
 
-      // Data per hari
-      const cnt={hadir:0,terlambat:0,izin:0,sakit:0,alpha:0,libur:0};
+      // Data per tanggal
+      const cnt = { hadir:0, terlambat:0, izin:0, sakit:0, alpha:0, libur:0 };
 
-      for(let d=1;d<=jumlahHari;d++){
-        const col=CD+d-1;
-        const tgl=`${thn}-${String(bln).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const dow=new Date(thn,bln-1,d).getDay();
-        const isWE=dow===0||dow===6;
-        const dayData=allDayData.find(x=>x.d===d)?.data||{};
+      for (let d = 1; d <= jumlahHari; d++) {
+        const col = CD + d - 1;
+        const tgl = `${thn}-${String(bln).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dow  = new Date(thn, bln - 1, d).getDay();
+        const isWE = dow === 0 || dow === 6;
 
-        let st='',jm='',jp='';
-        if(isWE){ st='libur'; }
-        else {
-          if(dayData[`${id}_alpha`])        st='alpha';
-          else if(dayData[`${id}_izin`])    st='izin';
-          else if(dayData[`${id}_sakit`])   st='sakit';
-          else if(dayData[`${id}_masuk`]){
-            const m=dayData[`${id}_masuk`];
-            st=m.status||'hadir'; jm=m.waktu||'';
-            if(dayData[`${id}_pulang`]) jp=dayData[`${id}_pulang`].waktu||'';
+        const dayData  = allData.find(x => x.d === d)?.data || {};
+        const masukKey = `${id}_masuk`;
+        const izinKey  = `${id}_izin`;
+        const sakitKey = `${id}_sakit`;
+        const alphaKey = `${id}_alpha`;
+        const pulangKey= `${id}_pulang`;
+
+        let st  = isWE ? 'libur' : '';
+        let jm  = '', jp = '';
+
+        if (!isWE) {
+          if (dayData[alphaKey])      { st = 'alpha'; }
+          else if (dayData[izinKey])  { st = 'izin'; }
+          else if (dayData[sakitKey]) { st = 'sakit'; }
+          else if (dayData[masukKey]) {
+            st = dayData[masukKey].status || 'hadir';
+            jm = dayData[masukKey].waktu || '';
+            if (dayData[pulangKey]) jp = dayData[pulangKey].waktu || '';
           }
         }
-        if(st) cnt[st]=(cnt[st]||0)+1;
 
-        const sc=C[st]||{bg:'FAFAFA',tx:'000000',lb:''};
-        const bgD=(st&&!isWE)?sc.bg:'FAFAFA';
+        if (st) cnt[st] = (cnt[st]||0) + 1;
 
-        // Status
-        cell(rs,col,sc.lb,{font:font(true,8,sc.tx),fill:fill(sc.bg),alignment:aln(),border:bdr()});
-        // Jam Masuk
-        cell(rs+1,col,jm,{font:font(false,7,'424242'),fill:fill(bgD),alignment:aln(),border:bdr()});
-        // Jam Pulang
-        cell(rs+2,col,jp,{font:font(false,7,'424242'),fill:fill(bgD),alignment:aln(),border:bdr()});
-        // TTD
-        cell(re,col,'',{fill:fill('F3E5F5'),border:bdr()});
+        const sc = STATUS_CLR[st] || { bg: CLR.ko, txt:{ rgb:'000000' }, lbl:'' };
+
+        // Status row
+        setCell(rs, col, sc.lbl, {
+          font: fnt(true, 8, sc.txt.rgb), fill: sc.bg,
+          alignment: aln(), border: mkBorder()
+        });
+        // Jam Masuk row
+        setCell(rs+1, col, jm, {
+          font: fnt(false, 7, '424242'),
+          fill: (st && !isWE) ? sc.bg : CLR.ko,
+          alignment: aln(), border: mkBorder(bThin, bThin, bThin, bThin)
+        });
+        // Jam Pulang row
+        setCell(rs+2, col, jp, {
+          font: fnt(false, 7, '424242'),
+          fill: (st && !isWE) ? sc.bg : CLR.ko,
+          alignment: aln(), border: mkBorder(bThin, bThin, bThin, bThin)
+        });
+        // TTD row
+        setCell(re, col, '', {
+          fill: CLR.tb,
+          border: mkBorder(bThin, bMed, bThin, bThin)
+        });
       }
 
-      // Ringkasan
-      const totH=cnt.hadir+cnt.terlambat;
-      const hk=jumlahHari-cnt.libur;
-      const pct=hk>0?Math.round(totH/hk*100):0;
-      const pctFill=pct>=95?C.hadir.bg:(pct>=80?C.terlambat.bg:C.alpha.bg);
+      // Kolom ringkasan (merge 4 baris)
+      const totHadir = cnt.hadir + cnt.terlambat;
+      const hariKerja = jumlahHari - cnt.libur;
+      const pct = hariKerja > 0 ? Math.round(totHadir / hariKerja * 100) : 0;
+      const pctStr = pct + '%';
+      const pctFill = pct >= 95 ? CLR.h : (pct >= 80 ? CLR.tl : CLR.al);
+      const pctTx   = pct >= 95 ? '1B5E20' : (pct >= 80 ? 'F57F17' : 'B71C1C');
 
       [
-        {c:CH,  v:cnt.hadir,     bg:C.hadir.bg,     tx:C.hadir.tx},
-        {c:CTL, v:cnt.terlambat, bg:C.terlambat.bg, tx:C.terlambat.tx},
-        {c:CI,  v:cnt.izin,      bg:C.izin.bg,      tx:C.izin.tx},
-        {c:CS,  v:cnt.sakit,     bg:C.sakit.bg,      tx:C.sakit.tx},
-        {c:CA,  v:cnt.alpha,     bg:C.alpha.bg,      tx:C.alpha.tx},
-        {c:CLBR,v:cnt.libur,     bg:C.libur.bg,      tx:C.libur.tx},
-        {c:CPCT,v:pct+'%',       bg:pctFill,          tx:'000000'},
-      ].forEach(h=>{
-        cell(rs,h.c,h.v,{
-          font:font(true,11,h.tx),fill:fill(h.bg),alignment:aln(),border:bdr()
+        { c:CH,   v:cnt.hadir,     fill:CLR.h,   tx:'1B5E20' },
+        { c:CTL,  v:cnt.terlambat, fill:CLR.tl,  tx:'F57F17' },
+        { c:CI,   v:cnt.izin,      fill:CLR.iz,  tx:'0D47A1' },
+        { c:CS,   v:cnt.sakit,     fill:CLR.sk,  tx:'880E4F' },
+        { c:CA,   v:cnt.alpha,     fill:CLR.al,  tx:'B71C1C' },
+        { c:CLBR, v:cnt.libur,     fill:CLR.lbr, tx:'616161' },
+        { c:CPCT, v:pctStr,        fill:pctFill, tx:pctTx   },
+      ].forEach(h => {
+        setCell(rs, h.c, h.v, {
+          font: fnt(true, 11, h.tx), fill: h.fill,
+          alignment: aln(), border: mkBorder(bMed, bMed, bThin, bMed)
         });
-        merge(rs,h.c,re,h.c);
+        addMerge(rs, h.c, re, h.c);
       });
 
-      row=re+1;
+      row = re + 1;
     });
 
     // Legenda
     row++;
-    cell(row,CO,'Keterangan:',{font:font(true,8,'1565C0'),alignment:aln('left')});
-    merge(row,CO,row,CL);
-    const legs=[
-      ['H = Hadir',C.hadir.bg,C.hadir.tx],['TL = Terlambat',C.terlambat.bg,C.terlambat.tx],
-      ['I = Izin',C.izin.bg,C.izin.tx],['S = Sakit',C.sakit.bg,C.sakit.tx],
-      ['A = Alpha',C.alpha.bg,C.alpha.tx],['Libur = Sabtu/Minggu',C.libur.bg,C.libur.tx],
+    const legRow = row;
+    setCell(legRow, CO, 'Keterangan:', { font:fnt(true,8,'1565C0'), alignment:aln('left') });
+    addMerge(legRow, CO, legRow, CL);
+
+    const legs = [
+      ['H = Hadir', CLR.h, '1B5E20'], ['TL = Terlambat', CLR.tl, 'F57F17'],
+      ['I = Izin', CLR.iz, '0D47A1'], ['S = Sakit', CLR.sk, '880E4F'],
+      ['A = Alpha', CLR.al, 'B71C1C'], ['Libur = Sabtu/Minggu', CLR.lbr, '616161'],
     ];
-    legs.forEach((l,i)=>{
-      const col=CD+i*5; if(col+4>TCOL) return;
-      cell(row,col,l[0],{font:font(true,8,l[2]),fill:fill(l[1]),alignment:aln(),border:bdr()});
-      merge(row,col,row,col+4);
+    legs.forEach((l, i) => {
+      const col = CD + i * 5;
+      if (col + 4 > TCOL) return;
+      setCell(legRow, col, l[0], {
+        font: fnt(true,8,l[2]), fill: l[1],
+        alignment: aln(), border: mkBorder()
+      });
+      addMerge(legRow, col, legRow, col + 4);
     });
 
-    // TTD
-    const ttdRow=row+2;
-    const tglStr=`${namaBln[bln]} ${thn}`;
-    [[ttdRow,'Mengetahui,'],[ttdRow+1,'Pengawas Sekolah'],[ttdRow+2,'(________________________)']].forEach(([r,v])=>{
-      cell(r,CO,v,{font:font(r===ttdRow+2,9,'424242'),alignment:aln('center')});
-      merge(r,CO,r,CO+7);
+    // Tanda Tangan
+    const ttdRow = legRow + 2;
+    const tglStr = `${namaBln[bln]} ${thn}`;
+    // Kiri
+    [
+      [ttdRow,   'Mengetahui,'],
+      [ttdRow+1, 'Pengawas Sekolah'],
+      [ttdRow+2, '(________________________)'],
+    ].forEach(([r, v]) => {
+      setCell(r, CO, v, { font:fnt(r===ttdRow+2,9,'424242'), alignment:aln('center') });
+      addMerge(r, CO, r, CO+7);
     });
-    const tc=CD_LAST-7;
-    [[ttdRow,tglStr,false],[ttdRow+1,'Kepala Sekolah',false],
-     [ttdRow+2,state.identitasData.nama||'SDIT',true],[ttdRow+3,'(________________________)',false]
-    ].forEach(([r,v,bold])=>{
-      cell(r,tc,v,{font:font(bold,9,bold?'1565C0':'424242'),alignment:aln('center')});
-      merge(r,tc,r,TCOL);
+    // Kanan
+    const tcol = CD_LAST - 7;
+    [
+      [ttdRow,   tglStr,             false],
+      [ttdRow+1, 'Kepala Sekolah',   false],
+      [ttdRow+2, state.identitasData.nama||'SDIT Qudwatun Hasanah', true],
+      [ttdRow+3, '(________________________)', false],
+    ].forEach(([r, v, bold]) => {
+      setCell(r, tcol, v, { font:fnt(bold,9,bold?'1565C0':'424242'), alignment:aln('center') });
+      addMerge(r, tcol, r, TCOL);
     });
 
-    ws['!merges']=merges;
-    ws['!ref']=XLSX.utils.encode_range({r:0,c:0},{r:ttdRow+3,c:TCOL});
+    // Set merges dan range
+    ws['!merges'] = merges;
+    ws['!ref'] = XLSX.utils.encode_range(
+      { r:0, c:0 },
+      { r: ttdRow+3, c: TCOL }
+    );
+
+    // Tinggi baris
+    const rowH = [];
+    rowH[0] = { hpx: 36 };  // Judul
+    rowH[1] = { hpx: 16 };  // Tagline
+    rowH[2] = { hpx: 26 };  // Laporan
+    rowH[3] = { hpx: 6  };  // Spacer
+    rowH[ROW_H1] = { hpx: 24 };
+    rowH[ROW_H2] = { hpx: 20 };
+    for (let g = 0; g < gl.length; g++) {
+      const baseRow = 6 + g * 4;
+      rowH[baseRow]   = { hpx: 16 };
+      rowH[baseRow+1] = { hpx: 16 };
+      rowH[baseRow+2] = { hpx: 16 };
+      rowH[baseRow+3] = { hpx: 22 };
+    }
+    ws['!rows'] = rowH;
 
     XLSX.utils.book_append_sheet(wb, ws, `${namaBln[bln]} ${thn}`);
     XLSX.writeFile(wb, `rekap_absensi_${namaBln[bln]}_${thn}.xlsx`);
-    toast(`✅ Excel ${namaBln[bln]} ${thn} berhasil diunduh`, 'ok', 3000);
-
+    toast(`✅ Rekap ${namaBln[bln]} ${thn} berhasil diunduh`, 'ok', 3000);
   }).catch(e => {
     console.error(e);
-    toast('❌ Gagal membuat Excel: '+e.message, 'err');
+    toast('❌ Gagal membuat Excel', 'err');
   });
 }
 
@@ -3021,16 +2480,20 @@ function applyIdentitas() {
     if (s) s.value = d.tagline;
   }
   if (d.logo) {
+    // Topbar logo — data: tidak boleh di-esc() (rusak base64)
     const el = $('tb-logo');
     if (el) {
-      el.innerHTML = d.logo.startsWith('http') || d.logo.startsWith('data:')
-        ? `<img src="${esc(d.logo)}" style="width:28px;height:28px;border-radius:7px;object-fit:cover">`
-        : `<span style="font-size:17px">${d.logo}</span>`;
+      if (d.logo.startsWith('data:') || d.logo.startsWith('http')) {
+        const safeUrl = d.logo.startsWith('data:') ? d.logo : esc(d.logo);
+        el.innerHTML = `<img src="${safeUrl}"
+          style="width:30px;height:30px;border-radius:9px;object-fit:cover"
+          onerror="if(this.parentElement){this.parentElement.innerHTML='🕌'}">`;
+      } else {
+        el.innerHTML = `<span style="font-size:18px">${san(d.logo)}</span>`;
+      }
     }
     const s = $('s-logo');
     if (s) s.value = d.logo;
-    _setLogoPreview(d.logo);
-    // Update preview di setting
     _updateLogoPreview(d.logo);
   }
   if (d.warna) applyColor(d.warna);
@@ -3041,45 +2504,18 @@ function applyIdentitas() {
 function handleLogoFile(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { toast('Logo terlalu besar, maks 2MB', 'warn'); return; }
+  if (file.size > 2 * 1024 * 1024) { toast('Logo maksimal 2MB', 'warn'); return; }
   const reader = new FileReader();
   reader.onload = e => {
     const dataUrl = e.target.result;
-    _updateLogoPreview(dataUrl);          // update preview di setting
-    const si = $('s-logo');
-    if (si) si.value = dataUrl;           // simpan ke input text
-    toast('✅ Logo berhasil diunggah — klik Simpan Identitas', 'ok', 3000);
+    // Update preview
+    _updateLogoPreview(dataUrl);
+    // Set ke input text juga supaya ikut tersimpan
+    const logoInput = $('s-logo');
+    if (logoInput) logoInput.value = dataUrl;
+    toast('✅ Logo siap — klik Simpan Identitas', 'ok');
   };
-  reader.onerror = () => toast('❌ Gagal membaca file', 'err');
   reader.readAsDataURL(file);
-}
-
-function previewLogoText(val) {
-  _updateLogoPreview(val || '');
-}
-
-function _updateLogoPreview(val) {
-  const prev = $('logo-preview');
-  if (!prev) return;
-  if (!val) { prev.innerHTML = '🕌'; return; }
-  if (val.startsWith('data:') || val.startsWith('http')) {
-    // data: URL tidak perlu di-escape (base64 sudah safe)
-    // http URL perlu esc() untuk XSS protection
-    const safeUrl = val.startsWith('data:') ? val : esc(val);
-    prev.innerHTML = `<img src="${safeUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="if(this.parentElement) this.parentElement.innerHTML='❌'">`;
-  } else {
-    prev.innerHTML = `<span style="font-size:32px">${san(val)}</span>`;
-  }
-  // Live update topbar logo
-  const tbLogo = $('tb-logo');
-  if (tbLogo) {
-    if (val.startsWith('data:') || val.startsWith('http')) {
-      const safeUrlTb = val.startsWith('data:') ? val : esc(val);
-      tbLogo.innerHTML = `<img src="${safeUrlTb}" style="width:30px;height:30px;border-radius:9px;object-fit:cover" onerror="if(this.parentElement) this.parentElement.innerHTML='🕌'">`;
-    } else {
-      tbLogo.innerHTML = `<span style="font-size:18px">${san(val)}</span>`;
-    }
-  }
 }
 
 function previewLogo(val) {
@@ -3093,27 +2529,24 @@ function previewLogo(val) {
 function _updateLogoPreview(val) {
   const prev = $('logo-preview');
   if (!prev) return;
-  if (!val) {
-    prev.innerHTML = '🏫';
-    return;
-  }
+  if (!val) { prev.innerHTML = '🕌'; return; }
   if (val.startsWith('data:') || val.startsWith('http')) {
-    prev.innerHTML = `<img src="${esc(val)}"
+    const su = val.startsWith('data:') ? val : esc(val);
+    prev.innerHTML = `<img src="${su}"
       style="width:100%;height:100%;object-fit:cover;border-radius:14px"
-      onerror="this.parentElement.innerHTML='❌'">`; 
+      onerror="if(this.parentElement)this.parentElement.innerHTML='❌'">`;
   } else {
-    // Emoji atau teks
-    prev.innerHTML = `<span style="font-size:32px">${val}</span>`;
+    prev.innerHTML = `<span style="font-size:32px">${san(val)}</span>`;
   }
-  // Update topbar logo juga live
-  const tbLogo = $('tb-logo');
-  if (tbLogo) {
+  const tb = $('tb-logo');
+  if (tb) {
     if (val.startsWith('data:') || val.startsWith('http')) {
-      const safeUrlTb = val.startsWith('data:') ? val : esc(val);
-      tbLogo.innerHTML = `<img src="${safeUrlTb}"
-        style="width:28px;height:28px;border-radius:7px;object-fit:cover">`;
+      const su2 = val.startsWith('data:') ? val : esc(val);
+      tb.innerHTML = `<img src="${su2}"
+        style="width:30px;height:30px;border-radius:9px;object-fit:cover"
+        onerror="if(this.parentElement)this.parentElement.innerHTML='🕌'">`;
     } else {
-      tbLogo.innerHTML = `<span style="font-size:17px">${val}</span>`;
+      tb.innerHTML = `<span style="font-size:18px">${san(val)}</span>`;
     }
   }
 }
@@ -3313,22 +2746,7 @@ function handleLogoFile(input) {
 }
 function previewLogo(val) { _setLogoPreview(val||''); }
 function _setLogoPreview(val) {
-  const p = $('logo-preview');
-  if (!p) return;
-  if (!val) { p.innerHTML='🏫'; return; }
-  if (val.startsWith('data:')||val.startsWith('http')) {
-    p.innerHTML=`<img src="${esc(val)}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.parentElement.innerHTML='❌'">`;
-  } else {
-    p.innerHTML=`<span style="font-size:28px">${val}</span>`;
-  }
-  // Live update topbar
-  const tb=$('tb-logo');
-  if (tb) {
-    if (val.startsWith('data:')||val.startsWith('http'))
-      tb.innerHTML=`<img src="${esc(val)}" style="width:28px;height:28px;border-radius:7px;object-fit:cover">`;
-    else
-      tb.innerHTML=`<span style="font-size:17px">${val}</span>`;
-  }
+  _updateLogoPreview(val);
 }
 
 window._app = {
@@ -3363,7 +2781,7 @@ window._app = {
   buatIDCard, renderQrGrid, pilihQR, cetakIDCard, unduhQR,
 
   // Setting
-  handleLogoFile, previewLogoText, _updateLogoPreview, simpanIdentitas, simpanJam, gantiPassword,
+  handleLogoFile, previewLogo, simpanIdentitas, simpanJam, gantiPassword,
   saveColor, resetHariIni, eksporBackup,
 };
 
@@ -3430,7 +2848,577 @@ if (document.readyState === 'loading') {
 
 
 
-
 </script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SESSION WARNING
+═══════════════════════════════════════ -->
+<div id="sess-warn">
+  ⚠️ Sesi berakhir dalam <span id="sess-cd">5</span> menit
+  <button onclick="window._app.renewSession()"
+    style="margin-left:8px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);
+           color:#fff;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer">
+    Perpanjang
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TOPBAR
+═══════════════════════════════════════ -->
+<div id="topbar">
+  <div id="tb-left">
+    <div id="tb-logo">🕌</div>
+    <div id="tb-texts">
+      <div id="tb-nama">SDIT Qudwatun Hasanah</div>
+      <div id="tb-sub">Sistem Absensi Digital</div>
+    </div>
+  </div>
+  <div id="tb-right">
+    <div>
+      <div id="tb-jam">--:--</div>
+      <div id="tb-tgl">--</div>
+    </div>
+    <div style="position:relative">
+      <div id="ud-btn" onclick="window._app.toggleUD(event)">
+        <div id="ud-av">👩‍🏫</div>
+        <span id="ud-nm">Guru</span>
+        <span id="ud-arr">▼</span>
+      </div>
+    
+    </div>
+  </div>
+</div>
+
+<!-- INFO BAR -->
+<!-- Dropdown: DI LUAR topbar -->
+<div id="ud-menu">
+        <div class="ud-head"><p>Masuk sebagai</p><b id="ud-role">Guru</b></div>
+        <div class="ud-sep">Ganti Akses</div>
+        <div class="ud-item" id="udi-guru"    onclick="event.stopPropagation();window._app.switchRole('guru')">   <div class="ud-ic" style="background:var(--gn2)">👩‍🏫</div>Guru</div>
+        <div class="ud-item" id="udi-admin"   onclick="event.stopPropagation();window._app.switchRole('admin')">  <div class="ud-ic" style="background:var(--or2)">👨‍💼</div>Admin</div>
+        <div class="ud-item" id="udi-kepsek"  onclick="event.stopPropagation();window._app.switchRole('kepsek')"> <div class="ud-ic" style="background:var(--pu2)">🏫</div>Kepala Sekolah</div>
+        <div class="ud-item" id="udi-yayasan" onclick="event.stopPropagation();window._app.switchRole('yayasan')"><div class="ud-ic" style="background:var(--tl2)">🏛️</div>Ketua Yayasan</div>
+        <div class="ud-hr"></div>
+        <div class="ud-item" onclick="event.stopPropagation();window._app.syncNow()">
+          <div class="ud-ic" style="background:var(--bl2)">🔄</div>Sinkronisasi
+          <span id="sync-dot" style="margin-left:auto;color:var(--gn)">●</span>
+        </div>
+        <div class="ud-item" onclick="event.stopPropagation();window._app.toggleDark()">
+          <div class="ud-ic" style="background:#1e293b">🌙</div>
+          <span id="dm-lbl">Mode Gelap</span>
+        </div>
+        <div class="ud-item red" id="udi-out" onclick="event.stopPropagation();window._app.doLogout()" style="display:none">
+          <div class="ud-ic" style="background:var(--rd2)">🚪</div>Keluar
+        </div>
+      </div>
+
+<div id="info-bar"></div>
+
+<!-- ═══════════════════════════════════════
+     KONTEN UTAMA
+═══════════════════════════════════════ -->
+<div id="content">
+
+<!-- ─── TAB: DASHBOARD ─── -->
+<div class="tab on" id="tab-dash">
+  <div id="ayat-banner">
+    <div class="ayat-arabic">اطْلُبُوا الْعِلْمَ مِنَ الْمَهْدِ إِلَى اللَّحْدِ</div>
+    <div class="ayat-trans">Tuntutlah ilmu dari buaian hingga liang lahat</div>
+    <div class="ayat-src">Hadits Nabi Muhammad SAW · Sabtu/Minggu tampilkan jadwal</div>
+  </div>
+  <div id="jambar">
+    <div id="jb-head">
+      <span>⏰ Status Waktu Absen</span>
+      <span id="jb-txt" style="color:var(--or);font-size:11px">--</span>
+    </div>
+    <div id="jb-track">
+      <div id="jb-fill" style="width:0"></div>
+      <div id="jb-ptr"  style="left:0"></div>
+    </div>
+    <div id="jb-lbl">
+      <span>06:30</span><span>08:00</span><span>11:00</span><span>14:00</span><span>15:30</span>
+    </div>
+  </div>
+
+  <div id="absen-grid">
+    <button class="ab-btn ab-off" id="btn-masuk" onclick="window._app.bukaAbsen('masuk')">
+      <div class="ab-ic">🟢</div>
+      <div><span class="ab-tx">Absen Masuk</span><span class="ab-sc" id="info-masuk">Aktif 06:30</span></div>
+    </button>
+    <button class="ab-btn ab-off" id="btn-pulang" onclick="window._app.bukaAbsen('pulang')">
+      <div class="ab-ic">🟣</div>
+      <div><span class="ab-tx">Absen Pulang</span><span class="ab-sc" id="info-pulang">Aktif 14:00</span></div>
+    </button>
+  </div>
+
+  <div id="sgrid">
+    <div class="sc" style="border-left-color:var(--or)"><div class="sc-lbl">Total</div><div class="sc-num" id="s-tot" style="color:var(--or)">0</div></div>
+    <div class="sc" style="border-left-color:var(--gn)"><div class="sc-lbl">Hadir</div><div class="sc-num" id="s-hdr" style="color:var(--gn)">0</div></div>
+    <div class="sc" style="border-left-color:var(--yl)"><div class="sc-lbl">Terlambat</div><div class="sc-num" id="s-tlt" style="color:var(--yl)">0</div></div>
+    <div class="sc" style="border-left-color:var(--bl)"><div class="sc-lbl">Izin/Sakit</div><div class="sc-num" id="s-izn" style="color:var(--bl)">0</div></div>
+    <div class="sc" style="border-left-color:var(--rd)"><div class="sc-lbl">Alpha</div><div class="sc-num" id="s-alph" style="color:var(--rd)">0</div></div>
+    <div class="sc" style="border-left-color:var(--tx3)"><div class="sc-lbl">Belum</div><div class="sc-num" id="s-alp" style="color:var(--tx2)">0</div></div>
+  </div>
+
+  <div class="card cp" id="keh-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:12px;font-weight:700">📊 Kehadiran Hari Ini</span>
+      <span id="pct" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:900;color:var(--gn)">0%</span>
+    </div>
+    <div class="pbar"><div class="pfill" id="pbar" style="width:0;background:var(--gn)"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:5px">
+      <span>0%</span><span style="color:var(--or);font-weight:700">Target ≥ 95%</span><span>100%</span>
+    </div>
+  </div>
+
+  <div class="card-head" style="margin-bottom:0;border-radius:14px 14px 0 0;border:1px solid var(--bdr);background:var(--card)">⏱ Absensi Terbaru</div>
+  <div class="card" id="list-recent">
+    <div class="empty"><div class="ei">📋</div><p>Belum ada absensi hari ini</p></div>
+  </div>
+</div>
+
+<!-- ─── TAB: SCAN QR ─── -->
+<div class="tab" id="tab-scan">
+  <div style="max-width:440px;margin:0 auto">
+    <div class="card">
+      <div class="sc-hdr">
+        <h2 id="scan-ttl">📷 Scan QR Code</h2>
+        <p  id="scan-sub">Pilih absen di dashboard</p>
+      </div>
+      <div id="qr-reader"></div>
+      <div id="scan-res" style="display:none;padding:10px 14px;border-top:1px solid var(--bdr)"></div>
+    </div>
+    <div class="card cp" style="font-size:11px;color:var(--tx2);line-height:2">
+      ✅ <b>Masuk:</b> 06:30–11:00 &nbsp;|&nbsp; ⚠️ <b>Terlambat</b> &gt; 08:01<br>
+      🟣 <b>Pulang:</b> 14:00–15:30 &nbsp;|&nbsp; 📅 <b>Sabtu/Minggu:</b> Libur
+    </div>
+  </div>
+</div>
+
+<!-- ─── TAB: MANUAL ─── -->
+<div class="tab" id="tab-manual">
+  <div class="card cp">
+    <div class="ct">✏️ Input Absensi Manual</div>
+    <div class="alert a-info" id="info-admin"><span>ℹ️</span><span>Input Izin, Sakit, Alpha dan koreksi data absensi.</span></div>
+    <div class="alert a-ok"   id="info-guru"  style="display:none"><span>📝</span><span>Input Masuk, Pulang, Izin, atau Sakit. Keterangan wajib untuk Izin/Sakit.</span></div>
+    <div class="alert a-err"  id="info-yay" style="display:none"><span>🚫</span><span>Ketua Yayasan tidak dapat mengisi absensi.</span></div>
+    <div id="frm-manual">
+      <div class="fg">
+        <label class="fl">Pilih Guru</label>
+        <select class="fc" id="mg-guru" onchange="window._app.onGuruPilih()">
+          <option value="">-- Pilih Guru --</option>
+        </select>
+        <div id="guru-status-info"
+          style="display:none;margin-top:6px;padding:7px 10px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--tx2)">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Jenis Absensi</label>
+        <select class="fc" id="mg-tipe" onchange="window._app.onTipeChange()">
+          <option value="masuk">🟢 Absen Masuk</option>
+          <option value="pulang">🟣 Absen Pulang</option>
+          <option value="izin">📝 Izin</option>
+          <option value="sakit">🏥 Sakit</option>
+          <option value="alpha">❌ Alpha</option>
+        </select>
+      </div>
+      <div class="fg" id="wrap-status">
+        <label class="fl">Status</label>
+        <select class="fc" id="mg-status">
+          <option value="hadir">Hadir Tepat Waktu</option>
+          <option value="terlambat">Terlambat</option>
+        </select>
+      </div>
+      <div class="fg" id="wrap-ket" style="display:none">
+        <label class="fl" id="ket-lbl">Keterangan *</label>
+        <textarea class="fc" id="mg-ket" rows="2" placeholder="Isi keterangan..."></textarea>
+      </div>
+      <div class="fg">
+        <label class="fl">Tanggal</label>
+        <input type="date" class="fc" id="mg-tgl">
+      </div>
+      <div class="brow">
+        <button class="btn btn-s" onclick="window._app.resetManual()">Reset</button>
+        <button class="btn btn-p" onclick="window._app.simpanManual()">✅ Simpan</button>
+      </div>
+    </div>
+  </div>
+  <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px">
+    📋 Log Hari Ini
+  </div>
+  <div class="card" id="list-manual">
+    <div class="empty"><div class="ei">📋</div><p>Belum ada absensi</p></div>
+  </div>
+</div>
+
+<!-- ─── TAB: ID CARD ─── -->
+<div class="tab" id="tab-qr">
+  <div class="card cp" style="margin-bottom:12px">
+    <div class="ct">🔲 ID Card &amp; QR Absensi</div>
+    <div class="fg" style="margin-bottom:0">
+      <label class="fl">Pilih Guru</label>
+      <select class="fc" id="qr-sel" onchange="window._app.buatIDCard()">
+        <option value="">-- Pilih Guru --</option>
+      </select>
+    </div>
+  </div>
+  <div id="qr-disp" style="display:none;flex-direction:column;align-items:center;margin-top:4px">
+    <div class="idc" id="idcard-el">
+      <div class="idc-top">
+        <div class="idc-ti">
+          <div class="idc-logo" id="idc-logo">🏫</div>
+          <div class="idc-sn"  id="idc-sn">SDIT Qudwatun Hasanah</div>
+          <div class="idc-tag" id="idc-tag">Sistem Absensi Digital</div>
+        </div>
+      </div>
+      <div class="idc-body">
+        <div class="idc-fc"><div class="idc-foto" id="idc-foto">👤</div></div>
+        <div class="idc-inf">
+          <div class="idc-nm"  id="idc-nm">Nama Guru</div>
+          <div class="idc-jb">
+            <div class="idc-dot"></div>
+            <span class="idc-jbt" id="idc-jbt">Jabatan</span>
+          </div>
+          <div class="idc-div"></div>
+          <div class="idc-ql">Scan Absensi</div>
+          <div class="idc-qb" id="qr-out"></div>
+        </div>
+      </div>
+      <div class="idc-ft">
+        <span class="idc-ftt" id="idc-ft-sn">SDIT Qudwatun Hasanah</span>
+        <div class="idc-fd"></div>
+        <span class="idc-ftt">Kartu Absensi Guru</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;width:100%;max-width:300px">
+      <button class="btn btn-p" onclick="window._app.cetakIDCard()" style="flex:1">🖨️ Cetak</button>
+      <button class="btn btn-s" onclick="window._app.unduhQR()"     style="flex:1">💾 Unduh QR</button>
+    </div>
+  </div>
+  <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin:14px 0 10px">
+    👥 Pilih Guru
+  </div>
+  <div class="ggrid" id="qr-grid"></div>
+</div>
+
+<!-- ─── TAB: REKAP ─── -->
+<div class="tab" id="tab-rekap">
+  <div class="ptabs">
+    <button class="ptab on" id="pt-harian"   onclick="window._app.setPeriod('harian',this)">📅 Harian</button>
+    <button class="ptab"    id="pt-bulanan"  onclick="window._app.setPeriod('bulanan',this)">📆 Bulanan</button>
+    <button class="ptab"    id="pt-semester" onclick="window._app.setPeriod('semester',this)">📚 Semester</button>
+    <button class="ptab"    id="pt-tahunan"  onclick="window._app.setPeriod('tahunan',this)" style="display:none">📊 Tahunan</button>
+  </div>
+  <div style="margin-bottom:10px">
+    <input type="text" class="fc" id="cari-rekap" placeholder="🔍 Cari nama guru..." oninput="window._app.filterRekap()">
+  </div>
+
+  <!-- HARIAN -->
+  <div id="r-harian">
+    <div class="card cp" style="padding-bottom:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="date" class="fc" id="r-tgl" style="flex:1;min-width:130px" onchange="window._app.loadHarian()">
+        <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadHarian()">🔄</button>
+        <button class="btn btn-s" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.eksporCSV()">CSV</button>
+        <button class="btn btn-d" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.cetakPDF()">📄 PDF</button>
+        <button class="btn"       style="width:auto;padding:9px 10px;flex:none;background:#1D6F42;color:#fff" onclick="window._app.eksporExcel()">📊 Excel</button>
+      </div>
+    </div>
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>#</th><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Ket</th></tr></thead>
+      <tbody id="tbl-h"></tbody>
+    </table></div></div>
+  </div>
+
+  <!-- BULANAN -->
+  <div id="r-bulanan" style="display:none">
+    <div class="card cp" style="padding-bottom:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="fc" id="r-bln" style="flex:1;min-width:110px">
+          <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+          <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+          <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+          <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+        </select>
+        <select class="fc" id="r-thn-b" style="flex:1;min-width:80px">
+          <option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option>
+        </select>
+        <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadBulanan()">🔄</button>
+        <button class="btn btn-s" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.eksporCSV()">CSV</button>
+        <button class="btn btn-d" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.cetakPDF()">📄 PDF</button>
+      </div>
+    </div>
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>#</th><th>Nama</th><th>Mapel</th><th>Hadir</th><th>Tlmbt</th><th>Izin</th><th>Sakit</th><th>Alpha</th><th>%</th></tr></thead>
+      <tbody id="tbl-b"></tbody>
+    </table></div></div>
+  </div>
+
+  <!-- SEMESTER -->
+  <div id="r-semester" style="display:none">
+    <div class="card cp" style="padding-bottom:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="fc" id="r-sem" style="flex:1">
+          <option value="1">Semester 1 (Jul–Des)</option><option value="2">Semester 2 (Jan–Jun)</option>
+        </select>
+        <select class="fc" id="r-thn-s" style="flex:1;min-width:80px">
+          <option value="2025">2025</option><option value="2026" selected>2026</option>
+        </select>
+        <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadSemester()">🔄</button>
+        <button class="btn btn-d" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.cetakPDF()">📄 PDF</button>
+      </div>
+    </div>
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>#</th><th>Nama</th><th>Mapel</th><th>Hadir</th><th>Tlmbt</th><th>Izin</th><th>Sakit</th><th>Alpha</th><th>%</th></tr></thead>
+      <tbody id="tbl-s"></tbody>
+    </table></div></div>
+  </div>
+
+  <!-- TAHUNAN -->
+  <div id="r-tahunan" style="display:none">
+    <div class="card cp" style="padding-bottom:10px">
+      <div style="display:flex;gap:8px">
+        <select class="fc" id="r-thn-t" style="flex:1">
+          <option value="2025">2025</option><option value="2026" selected>2026</option>
+        </select>
+        <button class="btn btn-p" style="width:auto;padding:9px 14px;flex:none" onclick="window._app.loadTahunan()">🔄</button>
+        <button class="btn btn-s" style="width:auto;padding:9px 10px;flex:none" onclick="window._app.eksporCSV()">CSV</button>
+      </div>
+    </div>
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>#</th><th>Nama</th><th>Mapel</th><th>Hadir</th><th>Tlmbt</th><th>Izin</th><th>Sakit</th><th>Alpha</th><th>%</th></tr></thead>
+      <tbody id="tbl-t"></tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<!-- ─── TAB: GURU ─── -->
+<div class="tab" id="tab-guru">
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <input type="text" class="fc" id="cari-guru" placeholder="🔍 Cari..." oninput="window._app.renderGuru()" style="flex:1">
+    <button class="btn btn-p" style="width:auto" id="btn-tambah" onclick="window._app.showFormGuru(null)">+ Tambah</button>
+  </div>
+  <div class="ggrid" id="guru-grid"></div>
+
+  <div id="form-guru" style="display:none">
+    <div class="card cp">
+      <div class="ct" id="fg-ttl">➕ Tambah Guru</div>
+      <div class="fpr">
+        <div class="fpv" id="foto-prev" onclick="document.getElementById('foto-input').click()">👤</div>
+        <div>
+          <input type="file" id="foto-input" accept="image/*" style="display:none"
+            onchange="window._app.handleFoto(this)">
+          <button class="btn btn-s" style="width:auto;font-size:11px"
+            onclick="document.getElementById('foto-input').click()">📷 Pilih Foto</button>
+          <div style="font-size:10px;color:var(--tx3);margin-top:4px">JPG/PNG maks 2MB</div>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Nama Lengkap *</label><input type="text" class="fc" id="g-nama" placeholder="Nama lengkap guru"></div>
+      <div class="fg"><label class="fl">Mata Pelajaran / Jabatan</label><input type="text" class="fc" id="g-mapel" placeholder="Contoh: Matematika"></div>
+      <div class="fg"><label class="fl">NIP / NIY</label><input type="text" class="fc" id="g-nip" placeholder="Opsional"></div>
+      <div class="fg"><label class="fl">Jenis Guru</label>
+        <select class="fc" id="g-jenis">
+          <option value="umum">Guru Umum</option>
+          <option value="quran">Guru Al Quran (07:00–08:10)</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fc" id="g-status">
+          <option value="aktif">Aktif</option>
+          <option value="nonaktif">Non-Aktif</option>
+        </select>
+      </div>
+      <input type="hidden" id="g-id">
+      <div class="brow">
+        <button class="btn btn-s" onclick="window._app.hideFormGuru()">Batal</button>
+        <button class="btn btn-p" onclick="window._app.simpanGuru()">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card cp" id="import-sec" style="display:none">
+    <div class="ct">📥 Import dari Google Sheets</div>
+    <div class="alert a-info" style="margin-bottom:10px">
+      <span>ℹ️</span><span>Format kolom: Nama | Mapel | NIP | Jenis (umum/quran)</span>
+    </div>
+    <div class="fg">
+      <label class="fl">URL Google Sheets (CSV export)</label>
+      <input type="text" class="fc" id="sheets-url" placeholder="https://docs.google.com/spreadsheets/...">
+    </div>
+    <button class="btn btn-t" onclick="window._app.importSheets()" style="width:100%">
+      <span id="imp-spin"></span>📊 Import Sekarang
+    </button>
+  </div>
+</div>
+
+<!-- ─── TAB: SETTING ─── -->
+<div class="tab" id="tab-setting">
+  <div class="card cp">
+    <div class="ct">🏫 Identitas Sekolah</div>
+    <div class="fg"><label class="fl">Nama Sekolah</label><input type="text" class="fc" id="s-nama" placeholder="Nama sekolah"></div>
+    <div class="fg"><label class="fl">Tagline / Motto</label><input type="text" class="fc" id="s-tag" placeholder="Tagline atau motto"></div>
+    <div class="fg">
+      <label class="fl">Logo Sekolah</label>
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:10px">
+        <div id="logo-preview" onclick="document.getElementById('logo-file-input').click()"
+          style="width:72px;height:72px;border-radius:16px;border:2px dashed var(--bdr2);display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--bg);overflow:hidden;cursor:pointer;flex-shrink:0;transition:all .2s" title="Klik untuk upload logo">🕌</div>
+        <div style="flex:1">
+          <input type="file" id="logo-file-input" accept="image/*" capture="environment" style="display:none" onchange="window._app.handleLogoFile(this)">
+          <button type="button" class="btn btn-s" style="width:100%;margin-bottom:8px" onclick="document.getElementById('logo-file-input').click()">📷 Upload Foto / Gambar</button>
+          <input type="text" class="fc" id="s-logo" placeholder="atau ketik URL / emoji 🏫" oninput="window._app._updateLogoPreview(this.value)" style="font-size:12px">
+          <p style="font-size:10px;color:var(--tx3);margin-top:4px">JPG/PNG maks 2MB • URL • emoji</p>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-p" onclick="window._app.simpanIdentitas()" style="width:100%">💾 Simpan Identitas</button>
+  </div>
+  <div class="card cp">
+    <div class="ct">⏰ Konfigurasi Jam Absen</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label class="fl">Mulai Masuk</label>   <input type="time" class="fc" id="j-mulai" value="06:30"></div>
+      <div class="fg"><label class="fl">Batas Tepat</label>   <input type="time" class="fc" id="j-batas" value="08:00"></div>
+      <div class="fg"><label class="fl">Maks Masuk</label>    <input type="time" class="fc" id="j-maxm"  value="11:00"></div>
+      <div class="fg"><label class="fl">Jam Alpha</label>     <input type="time" class="fc" id="j-alpha" value="10:30"></div>
+      <div class="fg"><label class="fl">Mulai Pulang</label>  <input type="time" class="fc" id="j-pulang" value="14:00"></div>
+      <div class="fg"><label class="fl">Maks Pulang</label>   <input type="time" class="fc" id="j-maxp"  value="15:30"></div>
+      <div class="fg"><label class="fl">Quran Mulai</label>   <input type="time" class="fc" id="j-qm"    value="07:00"></div>
+      <div class="fg"><label class="fl">Quran Batas</label>   <input type="time" class="fc" id="j-qb"    value="08:10"></div>
+    </div>
+    <button class="btn btn-p" onclick="window._app.simpanJam()" style="width:100%">💾 Simpan Jam</button>
+  </div>
+  <div class="card cp">
+    <div class="ct">🎨 Tema Warna</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px" id="clr-grid"></div>
+    <div class="fg" style="margin-bottom:0">
+      <label class="fl">Warna Kustom</label>
+      <input type="color" class="fc" id="clr-custom" value="#FF6B35"
+        oninput="window._app.applyColor(this.value)"
+        style="height:44px;padding:4px;cursor:pointer">
+    </div>
+  </div>
+  <div class="card cp" id="sec-security" style="display:none">
+    <div class="ct">🔐 Keamanan</div>
+    <div class="fg">
+      <label class="fl">Durasi Sesi Auto-Logout</label>
+      <select class="fc" id="s-sess">
+        <option value="30">30 menit</option>
+        <option value="60" selected>1 jam</option>
+        <option value="120">2 jam</option>
+        <option value="0">Tidak pernah</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">Ganti Password Admin</label>
+      <div class="pw-wr">
+        <input type="password" class="fc" id="s-pw1" placeholder="Password baru (min 8 karakter)">
+        <button class="pw-eye" onclick="window._app.togglePw('s-pw1')">👁</button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Konfirmasi Password</label>
+      <div class="pw-wr">
+        <input type="password" class="fc" id="s-pw2" placeholder="Ulangi password baru">
+        <button class="pw-eye" onclick="window._app.togglePw('s-pw2')">👁</button>
+      </div>
+    </div>
+    <button class="btn btn-p" onclick="window._app.gantiPassword()" style="width:100%">🔒 Simpan Password</button>
+  </div>
+  <div class="card cp">
+    <div class="ct">🔄 Firebase &amp; Data</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--gn)" id="fb-dot"></div>
+      <span style="font-size:12px;font-weight:600" id="fb-st">Memeriksa koneksi...</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button class="btn btn-s" onclick="event.stopPropagation();window._app.syncNow()"      style="flex:1">🔄 Sinkronisasi</button>
+      <button class="btn btn-d" onclick="window._app.resetHariIni()" style="flex:1">🗑 Reset Hari Ini</button>
+    </div>
+    <button class="btn btn-s" onclick="window._app.eksporBackup()" style="width:100%">📦 Export Backup JSON</button>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ═══════════════════════════════════════
+     BOTTOM NAV
+═══════════════════════════════════════ -->
+<nav id="bnav">
+  <button class="bn on" id="bn-dash"    onclick="window._app.goTab('dash')"><span class="bi">🏠</span>Dashboard<div class="bn-ln"></div></button>
+  <button class="bn"    id="bn-scan"    onclick="window._app.goTab('scan')"><span class="bi">📷</span>Scan QR<div class="bn-ln"></div></button>
+  <button class="bn"    id="bn-manual"  onclick="window._app.goTab('manual')"><span class="bi">✏️</span>Manual<div class="bn-ln"></div></button>
+  <button class="bn"    id="bn-guru"    onclick="window._app.goTab('guru')" style="display:none"><span class="bi">👥</span>Guru<div class="bn-ln"></div></button>
+  <button class="bn"    id="bn-qr"      onclick="window._app.goTab('qr')" style="display:none"><span class="bi">🪪</span>ID Card<div class="bn-ln"></div></button>
+  <button class="bn"    id="bn-rekap"   onclick="window._app.goTab('rekap')" style="display:none"><span class="bi">📊</span>Rekap<div class="bn-ln"></div></button>
+  <button class="bn"    id="bn-setting" onclick="window._app.goTab('setting')" style="display:none"><span class="bi">⚙️</span>Setting  <div class="bn-ln"></div></button>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     MODALS
+═══════════════════════════════════════ -->
+
+<!-- Login -->
+<div class="lov" id="login-ov">
+  <div class="lbox">
+    <div class="ll"><div class="le" id="l-emoji">🔐</div><h2>Login Diperlukan</h2><p id="l-desc">Masukkan kredensial</p></div>
+    <div class="lerr"      id="l-err"></div>
+    <div class="alert a-warn" id="l-warn" style="display:none"><span>⚠️</span><span id="l-warn-txt"></span></div>
+    <div class="fg"><label class="fl">Username</label><input type="text" class="fc" id="l-user" autocomplete="username"></div>
+    <div class="fg"><label class="fl">Password</label>
+      <div class="pw-wr">
+        <input type="password" class="fc" id="l-pw" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')window._app.doLogin()">
+        <button class="pw-eye" onclick="window._app.togglePw('l-pw')">👁</button>
+      </div>
+    </div>
+    <div class="brow">
+      <button class="btn btn-s" onclick="window._app.cancelLogin()">Batal</button>
+      <button class="btn btn-p" onclick="window._app.doLogin()">🔓 Masuk</button>
+    </div>
+  </div>
+</div>
+
+<!-- Konfirmasi -->
+<div class="mov" id="mov-konfirm">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mt" id="kf-ttl">Konfirmasi</div>
+    <p id="kf-msg" style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.6"></p>
+    <div class="brow">
+      <button class="btn btn-s" onclick="window._app.closeKonfirm()">Batal</button>
+      <button class="btn btn-p" id="kf-ok">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Absensi -->
+<div class="mov" id="mov-edit">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mt">✏️ Edit Absensi</div>
+    <div class="fg"><label class="fl">Nama Guru</label><input type="text" class="fc" id="e-nama" readonly></div>
+    <div class="fg"><label class="fl">Status</label>
+      <select class="fc" id="e-status">
+        <option value="hadir">Hadir</option><option value="terlambat">Terlambat</option>
+        <option value="izin">Izin</option><option value="sakit">Sakit</option><option value="alpha">Alpha</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Waktu</label><input type="time" class="fc" id="e-waktu"></div>
+    <div class="fg"><label class="fl">Keterangan</label><textarea class="fc" id="e-ket" rows="2"></textarea></div>
+    <input type="hidden" id="e-key">
+    <input type="hidden" id="e-tgl">
+    <div class="brow">
+      <button class="btn btn-s" onclick="window._app.closeModal('mov-edit')">Batal</button>
+      <button class="btn btn-d" onclick="window._app.hapusAbsensi()">🗑 Hapus</button>
+      <button class="btn btn-p" onclick="window._app.simpanEditAbsensi()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast & FAB -->
+<div class="toast" id="toast"></div>
+<button class="fab on" id="fab" onclick="window._app.refreshDash()" title="Refresh">🔄</button>
+
 </body>
 </html>
