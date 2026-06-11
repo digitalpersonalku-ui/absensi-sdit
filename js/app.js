@@ -293,7 +293,7 @@ function toggleDark() {
     root.style.setProperty('--tx3',  '#64748B');
     root.style.setProperty('--bdr',  '#334155');
   } else {
-    root.style.setProperty('--bg',   '#F1F5F9');
+    root.style.setProperty('--bg',   '#F4F5F7');
     root.style.setProperty('--card', '#ffffff');
     root.style.setProperty('--tx',   '#0F172A');
     root.style.setProperty('--tx2',  '#475569');
@@ -895,6 +895,15 @@ function doAbsen(guruId, tipe, metode = 'scan') {
   if (state.absensiData[key]) { toast(`⚠️ ${g.nama} sudah absen ${tipe}!`, 'warn'); return; }
 
   const now    = new Date().getHours() * 60 + new Date().getMinutes();
+
+  // Validasi jam absen — sudah dihandle updateAbsenBtns tapi double-check di sini
+  if (tipe === 'masuk' && now > toMin(state.JAM.maxmasuk)) {
+    toast('⏰ Sudah melewati batas jam masuk', 'warn'); return;
+  }
+  if (tipe === 'pulang' && now > toMin(state.JAM.maxpulang)) {
+    toast('⏰ Sudah melewati batas jam pulang', 'warn'); return;
+  }
+
   const batas  = g.jenis === 'quran' ? state.JAM.quran_batas : state.JAM.batas;
   const status = tipe === 'masuk' ? (now > toMin(batas) ? 'terlambat' : 'hadir') : 'hadir';
 
@@ -961,8 +970,13 @@ function simpanManual() {
   if (!g) { toast('Data guru tidak ditemukan', 'err'); return; }
 
   const key = `${guruId}_${tipe}`;
-  if (state.absensiData[key] && state.role === 'guru') {
-    toast(`Sudah ada absensi ${tipe} untuk ${g.nama}`, 'warn'); return;
+  // Cek duplikat - admin/kepsek bisa overwrite, guru tidak
+  if (state.absensiData[key]) {
+    if (state.role === 'guru') {
+      toast(`Sudah ada absensi ${tipe} untuk ${g.nama}`, 'warn'); return;
+    }
+    // Admin/kepsek: konfirmasi overwrite
+    if (!confirm(`${g.nama} sudah punya absensi ${tipe}. Timpa data lama?`)) return;
   }
 
   let status = $('mg-status')?.value || 'hadir';
@@ -1335,6 +1349,10 @@ function loadBulanan() {
   fetchDates(dates).then(allData => {
     const gl = guruAktif();
     tbody.innerHTML = gl.map(([id, g], i) => rekapRow(i, g, calcStat(allData, id))).join('') || emptyRow(9);
+  }).catch(e => {
+    console.error('loadBulanan error:', e);
+    tbody.innerHTML = emptyRow(9);
+    toast('❌ Gagal memuat rekap bulanan', 'err');
   });
 }
 
@@ -1383,12 +1401,17 @@ function eksporCSV() {
   const gl  = guruAktif();
   const rows = [['No','Nama','Mapel','Jam Masuk','Jam Pulang','Status','Keterangan']];
 
+  // Gunakan rekapCache jika tanggal cocok, bukan state.absensiData (hari ini saja)
+  const src = (state.rekapCache?.tgl === tgl && state.rekapCache?.data)
+    ? state.rekapCache.data
+    : state.absensiData;
+
   gl.forEach(([id, g], i) => {
-    const mk = state.absensiData[`${id}_masuk`];
-    const pk = state.absensiData[`${id}_pulang`];
-    const iz = state.absensiData[`${id}_izin`];
-    const sk = state.absensiData[`${id}_sakit`];
-    const al = state.absensiData[`${id}_alpha`];
+    const mk = src[`${id}_masuk`];
+    const pk = src[`${id}_pulang`];
+    const iz = src[`${id}_izin`];
+    const sk = src[`${id}_sakit`];
+    const al = src[`${id}_alpha`];
     let st = 'Belum Absen', masuk = '-', pulang = '-', ket = '';
     if      (al) st = 'Alpha';
     else if (iz) { st = 'Izin';  ket = iz.keterangan || ''; }
@@ -1418,12 +1441,17 @@ function eksporExcel() {
   const wb   = XLSX.utils.book_new();
   const hdrs = ['No','Nama Guru','Mata Pelajaran','Jam Masuk','Jam Pulang','Status','Keterangan'];
 
+  // Gunakan rekapCache jika tanggal cocok
+  const src = (state.rekapCache?.tgl === tgl && state.rekapCache?.data)
+    ? state.rekapCache.data
+    : state.absensiData;
+
   const rows = [hdrs, ...gl.map(([id, g], i) => {
-    const mk = state.absensiData[`${id}_masuk`];
-    const pk = state.absensiData[`${id}_pulang`];
-    const iz = state.absensiData[`${id}_izin`];
-    const sk = state.absensiData[`${id}_sakit`];
-    const al = state.absensiData[`${id}_alpha`];
+    const mk = src[`${id}_masuk`];
+    const pk = src[`${id}_pulang`];
+    const iz = src[`${id}_izin`];
+    const sk = src[`${id}_sakit`];
+    const al = src[`${id}_alpha`];
     let st = 'Belum Absen', masuk = '-', pulang = '-', ket = '';
     if      (al) st = 'Alpha';
     else if (iz) { st = 'Izin';  ket = iz.keterangan || ''; }
@@ -2008,8 +2036,10 @@ function cetakIDCard() {
   const card = $('idcard-el');
   if (!card) { toast('ID Card belum dibuat', 'warn'); return; }
 
-  const win = window.open('', '_blank', 'width=700,height=900');
-  win.document.write(`<!DOCTYPE html>
+  try {
+    const win = window.open('', '_blank', 'width=700,height=900');
+    if (!win) { toast('❌ Popup diblokir browser — izinkan popup untuk mencetak', 'err'); return; }
+    win.document.write(`<!DOCTYPE html>
 <html><head>
   <title>ID Card — ${esc(state.guruData[id]?.nama || '')}</title>
   <style>
@@ -2035,7 +2065,11 @@ function cetakIDCard() {
   <button class="print-btn" onclick="window.print()">🖨️ Cetak</button>
   <script>setTimeout(() => window.print(), 500);<\/script>
 </body></html>`);
-  win.document.close();
+    win.document.close();
+  } catch(e) {
+    console.error('cetakIDCard error:', e);
+    toast('❌ Gagal cetak ID Card: ' + e.message, 'err');
+  }
 }
 
 // ── Unduh QR saja sebagai PNG ──────────────
@@ -2394,7 +2428,7 @@ window._app = {
   buatIDCard, renderQrGrid, pilihQR, cetakIDCard, unduhQR,
 
   // Setting
-  handleLogoFile, previewLogo, simpanIdentitas, simpanJam, gantiPassword,
+  handleLogoFile, previewLogo, _updateLogoPreview, simpanIdentitas, simpanJam, gantiPassword,
   saveColor, resetHariIni, eksporBackup,
 };
 
