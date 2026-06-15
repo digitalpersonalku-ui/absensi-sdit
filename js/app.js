@@ -69,6 +69,13 @@ const state = {
     quran_batas: '08:10',
   },
 
+  LOK: {
+    lat:    null,
+    lng:    null,
+    radius: 200,   // meter — default 200m
+    aktif:  false, // false = fitur belum dikonfigurasi, skip cek
+  },
+
   PASS: {
     admin:   'sdit2025',
     kepsek:  'kepsek2025',
@@ -414,6 +421,14 @@ function initFirebase() {
   // ── Baca Setting Password (sekali) ───────
   DB.ref('setting/passwords').once('value').then(snap => {
     if (snap.exists()) Object.assign(state.PASS, snap.val());
+  });
+
+  // ── Baca Setting Lokasi (sekali) ──────────
+  DB.ref('setting/lokasi').once('value').then(snap => {
+    if (snap.exists()) {
+      Object.assign(state.LOK, snap.val());
+      applyLokasi();
+    }
   });
 
   // ── Listener: Absensi Hari Ini (realtime)
@@ -884,9 +899,141 @@ function bukaAbsen(tipe) {
 }
 
 // ── Proses absensi (dari scan QR) ─────────
-function doAbsen(guruId, tipe, metode = 'scan') {
+
+// ─── GEOLOKASI ─────────────────────────────────────────────
+// Haversine formula — hitung jarak 2 titik GPS dalam meter
+function hitungJarak(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2
+    + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180)
+    * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Ambil posisi GPS perangkat saat ini
+function getPosisi() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('GPS tidak tersedia di perangkat ini'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      err => reject(err),
+      { timeout: 12000, maximumAge: 60000, enableHighAccuracy: true }
+    );
+  });
+}
+
+// Cek apakah guru berada dalam radius sekolah
+// Admin/Kepsek/Yayasan selalu diizinkan (bypass)
+async function cekLokasi() {
+  // Hanya guru yang dicek lokasinya
+  if (state.role !== 'guru') return true;
+
+  // Kalau lokasi sekolah belum dikonfigurasi admin → skip cek
+  if (!state.LOK.aktif || !state.LOK.lat || !state.LOK.lng) return true;
+
+  try {
+    const toastId = toast('📍 Mengecek lokasi...', 'info', 15000);
+    const pos = await getPosisi();
+    const jarak = hitungJarak(pos.lat, pos.lng, state.LOK.lat, state.LOK.lng);
+    const jarakM = Math.round(jarak);
+
+    if (jarak <= state.LOK.radius) {
+      return true;
+    } else {
+      toast(
+        `❌ Anda berada ${jarakM}m dari sekolah.
+Absensi hanya bisa dilakukan dalam radius ${state.LOK.radius}m dari sekolah.`,
+        'err', 6000
+      );
+      return false;
+    }
+  } catch(e) {
+    // GPS gagal — izinkan tetapi beri peringatan
+    console.warn('GPS gagal:', e.message);
+    toast('⚠️ Lokasi tidak terdeteksi, absensi dicatat tanpa verifikasi GPS', 'warn', 4000);
+    return true;
+  }
+}
+
+// Simpan koordinat GPS sekolah saat ini (hanya Admin)
+async function simpanLokasi() {
+  if (!checkRole(['admin'])) return;
+  try {
+    toast('📍 Mengambil koordinat GPS...', 'info', 8000);
+    const pos = await getPosisi();
+    const radius = parseInt($('s-radius')?.value || 200);
+    await DB.ref('setting/lokasi').set({
+      lat:   pos.lat,
+      lng:   pos.lng,
+      radius,
+      aktif: true,
+    });
+    Object.assign(state.LOK, { lat: pos.lat, lng: pos.lng, radius, aktif: true });
+    applyLokasi();
+    toast(`✅ Lokasi sekolah disimpan!
+${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}
+Radius: ${radius}m`, 'ok', 5000);
+  } catch(e) {
+    if (e.code === 1) toast('❌ Izin lokasi ditolak. Aktifkan GPS di pengaturan HP.', 'err');
+    else if (e.code === 3) toast('❌ GPS timeout. Pastikan sinyal GPS aktif.', 'err');
+    else toast('❌ Gagal ambil lokasi: ' + e.message, 'err');
+  }
+}
+
+// Simpan hanya radius
+async function simpanRadius() {
+  if (!checkRole(['admin'])) return;
+  const radius = parseInt($('s-radius')?.value || 200);
+  if (radius < 50 || radius > 2000) { toast('Radius harus 50–2000 meter', 'warn'); return; }
+  await DB.ref('setting/lokasi/radius').set(radius);
+  state.LOK.radius = radius;
+  toast(`✅ Radius diperbarui: ${radius}m`, 'ok');
+}
+
+// Nonaktifkan cek lokasi (admin bisa matikan sementara)
+async function toggleLokasi() {
+  if (!checkRole(['admin'])) return;
+  state.LOK.aktif = !state.LOK.aktif;
+  await DB.ref('setting/lokasi/aktif').set(state.LOK.aktif);
+  applyLokasi();
+  toast(state.LOK.aktif ? '🔒 Verifikasi lokasi AKTIF' : '🔓 Verifikasi lokasi NONAKTIF', 'info');
+}
+
+// Apply state.LOK ke UI Setting
+function applyLokasi() {
+  const info = $('lok-info');
+  const coords = $('lok-coords');
+  const toggle = $('lok-toggle');
+  const radiusEl = $('s-radius');
+
+  if (radiusEl) radiusEl.value = state.LOK.radius;
+  if (toggle) {
+    toggle.textContent = state.LOK.aktif ? '🔒 Nonaktifkan' : '🔓 Aktifkan';
+    toggle.style.background = state.LOK.aktif ? 'var(--gn)' : 'var(--rd)';
+  }
+  if (coords) {
+    if (state.LOK.lat && state.LOK.lng) {
+      coords.innerHTML = `<span style="color:var(--gn)">✅ Lokasi tersimpan:</span>
+        ${state.LOK.lat.toFixed(6)}, ${state.LOK.lng.toFixed(6)} · Radius ${state.LOK.radius}m
+        · Status: <strong>${state.LOK.aktif ? 'AKTIF' : 'NONAKTIF'}</strong>`;
+    } else {
+      coords.innerHTML = '<span style="color:var(--yl)">⚠️ Lokasi sekolah belum diset. Klik "Simpan Lokasi Sekarang" saat berada di sekolah.</span>';
+    }
+  }
+}
+
+async function doAbsen(guruId, tipe, metode = 'scan') {
   if (state.role === 'yayasan') { toast('🚫 Tidak bisa absen', 'err'); return; }
   if (isWeekend()) { toast('📅 Hari Libur', 'warn'); return; }
+
+  // CEK LOKASI — Guru harus berada di sekitar sekolah
+  const lokasiOk = await cekLokasi();
+  if (!lokasiOk) return;
 
   const g = state.guruData[guruId];
   if (!g) { toast('❌ Guru tidak ditemukan', 'err'); return; }
@@ -948,8 +1095,12 @@ function onGuruPilih() {
   info.textContent   = txt;
 }
 
-function simpanManual() {
+async function simpanManual() {
   if (state.role === 'yayasan') { toast('🚫 Yayasan tidak dapat mengisi absensi', 'err'); return; }
+
+  // CEK LOKASI — Guru harus berada di sekitar sekolah
+  const lokasiOk = await cekLokasi();
+  if (!lokasiOk) return;
 
   const guruId = $('mg-guru').value;
   const tipe   = $('mg-tipe').value;
@@ -2430,6 +2581,7 @@ window._app = {
   // Setting
   handleLogoFile, previewLogo, _updateLogoPreview, simpanIdentitas, simpanJam, gantiPassword,
   saveColor, resetHariIni, eksporBackup,
+  simpanLokasi, simpanRadius, toggleLokasi, applyLokasi,
 };
 
 // ── Init ──────────────────────────────────
