@@ -2529,21 +2529,35 @@ function buatIDCard() {
   $('idc-tag').textContent  = state.identitasData.tagline || 'Sistem Absensi Digital';
   $('idc-ft-sn').textContent = sn;
 
-  // Logo sekolah
+  // Logo sekolah — support data: URL (upload foto) dan http: dan emoji
   const lEl = $('idc-logo');
   if (lEl) {
     const logo = state.identitasData.logo;
-    lEl.innerHTML = logo?.startsWith('http')
-      ? `<img src="${esc(logo)}" alt="logo">`
-      : `<span style="font-size:22px">${logo || '🏫'}</span>`;
+    if (logo && (logo.startsWith('data:') || logo.startsWith('http'))) {
+      // Gambar (foto upload atau URL) — data: tidak di-esc agar tidak rusak
+      const safeUrl = logo.startsWith('data:') ? logo : esc(logo);
+      lEl.innerHTML = `<img src="${safeUrl}"
+        style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        alt="logo"
+        onerror="if(this.parentElement)this.parentElement.innerHTML='🕌'">`;
+    } else {
+      // Emoji atau teks
+      lEl.innerHTML = `<span style="font-size:22px">${logo || '🕌'}</span>`;
+    }
   }
 
-  // Foto guru
+  // Foto guru — data: tidak di-esc agar base64 tidak rusak
   const fEl = $('idc-foto');
   if (fEl) {
-    fEl.innerHTML = g.foto
-      ? `<img src="${esc(g.foto)}" alt="${esc(g.nama)}">`
-      : '👤';
+    if (g.foto && (g.foto.startsWith('data:') || g.foto.startsWith('http'))) {
+      const safeUrl = g.foto.startsWith('data:') ? g.foto : esc(g.foto);
+      fEl.innerHTML = `<img src="${safeUrl}"
+        style="width:100%;height:100%;object-fit:cover"
+        alt="${esc(g.nama)}"
+        onerror="if(this.parentElement)this.parentElement.innerHTML='👤'">`;
+    } else {
+      fEl.innerHTML = '👤';
+    }
   }
 
   // QR Code — bersihkan dulu sebelum render baru
