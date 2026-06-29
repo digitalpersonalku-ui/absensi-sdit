@@ -899,7 +899,7 @@ function clearFail(role) { localStorage.removeItem('lk_' + role); }
 // ── LOGIN ─────────────────────────────────
 function switchRole(role) {
   closeUD();
-  if (role === 'guru') { state.role = 'guru'; applyRole(); startSession(); return; }
+  if (role === 'guru') { state.role = 'guru'; applyRole(); startSession(); goTab('dash'); return; }
 
   const lk = isLocked(role);
   if (lk) { toast(`🔒 Terkunci ${lk} menit lagi`, 'err'); return; }
@@ -960,12 +960,12 @@ function cancelLogin() {
 
 function doLogout() {
   closeUD();
-  // Import showKonfirm dinamis untuk hindari circular import
   showKonfirm('Keluar?', 'Kembali ke mode Guru?', () => {
     state.role = 'guru';
     clearSession();
     applyRole();
-    toast('👋 Keluar', 'info');
+    goTab('dash');          // ← selalu kembali ke Dashboard setelah keluar
+    toast('👋 Keluar ke mode Guru', 'info');
   });
 }
 
