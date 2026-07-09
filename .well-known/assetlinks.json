@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "id.my.absensi_sdit.twa",
+        "sha256_cert_fingerprints": ["EF:4B:91:B8:4C:56:0E:EA:54:BA:26:3D:5B:DE:AB:5D:F5:A6:B0:9E:96:E3:6E:30:9B:09:3C:F1:CB:F2:02:13"]
+      }
+    }]
