@@ -400,6 +400,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
 <!-- Entry point — type="module" aktifkan ES6 import/export -->
 <script>
@@ -434,11 +435,22 @@ const ROLES = {
   yayasan: { label: 'Ketua Yayasan',  icon: '🏛️' },
 };
 
-// Username untuk login
+// Username untuk login (ditampilkan ke user)
 const UNAME = {
   admin:   'admin',
   kepsek:  'kepsek',
   yayasan: 'yayasan',
+};
+
+// Pemetaan role → email internal Firebase Authentication.
+// Ini BUKAN alamat email sungguhan — hanya format identitas yang
+// disyaratkan Firebase Auth untuk provider Email/Password.
+// Akun-akun ini harus dibuat lebih dulu di Firebase Console
+// (Authentication → Users) sebelum login role ini bisa dipakai.
+const AUTH_EMAIL = {
+  admin:   'admin@absensi-sdit.internal',
+  kepsek:  'kepsek@absensi-sdit.internal',
+  yayasan: 'yayasan@absensi-sdit.internal',
 };
 
 // Preset warna tema
@@ -484,11 +496,10 @@ const state = {
     aktif:  false, // false = fitur belum dikonfigurasi, skip cek
   },
 
-  PASS: {
-    admin:   'sdit2025',
-    kepsek:  'kepsek2025',
-    yayasan: 'yayasan2025',
-  },
+  // Password TIDAK lagi disimpan di sini — autentikasi admin/kepsek/yayasan
+  // sekarang sepenuhnya ditangani Firebase Authentication (lihat auth.js).
+
+  serverTimeOffset: 0, // ms — selisih jam perangkat vs jam server Firebase
 };
 
 
@@ -527,6 +538,14 @@ const isWeekend = () => [0, 6].includes(new Date().getDay());
 
 // Sanitasi input — buang karakter berbahaya
 const san = s => s ? String(s).replace(/[<>"'`]/g, '').trim().slice(0, 300) : '';
+
+// Waktu "sekarang" yang sudah dikoreksi terhadap jam server Firebase —
+// pakai ini (bukan Date.now()/new Date() langsung) untuk keputusan yang
+// berdampak ke status absensi, supaya tidak bisa dikelabui dengan
+// memundurkan jam perangkat. Offset diperbarui realtime oleh initFirebase().
+function serverNow() {
+  return new Date(Date.now() + (state.serverTimeOffset || 0));
+}
 
 // Escape HTML — untuk ditampilkan di DOM
 const esc = s => s
@@ -800,6 +819,7 @@ function hideSessWarn() {
 // ─────────────────────────────────────────
 
 let DB = null;
+let AUTHFB = null; // instance Firebase Authentication
 
 function initFirebase() {
   firebase.initializeApp(FB_CONFIG);
@@ -826,9 +846,17 @@ function initFirebase() {
     document.dispatchEvent(new CustomEvent('jamLoaded'));
   });
 
-  // ── Baca Setting Password (sekali) ───────
-  DB.ref('setting/passwords').once('value').then(snap => {
-    if (snap.exists()) Object.assign(state.PASS, snap.val());
+  // ── Firebase Authentication (admin/kepsek/yayasan) ──
+  // Password tidak lagi pernah dikirim ke client dalam bentuk apa pun —
+  // verifikasi terjadi di server Firebase lewat signInWithEmailAndPassword.
+  AUTHFB = firebase.auth();
+
+  // ── Selisih jam perangkat vs jam server Firebase ──
+  // Dipakai supaya status "tepat waktu"/"terlambat" tidak bisa dikelabui
+  // dengan memundurkan jam HP. serverNow() di bawah selalu memberi waktu
+  // yang sudah dikoreksi dengan offset ini.
+  DB.ref('.info/serverTimeOffset').on('value', snap => {
+    state.serverTimeOffset = snap.val() || 0;
   });
 
   // ── Baca Setting Lokasi (sekali) ──────────
@@ -916,7 +944,7 @@ function switchRole(role) {
   setTimeout(() => $('l-user').focus(), 200);
 }
 
-function doLogin() {
+async function doLogin() {
   const role = _pendingRole;
   if (!role) return;
 
@@ -927,9 +955,9 @@ function doLogin() {
   const pw   = san($('l-pw').value);
   if (!user || !pw) { toast('Username & password wajib diisi', 'warn'); return; }
 
-  if (user !== UNAME[role] || pw !== state.PASS[role]) {
+  if (user !== UNAME[role]) {
     const left = recordFail(role);
-    _showErr('Password salah!');
+    _showErr('Username atau password salah!');
     if (left <= 2 && left > 0) {
       $('l-warn').style.display = 'flex';
       $('l-warn-txt').textContent = `Tersisa ${left} percobaan sebelum terkunci`;
@@ -939,12 +967,32 @@ function doLogin() {
     return;
   }
 
-  clearFail(role);
-  state.role = role;
-  $('login-ov').classList.remove('open');
-  applyRole();
-  startSession();
-  toast('✅ Login sebagai ' + ROLES[role].label, 'ok');
+  const btnLogin = $('l-submit');
+  if (btnLogin) btnLogin.disabled = true;
+
+  try {
+    // Verifikasi password terjadi di server Firebase — password TIDAK
+    // pernah dicek atau tersimpan dalam bentuk terbaca di browser.
+    await AUTHFB.signInWithEmailAndPassword(AUTH_EMAIL[role], pw);
+
+    clearFail(role);
+    state.role = role;
+    $('login-ov').classList.remove('open');
+    applyRole();
+    startSession();
+    toast('✅ Login sebagai ' + ROLES[role].label, 'ok');
+  } catch (e) {
+    const left = recordFail(role);
+    _showErr('Username atau password salah!');
+    if (left <= 2 && left > 0) {
+      $('l-warn').style.display = 'flex';
+      $('l-warn-txt').textContent = `Tersisa ${left} percobaan sebelum terkunci`;
+    }
+    $('l-pw').value = '';
+    $('l-pw').focus();
+  } finally {
+    if (btnLogin) btnLogin.disabled = false;
+  }
 }
 
 function _showErr(msg) {
@@ -961,6 +1009,7 @@ function cancelLogin() {
 function doLogout() {
   closeUD();
   showKonfirm('Keluar?', 'Kembali ke mode Guru?', () => {
+    if (AUTHFB && AUTHFB.currentUser) AUTHFB.signOut().catch(() => {});
     state.role = 'guru';
     clearSession();
     applyRole();
@@ -1337,34 +1386,47 @@ function getPosisi() {
 
 // Cek apakah guru berada dalam radius sekolah
 // Admin/Kepsek/Yayasan selalu diizinkan (bypass)
+//
+// Mengembalikan objek, BUKAN boolean, supaya kasus "GPS gagal" bisa dibedakan
+// dari "lokasi terverifikasi valid":
+//   { allowed: bool, needsVerification: bool, jarakM: number|null }
+// allowed=false  → absen diblokir total (di luar radius)
+// needsVerification=true → absen tetap dicatat, tapi ditandai perlu
+//                           ditinjau manual oleh admin (GPS gagal/ditolak),
+//                           BUKAN otomatis dianggap valid seperti sebelumnya.
 async function cekLokasi() {
   // Hanya guru yang dicek lokasinya
-  if (state.role !== 'guru') return true;
+  if (state.role !== 'guru') return { allowed: true, needsVerification: false, jarakM: null };
 
   // Kalau lokasi sekolah belum dikonfigurasi admin → skip cek
-  if (!state.LOK.aktif || !state.LOK.lat || !state.LOK.lng) return true;
+  if (!state.LOK.aktif || !state.LOK.lat || !state.LOK.lng) {
+    return { allowed: true, needsVerification: false, jarakM: null };
+  }
 
   try {
-    const toastId = toast('📍 Mengecek lokasi...', 'info', 15000);
+    toast('📍 Mengecek lokasi...', 'info', 15000);
     const pos = await getPosisi();
     const jarak = hitungJarak(pos.lat, pos.lng, state.LOK.lat, state.LOK.lng);
     const jarakM = Math.round(jarak);
 
     if (jarak <= state.LOK.radius) {
-      return true;
+      return { allowed: true, needsVerification: false, jarakM };
     } else {
       toast(
         `❌ Anda berada ${jarakM}m dari sekolah.
 Absensi hanya bisa dilakukan dalam radius ${state.LOK.radius}m dari sekolah.`,
         'err', 6000
       );
-      return false;
+      return { allowed: false, needsVerification: false, jarakM };
     }
   } catch(e) {
-    // GPS gagal — izinkan tetapi beri peringatan
+    // GPS gagal/ditolak — TIDAK lagi otomatis dianggap valid.
+    // Absensi tetap dicatat (supaya guru tidak dirugikan karena kendala
+    // teknis di luar kendalinya), tapi diberi tanda "perlu verifikasi
+    // manual" agar admin bisa meninjau entri ini secara terpisah.
     console.warn('GPS gagal:', e.message);
-    toast('⚠️ Lokasi tidak terdeteksi, absensi dicatat tanpa verifikasi GPS', 'warn', 4000);
-    return true;
+    toast('⚠️ Lokasi tidak terdeteksi. Absensi dicatat, namun ditandai "perlu verifikasi manual" oleh admin.', 'warn', 5000);
+    return { allowed: true, needsVerification: true, jarakM: null };
   }
 }
 
@@ -1440,8 +1502,8 @@ async function doAbsen(guruId, tipe, metode = 'scan') {
   if (isWeekend()) { toast('📅 Hari Libur', 'warn'); return; }
 
   // CEK LOKASI — Guru harus berada di sekitar sekolah
-  const lokasiOk = await cekLokasi();
-  if (!lokasiOk) return;
+  const lok = await cekLokasi();
+  if (!lok.allowed) return;
 
   const g = state.guruData[guruId];
   if (!g) { toast('❌ Guru tidak ditemukan', 'err'); return; }
@@ -1449,7 +1511,8 @@ async function doAbsen(guruId, tipe, metode = 'scan') {
   const key = `${guruId}_${tipe}`;
   if (state.absensiData[key]) { toast(`⚠️ ${g.nama} sudah absen ${tipe}!`, 'warn'); return; }
 
-  const now    = new Date().getHours() * 60 + new Date().getMinutes();
+  const sNow = serverNow();
+  const now  = sNow.getHours() * 60 + sNow.getMinutes();
 
   // Validasi jam absen — sudah dihandle updateAbsenBtns tapi double-check di sini
   if (tipe === 'masuk' && now > toMin(state.JAM.maxmasuk)) {
@@ -1465,7 +1528,10 @@ async function doAbsen(guruId, tipe, metode = 'scan') {
   DB.ref(`absensi/${today()}/${key}`).set({
     guruId, nama: g.nama, mapel: g.mapel || '',
     waktu: nowHM(), status, tipe, metode,
-    tanggal: today(), createdAt: Date.now(), createdBy: state.role,
+    tanggal: today(),
+    createdAt: firebase.database.ServerValue.TIMESTAMP, // waktu server, bukan waktu perangkat
+    createdBy: state.role,
+    perluVerifikasiLokasi: lok.needsVerification, // true jika GPS gagal saat absen — perlu ditinjau admin
   }).then(() => {
     toast(`${status === 'hadir' ? '✅ Hadir' : '⚠️ Terlambat'} — ${g.nama}`, 'ok', 3000);
     if (navigator.vibrate) navigator.vibrate(tipe === 'masuk' ? [80, 40, 80] : [160]);
@@ -1507,8 +1573,8 @@ async function simpanManual() {
   if (state.role === 'yayasan') { toast('🚫 Yayasan tidak dapat mengisi absensi', 'err'); return; }
 
   // CEK LOKASI — Guru harus berada di sekitar sekolah
-  const lokasiOk = await cekLokasi();
-  if (!lokasiOk) return;
+  const lok = await cekLokasi();
+  if (!lok.allowed) return;
 
   const guruId = $('mg-guru').value;
   const tipe   = $('mg-tipe').value;
@@ -1547,7 +1613,10 @@ async function simpanManual() {
     guruId, nama: g.nama, mapel: g.mapel || '',
     waktu: nowHM(), status, tipe,
     metode: 'manual', keterangan: ket,
-    tanggal: tgl, createdAt: Date.now(), createdBy: state.role,
+    tanggal: tgl,
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
+    createdBy: state.role,
+    perluVerifikasiLokasi: lok.needsVerification,
   }).then(() => {
     toast(`✅ Absensi ${tipe} ${g.nama} disimpan`, 'ok');
     resetManual();
@@ -1619,6 +1688,7 @@ function renderRecent() {
       <div class="lrt">
         <div class="ltm">${d.waktu || '-'}</div>
         <span class="bdg ${statusBadge(d.status)}">${esc(d.status)}</span>
+        ${d.perluVerifikasiLokasi ? '<span class="bdg" style="background:var(--yl2,#FEF3C7);color:var(--yl3,#92400E)" title="GPS gagal saat absen — lokasi belum terverifikasi">📍 Perlu verifikasi</span>' : ''}
       </div>
     </div>`).join('');
 }
@@ -1671,7 +1741,7 @@ function simpanEditAbsensi() {
     waktu:      $('e-waktu').value,
     keterangan: san($('e-ket').value),
     editedBy:   state.role,
-    editedAt:   Date.now(),
+    editedAt:   firebase.database.ServerValue.TIMESTAMP,
   }).then(() => {
     closeModal('mov-edit');
     toast('✅ Absensi diperbarui', 'ok');
@@ -1882,7 +1952,7 @@ function renderHarian(gl, data) {
           <span style="font-size:10px;color:var(--tx3)">${esc(g.mapel || '')}</span></td>
       <td>${masuk}</td>
       <td>${pulang}</td>
-      <td><span class="bdg ${sc}">${st}</span></td>
+      <td><span class="bdg ${sc}">${st}</span>${(mk && mk.perluVerifikasiLokasi) ? ' <span title="GPS gagal saat absen masuk — lokasi belum terverifikasi">📍</span>' : ''}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(ket)}</td>
     </tr>`;
   }).join('');
@@ -2926,8 +2996,17 @@ function simpanJam() {
 }
 
 // ── Ganti Password ────────────────────────
-function gantiPassword() {
-  if (!checkRole(['admin'])) return;
+// Catatan: sejak migrasi ke Firebase Authentication, tiap role mengganti
+// passwordnya SENDIRI saat login sebagai role tersebut (Firebase mewajibkan
+// re-autentikasi baru-baru ini untuk mengubah password — demi keamanan,
+// bukan bug). Admin tidak lagi bisa mengubah password kepsek/yayasan dari
+// sini; itu harus dilakukan lewat Firebase Console atau oleh role itu sendiri.
+async function gantiPassword() {
+  const role = state.role;
+  if (!AUTHFB || !AUTHFB.currentUser || role === 'guru') {
+    toast('Login sebagai role yang bersangkutan untuk mengganti password', 'warn');
+    return;
+  }
   const a = $('s-pw1').value;
   const b = $('s-pw2').value;
   if (!a || !b)             { toast('Isi kedua field password', 'warn'); return; }
@@ -2936,14 +3015,18 @@ function gantiPassword() {
   if (!/[a-zA-Z]/.test(a) || !/[0-9]/.test(a)) {
     toast('Harus mengandung huruf & angka', 'warn'); return;
   }
-  DB.ref('setting/passwords/admin').set(a)
-    .then(() => {
-      state.PASS.admin = a;
-      toast('✅ Password berhasil diubah', 'ok');
-      $('s-pw1').value = '';
-      $('s-pw2').value = '';
-    })
-    .catch(() => toast('❌ Gagal menyimpan', 'err'));
+  try {
+    await AUTHFB.currentUser.updatePassword(a);
+    toast('✅ Password berhasil diubah', 'ok');
+    $('s-pw1').value = '';
+    $('s-pw2').value = '';
+  } catch (e) {
+    if (e.code === 'auth/requires-recent-login') {
+      toast('⚠️ Demi keamanan, silakan logout lalu login ulang sebelum mengganti password', 'warn', 5000);
+    } else {
+      toast('❌ Gagal menyimpan: ' + e.message, 'err');
+    }
+  }
 }
 
 // ── Simpan Warna ke Firebase ──────────────
@@ -3729,7 +3812,7 @@ if (document.readyState === 'loading') {
     </div>
     <div class="brow">
       <button class="btn btn-s" onclick="window._app.cancelLogin()">Batal</button>
-      <button class="btn btn-p" onclick="window._app.doLogin()">🔓 Masuk</button>
+      <button class="btn btn-p" id="l-submit" onclick="window._app.doLogin()">🔓 Masuk</button>
     </div>
   </div>
 </div>
