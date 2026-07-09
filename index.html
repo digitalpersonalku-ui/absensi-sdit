@@ -1959,6 +1959,7 @@ function renderHarian(gl, data) {
   if (!tbody) return;
   const q = ($('cari-rekap')?.value || '').toLowerCase();
   const filtered = gl.filter(([, g]) => g.nama.toLowerCase().includes(q));
+  const canEditBase = (state.role === 'admin' || state.role === 'kepsek');
 
   tbody.innerHTML = filtered.map(([id, g], i) => {
     const mk = data[`${id}_masuk`];
@@ -1976,17 +1977,33 @@ function renderHarian(gl, data) {
       st     = mk.status === 'hadir' ? 'Hadir' : 'Terlambat';
       sc     = mk.status === 'hadir' ? 'ok' : 'tl';
       if (pk) pulang = pk.waktu || '-';
+    } else if (pk) {
+      // Entri "pulang" tanpa "masuk" — anomali (data tidak lengkap/salah
+      // input), sebelumnya tersembunyi total dari tabel ini. Sekarang
+      // ditandai eksplisit supaya admin sadar dan bisa meninjau/menghapusnya.
+      pulang = pk.waktu || '-';
+      st     = '⚠️ Pulang saja';
+      sc     = 'tl';
     }
 
-    const canEdit = (state.role === 'admin' || state.role === 'kepsek') && mk;
-    const eKey    = mk ? `${id}_masuk` : '';
+    // Masuk & pulang sekarang bisa diklik terpisah untuk edit/hapus —
+    // sebelumnya klik baris cuma pernah menyasar entri "masuk", membuat
+    // entri "pulang" tidak pernah bisa dihapus lewat tabel ini sama sekali.
+    const masukClickable  = canEditBase && mk;
+    const pulangClickable = canEditBase && pk;
+    const masukCell = masukClickable
+      ? `<span onclick="event.stopPropagation();window._app.openEdit('${esc(id + '_masuk')}')" style="cursor:pointer;text-decoration:underline dotted" title="Klik untuk edit/hapus absen masuk">${masuk}</span>`
+      : masuk;
+    const pulangCell = pulangClickable
+      ? `<span onclick="event.stopPropagation();window._app.openEdit('${esc(id + '_pulang')}')" style="cursor:pointer;text-decoration:underline dotted" title="Klik untuk edit/hapus absen pulang">${pulang}</span>`
+      : pulang;
 
-    return `<tr ${canEdit ? `onclick="window._app.openEdit('${esc(eKey)}')" style="cursor:pointer"` : ''}>
+    return `<tr>
       <td style="color:var(--tx3)">${i + 1}</td>
       <td><b>${esc(g.nama)}</b><br>
           <span style="font-size:10px;color:var(--tx3)">${esc(g.mapel || '')}</span></td>
-      <td>${masuk}</td>
-      <td>${pulang}</td>
+      <td>${masukCell}</td>
+      <td>${pulangCell}</td>
       <td><span class="bdg ${sc}">${st}</span>${(mk && mk.perluVerifikasiLokasi) ? ' <span title="GPS gagal saat absen masuk — lokasi belum terverifikasi">📍</span>' : ''}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(ket)}</td>
     </tr>`;
