@@ -1542,7 +1542,12 @@ async function doAbsen(guruId, tipe, metode = 'scan') {
 function onTipeChange() {
   const tipe = $('mg-tipe')?.value;
   $('wrap-ket').style.display    = ['izin','sakit','alpha'].includes(tipe) ? 'block' : 'none';
-  $('wrap-status').style.display = tipe === 'masuk' ? 'block' : 'none';
+  // Dropdown status bebas HANYA untuk Admin/Kepsek (koreksi data).
+  // Guru tidak boleh memilih status sendiri — dihitung otomatis dari jam
+  // server saat submit, sama seperti Scan QR.
+  const isPrivileged = state.role === 'admin' || state.role === 'kepsek';
+  $('wrap-status').style.display      = (tipe === 'masuk' && isPrivileged) ? 'block' : 'none';
+  $('wrap-status-guru').style.display = (tipe === 'masuk' && !isPrivileged) ? 'block' : 'none';
   $('ket-lbl').textContent       = tipe === 'alpha' ? 'Keterangan (opsional)' : 'Keterangan *';
 }
 
@@ -1608,6 +1613,29 @@ async function simpanManual() {
   if (tipe === 'izin')  status = 'izin';
   if (tipe === 'sakit') status = 'sakit';
   if (tipe === 'alpha') status = 'alpha';
+
+  // Guru: berlaku aturan sama seperti Scan QR — tidak bisa memilih status
+  // sendiri, dan tidak bisa input di luar jam yang ditentukan. Ini menutup
+  // celah "tandai diri Hadir Tepat Waktu" lewat tab Manual di luar jam.
+  // Admin/Kepsek TIDAK terkena batasan ini karena tab ini juga dipakai
+  // untuk mengoreksi data lampau (mengisi Izin/Sakit/Alpha kapan saja, dsb).
+  if (state.role === 'guru' && (tipe === 'masuk' || tipe === 'pulang')) {
+    const sNow = serverNow();
+    const nowMin = sNow.getHours() * 60 + sNow.getMinutes();
+
+    if (tipe === 'masuk' && nowMin > toMin(state.JAM.maxmasuk)) {
+      toast('⏰ Sudah melewati batas jam masuk', 'warn'); return;
+    }
+    if (tipe === 'pulang' && nowMin > toMin(state.JAM.maxpulang)) {
+      toast('⏰ Sudah melewati batas jam pulang', 'warn'); return;
+    }
+    if (tipe === 'masuk') {
+      const batas = g.jenis === 'quran' ? state.JAM.quran_batas : state.JAM.batas;
+      status = nowMin > toMin(batas) ? 'terlambat' : 'hadir';
+    } else {
+      status = 'hadir';
+    }
+  }
 
   DB.ref(`absensi/${tgl}/${key}`).set({
     guruId, nama: g.nama, mapel: g.mapel || '',
@@ -3437,6 +3465,11 @@ if (document.readyState === 'loading') {
           <option value="hadir">Hadir Tepat Waktu</option>
           <option value="terlambat">Terlambat</option>
         </select>
+      </div>
+      <div class="fg" id="wrap-status-guru" style="display:none">
+        <div style="padding:8px 10px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--tx2)">
+          ℹ️ Status (Hadir/Terlambat) dihitung otomatis dari jam saat Anda submit, sesuai jam kerja yang berlaku.
+        </div>
       </div>
       <div class="fg" id="wrap-ket" style="display:none">
         <label class="fl" id="ket-lbl">Keterangan *</label>
