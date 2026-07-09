@@ -8,12 +8,13 @@
 <meta name="apple-touch-fullscreen" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Absensi SDIT">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23FF6B35'/><text y='24' x='4' font-size='22'>🏫</text></svg>">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>Absensi - SDIT Qudwatun Hasanah</title>
 
 <!-- Font -->
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23FF6B35'/><text y='24' x='4' font-size='22'>🕌</text></svg>">
 
 <!-- CSS -->
 <style>
@@ -3896,6 +3897,18 @@ if (document.readyState === 'loading') {
 <!-- Toast & FAB -->
 <div class="toast" id="toast"></div>
 <button class="fab on" id="fab" onclick="window._app.refreshDash()" title="Refresh">🔄</button>
+
+<script>
+// Registrasi Service Worker (PWA) — hanya di HTTPS/localhost, aman diabaikan
+// kalau browser tidak mendukung (mis. beberapa in-app browser lama).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => {
+      console.warn('Service worker gagal register:', err);
+    });
+  });
+}
+</script>
 
 </body>
 </html>
