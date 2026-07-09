@@ -1513,16 +1513,21 @@ async function doAbsen(guruId, tipe, metode = 'scan') {
 
   const sNow = serverNow();
   const now  = sNow.getHours() * 60 + sNow.getMinutes();
+  const { JAM } = state;
 
-  // Validasi jam absen — sudah dihandle updateAbsenBtns tapi double-check di sini
-  if (tipe === 'masuk' && now > toMin(state.JAM.maxmasuk)) {
-    toast('⏰ Sudah melewati batas jam masuk', 'warn'); return;
+  // Validasi jam absen — dicek ulang di sini (bukan hanya di bukaAbsen/
+  // updateAbsenBtns) karena tab Scan bisa dibuka langsung lewat nav bawah,
+  // melewati gerbang bukaAbsen(). Cek KEDUA batas: sebelum jam mulai DAN
+  // sesudah batas akhir — sebelumnya hanya batas akhir yang dicek, sehingga
+  // absen bisa lolos jika dilakukan jauh sebelum jam mulai (mis. dini hari).
+  if (tipe === 'masuk' && (now < toMin(JAM.mulai) || now > toMin(JAM.maxmasuk))) {
+    toast(`⏰ Absen masuk hanya ${JAM.mulai}–${JAM.maxmasuk}`, 'warn'); return;
   }
-  if (tipe === 'pulang' && now > toMin(state.JAM.maxpulang)) {
-    toast('⏰ Sudah melewati batas jam pulang', 'warn'); return;
+  if (tipe === 'pulang' && (now < toMin(JAM.pulang) || now > toMin(JAM.maxpulang))) {
+    toast(`⏰ Absen pulang hanya ${JAM.pulang}–${JAM.maxpulang}`, 'warn'); return;
   }
 
-  const batas  = g.jenis === 'quran' ? state.JAM.quran_batas : state.JAM.batas;
+  const batas  = g.jenis === 'quran' ? JAM.quran_batas : JAM.batas;
   const status = tipe === 'masuk' ? (now > toMin(batas) ? 'terlambat' : 'hadir') : 'hadir';
 
   DB.ref(`absensi/${today()}/${key}`).set({
@@ -1622,15 +1627,16 @@ async function simpanManual() {
   if (state.role === 'guru' && (tipe === 'masuk' || tipe === 'pulang')) {
     const sNow = serverNow();
     const nowMin = sNow.getHours() * 60 + sNow.getMinutes();
+    const { JAM } = state;
 
-    if (tipe === 'masuk' && nowMin > toMin(state.JAM.maxmasuk)) {
-      toast('⏰ Sudah melewati batas jam masuk', 'warn'); return;
+    if (tipe === 'masuk' && (nowMin < toMin(JAM.mulai) || nowMin > toMin(JAM.maxmasuk))) {
+      toast(`⏰ Absen masuk hanya ${JAM.mulai}–${JAM.maxmasuk}`, 'warn'); return;
     }
-    if (tipe === 'pulang' && nowMin > toMin(state.JAM.maxpulang)) {
-      toast('⏰ Sudah melewati batas jam pulang', 'warn'); return;
+    if (tipe === 'pulang' && (nowMin < toMin(JAM.pulang) || nowMin > toMin(JAM.maxpulang))) {
+      toast(`⏰ Absen pulang hanya ${JAM.pulang}–${JAM.maxpulang}`, 'warn'); return;
     }
     if (tipe === 'masuk') {
-      const batas = g.jenis === 'quran' ? state.JAM.quran_batas : state.JAM.batas;
+      const batas = g.jenis === 'quran' ? JAM.quran_batas : JAM.batas;
       status = nowMin > toMin(batas) ? 'terlambat' : 'hadir';
     } else {
       status = 'hadir';
