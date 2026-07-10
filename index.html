@@ -397,6 +397,7 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 
 <!-- Library eksternal (harus load sebelum module) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -2765,13 +2766,20 @@ function cetakIDCard() {
   <style>
     @page { size: 53.98mm 85.6mm; margin: 0; }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
+    html, body {
       font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
       display: flex; flex-direction: column; align-items: center;
-      padding: 20px; min-height: 100vh;
+      padding: 20px;
       background: #f0f4f8;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+    }
+    /* Cegah kartu terpecah ke halaman berikutnya — penting karena beberapa
+       printer/PDF Android mengabaikan @page kecil di atas dan memakai A4,
+       sehingga tanpa aturan ini kartu bisa terbelah jadi 2 halaman. */
+    .wrap, .idc {
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=DM+Sans:wght@400;600;700&display=swap');
     :root {
@@ -2838,6 +2846,7 @@ function cetakIDCard() {
     @media print {
       body { padding: 0; background: white; }
       .print-btn { display: none; }
+      .wrap, .idc { break-inside: avoid; page-break-inside: avoid; }
     }
 </style>
 </head>
@@ -2856,19 +2865,35 @@ function cetakIDCard() {
   }
 }
 
-// ── Unduh QR saja sebagai PNG ──────────────
-function unduhIDCard() {
+// ── Unduh ID Card sebagai gambar PNG ───────
+async function unduhIDCard() {
   const card = $('idcard-el');
   if (!card) { toast('ID Card belum dibuat. Pilih guru dulu.', 'warn'); return; }
-  const id = $('qr-sel')?.value;
+  const id   = $('qr-sel')?.value;
   const nama = state.guruData[id]?.nama?.replace(/[^a-zA-Z0-9]/g, '_') || 'idcard';
 
-  // Buat blob HTML untuk diunduh sebagai file
-  toast('⏳ Menyiapkan ID Card untuk diunduh...', 'info', 3000);
+  if (typeof html2canvas === 'undefined') {
+    toast('❌ Gagal memuat modul gambar. Coba lagi atau cek koneksi internet.', 'err');
+    return;
+  }
 
-  // Cukup buka print dialog untuk simpan sebagai PDF/gambar
-  cetakIDCard();
-  setTimeout(() => toast('💡 Di jendela cetak: pilih "Simpan sebagai PDF" untuk menyimpan file', 'info', 6000), 1500);
+  toast('⏳ Menyiapkan gambar ID Card...', 'info', 4000);
+  try {
+    const canvas = await html2canvas(card, {
+      backgroundColor: '#ffffff',
+      scale: 3,          // resolusi tinggi supaya tajam saat dicetak/dibagikan
+      useCORS: true,
+      logging: false,
+    });
+    const a = document.createElement('a');
+    a.download = `idcard-${nama}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    toast('💾 ID Card berhasil diunduh sebagai gambar', 'ok');
+  } catch (e) {
+    console.error('unduhIDCard error:', e);
+    toast('❌ Gagal membuat gambar ID Card: ' + e.message, 'err');
+  }
 }
 
 function unduhQR() {
