@@ -3581,9 +3581,10 @@ if (document.readyState === 'loading') {
         <span class="idc-ftt">Kartu Absensi Guru</span>
       </div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:14px;width:100%;max-width:300px">
-      <button class="btn btn-p" onclick="window._app.cetakIDCard()" style="flex:1">🖨️ Cetak</button>
-      <button class="btn btn-s" onclick="window._app.unduhQR()"     style="flex:1">💾 Unduh QR</button>
+    <div style="display:flex;gap:10px;margin-top:14px;width:100%;max-width:300px;flex-wrap:wrap">
+      <button class="btn btn-p" onclick="window._app.cetakIDCard()"   style="flex:1;min-width:120px">🖨️ Cetak</button>
+      <button class="btn btn-s" onclick="window._app.unduhIDCard()"   style="flex:1;min-width:120px">🪪 Unduh ID Card</button>
+      <button class="btn btn-s" onclick="window._app.unduhQR()"       style="flex:1;min-width:120px">💾 Unduh QR</button>
     </div>
   </div>
   <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;margin:14px 0 10px">
