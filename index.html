@@ -396,6 +396,8 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 </style>
 
 <!-- Library eksternal (harus load sebelum module) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -1274,15 +1276,65 @@ function hapusGuru(id, nama) {
   });
 }
 
+// ── Upload & Crop Foto ─────────────────────
+let _cropper = null;
+
 function handleFoto(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { toast('Foto maksimal 2MB', 'warn'); return; }
+  if (file.size > 5 * 1024 * 1024) { toast('Foto maksimal 5MB', 'warn'); return; }
+  if (!file.type.startsWith('image/')) { toast('File harus berupa gambar', 'warn'); return; }
+
   const reader = new FileReader();
   reader.onload = e => {
-    $('foto-prev').innerHTML = `<img src="${e.target.result}" alt="foto">`;
+    const img = $('crop-img');
+    if (!img) return;
+    img.src = e.target.result;
+    $('mov-crop')?.classList.add('open');
+
+    // Tunggu gambar benar-benar termuat sebelum Cropper dipasang
+    img.onload = () => {
+      if (_cropper) { _cropper.destroy(); _cropper = null; }
+      if (typeof Cropper === 'undefined') {
+        toast('❌ Modul crop gagal dimuat, cek koneksi internet', 'err');
+        return;
+      }
+      _cropper = new Cropper(img, {
+        aspectRatio: 4 / 5,      // rasio potret, serasi dengan foto di ID Card
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.9,
+        background: false,
+        responsive: true,
+      });
+    };
   };
   reader.readAsDataURL(file);
+  input.value = ''; // supaya bisa pilih file yang sama lagi kalau mau ulang
+}
+
+function batalCropFoto() {
+  if (_cropper) { _cropper.destroy(); _cropper = null; }
+  $('mov-crop')?.classList.remove('open');
+}
+
+function simpanCropFoto() {
+  if (!_cropper) { toast('Belum ada foto untuk di-crop', 'warn'); return; }
+  try {
+    const canvas = _cropper.getCroppedCanvas({
+      width: 400, height: 500,   // ukuran cukup tajam tapi tetap kecil filenya
+      imageSmoothingQuality: 'high',
+    });
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85); // JPEG kompresi ringan
+    $('foto-prev').innerHTML = `<img src="${dataUrl}" alt="foto">`;
+    _cropper.destroy();
+    _cropper = null;
+    $('mov-crop')?.classList.remove('open');
+    toast('✅ Foto siap disimpan', 'ok');
+  } catch (e) {
+    console.error('simpanCropFoto error:', e);
+    toast('❌ Gagal memproses foto: ' + e.message, 'err');
+  }
 }
 
 // ── Import dari Google Sheets ─────────────
@@ -3262,6 +3314,7 @@ window._app = {
 
   // ID Card
   buatIDCard, renderQrGrid, pilihQR, cetakIDCard, unduhQR, unduhIDCard,
+  batalCropFoto, simpanCropFoto,
 
   // Setting
   handleLogoFile, previewLogo, _updateLogoPreview, simpanIdentitas, simpanJam, gantiPassword,
@@ -3933,6 +3986,21 @@ if (document.readyState === 'loading') {
       <button class="btn btn-s" onclick="window._app.closeModal('mov-edit')">Batal</button>
       <button class="btn btn-d" onclick="window._app.hapusAbsensi()">🗑 Hapus</button>
       <button class="btn btn-p" onclick="window._app.simpanEditAbsensi()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="mov" id="mov-crop">
+  <div class="modal" style="max-width:420px">
+    <div class="mdrag"></div>
+    <div class="mt">✂️ Sesuaikan Foto</div>
+    <p style="font-size:11px;color:var(--tx2);margin-bottom:10px">Geser & perbesar/perkecil untuk mengatur bagian foto yang dipakai. Rasio sudah disesuaikan dengan ID Card.</p>
+    <div style="width:100%;max-height:320px;overflow:hidden;border-radius:10px;background:#111">
+      <img id="crop-img" style="display:block;max-width:100%">
+    </div>
+    <div class="brow" style="margin-top:14px">
+      <button class="btn btn-s" onclick="window._app.batalCropFoto()">Batal</button>
+      <button class="btn btn-p" onclick="window._app.simpanCropFoto()">✅ Pakai Foto Ini</button>
     </div>
   </div>
 </div>
