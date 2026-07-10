@@ -1565,6 +1565,14 @@ async function doAbsen(guruId, tipe, metode = 'scan') {
   const key = `${guruId}_${tipe}`;
   if (state.absensiData[key]) { toast(`⚠️ ${g.nama} sudah absen ${tipe}!`, 'warn'); return; }
 
+  // Tidak boleh absen pulang kalau belum pernah absen masuk hari ini —
+  // mencegah entri "pulang" yatim yang membingungkan di rekap (sebelumnya
+  // bisa terjadi dan bahkan tersembunyi dari tabel Rekap Harian).
+  if (tipe === 'pulang' && !state.absensiData[`${guruId}_masuk`]) {
+    toast(`⚠️ ${g.nama} belum absen masuk hari ini — tidak bisa absen pulang`, 'warn');
+    return;
+  }
+
   const sNow = serverNow();
   const now  = sNow.getHours() * 60 + sNow.getMinutes();
   const { JAM } = state;
@@ -1666,6 +1674,18 @@ async function simpanManual() {
     }
     // Admin/kepsek: konfirmasi overwrite
     if (!confirm(`${g.nama} sudah punya absensi ${tipe}. Timpa data lama?`)) return;
+  }
+
+  // Tidak boleh absen pulang kalau belum pernah absen masuk hari itu.
+  // Guru: diblokir total (mencegah entri "pulang" yatim yang membingungkan
+  // di rekap). Admin/Kepsek: tetap diizinkan lewat konfirmasi eksplisit,
+  // karena tab ini juga dipakai mengoreksi data lampau yang tidak lengkap.
+  if (tipe === 'pulang' && !state.absensiData[`${guruId}_masuk`]) {
+    if (state.role === 'guru') {
+      toast(`⚠️ Anda belum absen masuk hari ini — tidak bisa absen pulang`, 'warn');
+      return;
+    }
+    if (!confirm(`${g.nama} belum tercatat absen masuk hari ini. Tetap simpan absen pulang tanpa masuk?`)) return;
   }
 
   let status = $('mg-status')?.value || 'hadir';
