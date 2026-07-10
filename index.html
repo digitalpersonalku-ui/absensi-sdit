@@ -540,6 +540,29 @@ const toMin = t => {
 // Cek apakah hari ini Sabtu/Minggu
 const isWeekend = () => [0, 6].includes(new Date().getDay());
 
+// Jenis absensi yang saling eksklusif dalam satu hari — seorang guru tidak
+// boleh tercatat Izin DAN Sakit, atau Masuk DAN Sakit, di hari yang sama.
+// Masuk & Pulang dikecualikan dari daftar ini karena keduanya memang
+// pasangan normal (guru masuk lalu pulang di hari yang sama).
+const EXCEPTION_TYPES = ['izin', 'sakit', 'alpha'];
+
+function cekKonflikStatus(guruId, tipeBaru) {
+  const konflik = [];
+  if (EXCEPTION_TYPES.includes(tipeBaru)) {
+    // Izin/Sakit/Alpha konflik dengan Masuk dan dengan jenis exception lain
+    if (state.absensiData[`${guruId}_masuk`]) konflik.push('masuk');
+    EXCEPTION_TYPES.forEach(t => {
+      if (t !== tipeBaru && state.absensiData[`${guruId}_${t}`]) konflik.push(t);
+    });
+  } else if (tipeBaru === 'masuk') {
+    // Masuk konflik dengan Izin/Sakit/Alpha yang sudah ada
+    EXCEPTION_TYPES.forEach(t => {
+      if (state.absensiData[`${guruId}_${t}`]) konflik.push(t);
+    });
+  }
+  return konflik;
+}
+
 // Sanitasi input — buang karakter berbahaya
 const san = s => s ? String(s).replace(/[<>"'`]/g, '').trim().slice(0, 300) : '';
 
@@ -1573,6 +1596,14 @@ async function doAbsen(guruId, tipe, metode = 'scan') {
     return;
   }
 
+  // Cegah scan Masuk kalau hari ini sudah tercatat Izin/Sakit/Alpha —
+  // status-status itu saling eksklusif dengan kehadiran fisik.
+  const konflik = cekKonflikStatus(guruId, tipe);
+  if (konflik.length) {
+    toast(`⚠️ ${g.nama} sudah tercatat "${konflik.join(', ')}" hari ini — tidak bisa absen ${tipe} juga`, 'warn');
+    return;
+  }
+
   const sNow = serverNow();
   const now  = sNow.getHours() * 60 + sNow.getMinutes();
   const { JAM } = state;
@@ -1667,6 +1698,8 @@ async function simpanManual() {
   if (!g) { toast('Data guru tidak ditemukan', 'err'); return; }
 
   const key = `${guruId}_${tipe}`;
+  let keysToDelete = []; // key lama yang perlu dihapus kalau admin/kepsek konfirmasi override
+
   // Cek duplikat - admin/kepsek bisa overwrite, guru tidak
   if (state.absensiData[key]) {
     if (state.role === 'guru') {
@@ -1686,6 +1719,22 @@ async function simpanManual() {
       return;
     }
     if (!confirm(`${g.nama} belum tercatat absen masuk hari ini. Tetap simpan absen pulang tanpa masuk?`)) return;
+  }
+
+  // Cegah status ganda yang saling bertentangan di hari yang sama (mis.
+  // tercatat Izin sekaligus Sakit, atau Masuk sekaligus Sakit). Kalau
+  // Admin/Kepsek mengonfirmasi override — mis. mengoreksi Alpha jadi Sakit
+  // setelah keluarga lapor sore hari — status LAMA yang konflik dihapus
+  // dan DIGANTI status baru, bukan ditambahkan berdampingan dengan yang lama.
+  const konflik = cekKonflikStatus(guruId, tipe);
+  if (konflik.length) {
+    const daftar = konflik.join(', ');
+    if (state.role === 'guru') {
+      toast(`⚠️ ${g.nama} sudah tercatat "${daftar}" hari ini — tidak bisa juga input "${tipe}"`, 'warn');
+      return;
+    }
+    if (!confirm(`${g.nama} sudah tercatat "${daftar}" hari ini. Ganti dengan "${tipe}"? (Status lama akan dihapus & digantikan)`)) return;
+    keysToDelete = konflik.map(t => `${guruId}_${t}`);
   }
 
   let status = $('mg-status')?.value || 'hadir';
@@ -1717,7 +1766,13 @@ async function simpanManual() {
     }
   }
 
-  DB.ref(`absensi/${tgl}/${key}`).set({
+  // Hapus status lama yang konflik dulu (kalau ada), baru simpan yang baru —
+  // supaya jadi "ganti", bukan "tambah di samping" status lama.
+  const hapusLama = keysToDelete.length
+    ? Promise.all(keysToDelete.map(k => DB.ref(`absensi/${tgl}/${k}`).remove()))
+    : Promise.resolve();
+
+  hapusLama.then(() => DB.ref(`absensi/${tgl}/${key}`).set({
     guruId, nama: g.nama, mapel: g.mapel || '',
     waktu: nowHM(), status, tipe,
     metode: 'manual', keterangan: ket,
@@ -1725,8 +1780,8 @@ async function simpanManual() {
     createdAt: firebase.database.ServerValue.TIMESTAMP,
     createdBy: state.role,
     perluVerifikasiLokasi: lok.needsVerification,
-  }).then(() => {
-    toast(`✅ Absensi ${tipe} ${g.nama} disimpan`, 'ok');
+  })).then(() => {
+    toast(`✅ Absensi ${tipe} ${g.nama} disimpan${keysToDelete.length ? ' (menggantikan status lama)' : ''}`, 'ok');
     resetManual();
   }).catch(() => toast('❌ Gagal menyimpan', 'err'));
 }
@@ -1868,6 +1923,13 @@ function hapusAbsensi() {
 }
 
 // ── Alpha Otomatis ────────────────────────
+// ⚠️ KETERBATASAN: fungsi ini berjalan lewat setInterval di BROWSER, bukan
+// di server. Artinya auto-Alpha hanya benar-benar terpicu kalau ADA
+// perangkat yang sedang membuka aplikasi tepat di menit jam_alpha. Kalau
+// tidak ada satu pun perangkat online saat itu, auto-Alpha hari itu tidak
+// akan berjalan sama sekali. Perbaikan sesungguhnya butuh Cloud Function
+// terjadwal (di luar cakupan aplikasi statis ini) — dicatat sebagai item
+// jangka menengah di Risk Map / Change Guide.
 function scheduleAlpha() {
   setInterval(() => {
     if (isWeekend()) return;
@@ -1882,7 +1944,7 @@ function scheduleAlpha() {
           guruId: id, nama: g.nama, mapel: g.mapel || '',
           waktu: state.JAM.jam_alpha, status: 'alpha',
           tipe: 'masuk', metode: 'otomatis',
-          tanggal: today(), createdAt: Date.now(), createdBy: 'system',
+          tanggal: today(), createdAt: firebase.database.ServerValue.TIMESTAMP, createdBy: 'system',
         });
       }
     });
