@@ -2133,13 +2133,26 @@ function renderHarian(gl, data) {
       ? `<span onclick="event.stopPropagation();window._app.openEdit('${esc(id + '_pulang')}')" style="cursor:pointer;text-decoration:underline dotted" title="Klik untuk edit/hapus absen pulang">${pulang}</span>`
       : pulang;
 
+    // Badge status Izin/Sakit/Alpha kini juga bisa diklik untuk edit/hapus —
+    // sebelumnya sama sekali tidak ada cara mengedit/menghapus entri jenis
+    // ini lewat tabel Rekap (harus lewat Firebase Console langsung).
+    let statusKey = null;
+    if (al) statusKey = `${id}_alpha`;
+    else if (iz) statusKey = `${id}_izin`;
+    else if (sk) statusKey = `${id}_sakit`;
+    const statusClickable = canEditBase && statusKey;
+    const badge = `<span class="bdg ${sc}">${st}</span>`;
+    const statusCell = statusClickable
+      ? `<span onclick="event.stopPropagation();window._app.openEdit('${esc(statusKey)}')" style="cursor:pointer" title="Klik untuk edit/hapus">${badge}</span>`
+      : badge;
+
     return `<tr>
       <td style="color:var(--tx3)">${i + 1}</td>
       <td><b>${esc(g.nama)}</b><br>
           <span style="font-size:10px;color:var(--tx3)">${esc(g.mapel || '')}</span></td>
       <td>${masukCell}</td>
       <td>${pulangCell}</td>
-      <td><span class="bdg ${sc}">${st}</span>${(mk && mk.perluVerifikasiLokasi) ? ' <span title="GPS gagal saat absen masuk — lokasi belum terverifikasi">📍</span>' : ''}</td>
+      <td>${statusCell}${(mk && mk.perluVerifikasiLokasi) ? ' <span title="GPS gagal saat absen masuk — lokasi belum terverifikasi">📍</span>' : ''}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(ket)}</td>
     </tr>`;
   }).join('');
