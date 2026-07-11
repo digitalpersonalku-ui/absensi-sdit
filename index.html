@@ -397,12 +397,6 @@ tbody tr:hover{background:rgba(255,107,53,.03)}
 </style>
 
 <!-- Library eksternal (harus load sebelum module) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -574,6 +568,45 @@ const san = s => s ? String(s).replace(/[<>"'`]/g, '').trim().slice(0, 300) : ''
 function serverNow() {
   return new Date(Date.now() + (state.serverTimeOffset || 0));
 }
+
+// ── Lazy-load library berat ────────────────
+// Beberapa fitur (Excel, ID Card, Scan QR, crop foto) memakai library pihak
+// ketiga yang cukup besar (>1MB total kalau digabung). Supaya aplikasi tetap
+// ringan & cepat dibuka untuk kasus paling umum (guru cuma mau lihat
+// Dashboard atau absen sekali klik), library-library ini dimuat hanya saat
+// fiturnya benar-benar dipakai, bukan sekaligus di awal.
+const _loadedScripts = {};
+function loadScript(src) {
+  if (_loadedScripts[src]) return _loadedScripts[src];
+  _loadedScripts[src] = new Promise((resolve, reject) => {
+    const el = document.createElement('script');
+    el.src = src;
+    el.onload = resolve;
+    el.onerror = () => { delete _loadedScripts[src]; reject(new Error('Gagal memuat ' + src)); };
+    document.head.appendChild(el);
+  });
+  return _loadedScripts[src];
+}
+function loadCSS(href) {
+  if (_loadedScripts[href]) return _loadedScripts[href];
+  _loadedScripts[href] = new Promise((resolve, reject) => {
+    const el = document.createElement('link');
+    el.rel = 'stylesheet';
+    el.href = href;
+    el.onload = resolve;
+    el.onerror = () => { delete _loadedScripts[href]; reject(new Error('Gagal memuat ' + href)); };
+    document.head.appendChild(el);
+  });
+  return _loadedScripts[href];
+}
+const LIB = {
+  cropperJS:  'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js',
+  cropperCSS: 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css',
+  qrcode:     'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+  html2canvas:'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+  html5qr:    'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
+  xlsx:       'https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js',
+};
 
 // Escape HTML — untuk ditampilkan di DOM
 const esc = s => s
@@ -1303,11 +1336,21 @@ function hapusGuru(id, nama) {
 // ── Upload & Crop Foto ─────────────────────
 let _cropper = null;
 
-function handleFoto(input) {
+async function handleFoto(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 5 * 1024 * 1024) { toast('Foto maksimal 5MB', 'warn'); return; }
   if (!file.type.startsWith('image/')) { toast('File harus berupa gambar', 'warn'); return; }
+
+  if (typeof Cropper === 'undefined') {
+    toast('⏳ Memuat modul crop foto...', 'info', 3000);
+    try {
+      await Promise.all([loadCSS(LIB.cropperCSS), loadScript(LIB.cropperJS)]);
+    } catch (e) {
+      toast('❌ Gagal memuat modul crop, cek koneksi internet', 'err');
+      return;
+    }
+  }
 
   const reader = new FileReader();
   reader.onload = e => {
@@ -1319,10 +1362,6 @@ function handleFoto(input) {
     // Tunggu gambar benar-benar termuat sebelum Cropper dipasang
     img.onload = () => {
       if (_cropper) { _cropper.destroy(); _cropper = null; }
-      if (typeof Cropper === 'undefined') {
-        toast('❌ Modul crop gagal dimuat, cek koneksi internet', 'err');
-        return;
-      }
       _cropper = new Cropper(img, {
         aspectRatio: 4 / 5,      // rasio potret, serasi dengan foto di ID Card
         viewMode: 1,
@@ -1953,10 +1992,16 @@ function scheduleAlpha() {
 }
 
 // ── Scanner QR ────────────────────────────
-function startScanner(tipe) {
+async function startScanner(tipe) {
   $('scan-ttl').textContent = `📷 Scan — Absen ${tipe === 'masuk' ? 'Masuk' : 'Pulang'}`;
   $('scan-sub').textContent = 'Arahkan kamera ke QR Code ID Card guru';
   $('scan-res').style.display = 'none';
+
+  if (typeof Html5Qrcode === 'undefined') {
+    toast('⏳ Memuat modul scanner...', 'info', 3000);
+    try { await loadScript(LIB.html5qr); }
+    catch (e) { toast('❌ Gagal memuat modul scanner, cek koneksi internet', 'err'); return; }
+  }
 
   if (_scanner) { try { _scanner.stop(); } catch (e) {} }
   _scanner = new Html5Qrcode('qr-reader');
@@ -2263,10 +2308,16 @@ function eksporCSV() {
 }
 
 // ── EXPORT EXCEL ──────────────────────────
-function eksporExcel() {
+async function eksporExcel() {
   const tgl = $('r-tgl')?.value || today();
   const gl  = guruAktif();
   if (!gl.length) { toast('Belum ada data guru', 'warn'); return; }
+
+  if (typeof XLSX === 'undefined') {
+    toast('⏳ Memuat modul Excel...', 'info', 3000);
+    try { await loadScript(LIB.xlsx); }
+    catch (e) { toast('❌ Gagal memuat modul Excel, cek koneksi internet', 'err'); return; }
+  }
 
   const wb   = XLSX.utils.book_new();
   const hdrs = ['No','Nama Guru','Mata Pelajaran','Jam Masuk','Jam Pulang','Status','Keterangan'];
@@ -2326,11 +2377,17 @@ function eksporExcel() {
   toast('✅ Excel berhasil diunduh', 'ok');
 }
 // ─── EXPORT EXCEL BULANAN (format laporan seperti gambar) ───
-function eksporExcelBulanan() {
+async function eksporExcelBulanan() {
   const bln = parseInt($('r-bln')?.value || new Date().getMonth() + 1);
   const thn = parseInt($('r-thn-b')?.value || new Date().getFullYear());
   const gl  = guruAktif();
   if (!gl.length) { toast('Belum ada data guru', 'warn'); return; }
+
+  if (typeof XLSX === 'undefined') {
+    toast('⏳ Memuat modul Excel...', 'info', 3000);
+    try { await loadScript(LIB.xlsx); }
+    catch (e) { toast('❌ Gagal memuat modul Excel, cek koneksi internet', 'err'); return; }
+  }
 
   const namaBln = ['','Januari','Februari','Maret','April','Mei','Juni',
     'Juli','Agustus','September','Oktober','November','Desember'];
@@ -2782,13 +2839,18 @@ function cetakPDF() {
 // ─────────────────────────────────────────
 
 // ── Buat ID Card untuk guru terpilih ──────
-function buatIDCard() {
+async function buatIDCard() {
   const id   = $('qr-sel')?.value;
   const disp = $('qr-disp');
   if (!id) { if (disp) disp.style.display = 'none'; return; }
 
   const g  = state.guruData[id];
   if (!g) return;
+
+  if (typeof QRCode === 'undefined') {
+    try { await loadScript(LIB.qrcode); }
+    catch (e) { toast('❌ Gagal memuat modul QR, cek koneksi internet', 'err'); return; }
+  }
 
   if (disp) disp.style.display = 'flex';
 
@@ -3021,8 +3083,9 @@ async function unduhIDCard() {
   const nama = state.guruData[id]?.nama?.replace(/[^a-zA-Z0-9]/g, '_') || 'idcard';
 
   if (typeof html2canvas === 'undefined') {
-    toast('❌ Gagal memuat modul gambar. Coba lagi atau cek koneksi internet.', 'err');
-    return;
+    toast('⏳ Memuat modul gambar...', 'info', 3000);
+    try { await loadScript(LIB.html2canvas); }
+    catch (e) { toast('❌ Gagal memuat modul gambar, cek koneksi internet', 'err'); return; }
   }
 
   toast('⏳ Menyiapkan gambar ID Card...', 'info', 4000);
