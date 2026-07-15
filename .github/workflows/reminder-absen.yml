@@ -1,0 +1,29 @@
+name: Reminder Absen
+
+on:
+  schedule:
+    # Tiap 15 menit, jam 00:00–06:59 UTC = 07:00–13:59 WIB, Senin–Sabtu (UTC).
+    # Skrip sendiri yang menentukan waktu tepatnya (30 menit sebelum
+    # setting/jam/maxmasuk) — jadwal cron ini cuma jadwal "pengecekan".
+    - cron: '*/15 0-6 * * 1-6'
+  workflow_dispatch: {} # supaya bisa dites manual lewat tab Actions di GitHub
+
+jobs:
+  reminder-absen:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install firebase-admin
+        run: npm install firebase-admin --no-save
+
+      - name: Jalankan pengiriman reminder
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node .github/scripts/reminder-absen.js
