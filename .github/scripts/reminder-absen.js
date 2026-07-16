@@ -53,9 +53,9 @@ async function main() {
     process.exit(1);
   }
   admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(serviceAccountJson)),
-    databaseURL: DB_URL,
-  });
+  credential: cert(JSON.parse(serviceAccountJson)), // <-- UBAH JADI SEPERTI INI
+  databaseURL: DB_URL,
+});
   const db = admin.database();
   const messaging = admin.messaging();
 
