@@ -13,9 +13,9 @@ const FB_CONFIG = {
   authDomain: "absensi-sdit.firebaseapp.com",
   databaseURL: "https://absensi-sdit-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "absensi-sdit",
-  storageBucket: "absensi-sdit.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:000000"
+  storageBucket: "absensi-sdit.firebasestorage.app",
+  messagingSenderId: "179050530066",
+  appId: "1:179050530066:web:b35c07d59c435365bb5fcb"
 };
 
 // Role labels & icons
