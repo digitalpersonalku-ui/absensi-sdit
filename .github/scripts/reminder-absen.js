@@ -10,8 +10,7 @@
 // FIREBASE_SERVICE_ACCOUNT — TIDAK PERNAH ditulis langsung di kode ini.
 
 const admin = require('firebase-admin');
-const admin = require('firebase-admin');
-const { cert } = require('firebase-admin/app'); // <-- TAMBAHKAN BARIS INI
+const { cert } = require('firebase-admin/app');
 const DB_URL = 'https://absensi-sdit-default-rtdb.asia-southeast1.firebasedatabase.app';
 const TZ = 'Asia/Jakarta';
 const MENIT_SEBELUM_BATAS = 30; // kirim reminder 30 menit sebelum jam.maxmasuk
