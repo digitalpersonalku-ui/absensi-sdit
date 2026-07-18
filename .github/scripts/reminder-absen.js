@@ -15,6 +15,8 @@ const DB_URL = 'https://absensi-sdit-default-rtdb.asia-southeast1.firebasedataba
 const TZ = 'Asia/Jakarta';
 const MENIT_SEBELUM_BATAS = 30; // kirim reminder 30 menit sebelum jam.maxmasuk
 
+// ... sisanya sama persis, tidak ada perubahan lain
+
 function nowJakarta() {
   return new Date(new Date().toLocaleString('en-US', { timeZone: TZ }));
 }
