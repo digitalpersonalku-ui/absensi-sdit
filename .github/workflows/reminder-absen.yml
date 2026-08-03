@@ -21,7 +21,7 @@ jobs:
           node-version: '22'
 
       - name: Install firebase-admin
-        run: npm install firebase-admin --no-save
+        run: npm install firebase-admin @firebase/app --no-save
 
       - name: Jalankan pengiriman reminder
         env:
