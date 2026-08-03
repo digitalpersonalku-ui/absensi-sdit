@@ -9,8 +9,9 @@
 // absensi biasa). Kredensial disimpan sebagai GitHub Secret bernama
 // FIREBASE_SERVICE_ACCOUNT — TIDAK PERNAH ditulis langsung di kode ini.
 
-const admin = require('firebase-admin');
-const { cert } = require('firebase-admin/app');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getDatabase } = require('firebase-admin/database');
+const { getMessaging } = require('firebase-admin/messaging');
 const DB_URL = 'https://absensi-sdit-default-rtdb.asia-southeast1.firebasedatabase.app';
 const TZ = 'Asia/Jakarta';
 const MENIT_SEBELUM_BATAS = 30; // kirim reminder 30 menit sebelum jam.maxmasuk
@@ -53,12 +54,12 @@ async function main() {
     console.error('[reminder-absen] FIREBASE_SERVICE_ACCOUNT belum diset di GitHub Secrets. Berhenti.');
     process.exit(1);
   }
-  admin.initializeApp({
-  credential: cert(JSON.parse(serviceAccountJson)), // <-- UBAH JADI SEPERTI INI
-  databaseURL: DB_URL,
-});
-  const db = admin.database();
-  const messaging = admin.messaging();
+  const app = initializeApp({
+    credential: cert(JSON.parse(serviceAccountJson)),
+    databaseURL: DB_URL,
+  });
+  const db = getDatabase(app);
+  const messaging = getMessaging(app);
 
   const jamSnap = await db.ref('setting/jam/maxmasuk').once('value');
   const maxmasuk = jamSnap.val();
