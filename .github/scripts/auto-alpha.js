@@ -13,7 +13,18 @@ const DB_URL = 'https://absensi-sdit-default-rtdb.asia-southeast1.firebasedataba
 const TZ = 'Asia/Jakarta';
 
 function nowJakarta() {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: TZ }));
+  // PENTING: sebelumnya pakai toLocaleString() + re-parse, yang ternyata
+  // bisa meleset (pernah terdeteksi selisih 1 jam) tergantung dukungan
+  // data zona waktu (ICU) di lingkungan Node.js yang menjalankannya —
+  // beda runner/versi Node bisa beda hasil, sangat tidak bisa diandalkan
+  // untuk keperluan jadwal seperti ini.
+  //
+  // Solusi lebih aman: karena WIB SELALU UTC+7 sepanjang tahun (Indonesia
+  // tidak menerapkan daylight saving time), cukup tambahkan 7 jam
+  // langsung ke waktu UTC — perhitungan matematis murni, tidak bergantung
+  // sama sekali pada database zona waktu apa pun.
+  const utc = new Date();
+  return new Date(utc.getTime() + 7 * 60 * 60 * 1000);
 }
 
 function todayStr() {
