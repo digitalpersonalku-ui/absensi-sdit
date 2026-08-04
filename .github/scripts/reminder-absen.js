@@ -139,7 +139,18 @@ async function main() {
   console.log('[reminder-absen] Selesai.');
 }
 
-main().catch(err => {
-  console.error('[reminder-absen] ERROR:', err);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    // PENTING: Firebase Admin SDK membuka koneksi realtime ke Database
+    // (mirip WebSocket) yang TIDAK otomatis tertutup sendiri walau kode
+    // kita sudah selesai. Tanpa process.exit(0) di sini, Node.js akan
+    // menunggu selamanya sampai koneksi itu "mati sendiri" — yang
+    // ternyata tidak pernah terjadi, sehingga proses macet sampai
+    // GitHub Actions terpaksa menghentikan paksa di batas 6 jam.
+    console.log('[reminder-absen] Proses ditutup dengan sukses.');
+    process.exit(0);
+  })
+  .catch(err => {
+    console.error('[reminder-absen] ERROR:', err);
+    process.exit(1);
+  });
