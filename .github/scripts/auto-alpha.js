@@ -43,6 +43,10 @@ function isWeekend() {
   return day === 0 || day === 6;
 }
 
+function isJumat() {
+  return nowJakarta().getDay() === 5;
+}
+
 function toMin(t) {
   if (!t) return null;
   const [h, m] = String(t).split(':').map(Number);
@@ -60,6 +64,15 @@ async function main() {
 
   if (isWeekend()) {
     console.log('[auto-alpha] Hari libur (Sabtu/Minggu). Selesai, tidak ada tindakan.');
+    return;
+  }
+
+  // Cek hari libur khusus (hari besar/libur nasional) yang diisi Admin
+  // lewat Setting → Hari Libur Khusus. Formatnya: { "2026-08-17": "label" }
+  const tglHariIni = todayStr();
+  const liburKhusus = await getJSON('/setting/liburKhusus').then(v => v || {});
+  if (liburKhusus[tglHariIni]) {
+    console.log(`[auto-alpha] Hari libur khusus: "${liburKhusus[tglHariIni]}". Selesai, tidak ada tindakan.`);
     return;
   }
 
@@ -89,6 +102,10 @@ async function main() {
 
   const perluDitandai = Object.entries(guruData).filter(([id, g]) => {
     if ((g.status || 'aktif') !== 'aktif') return false;
+    // Guru dengan wajibJumat=false (mis. guru mengaji yang cuma wajib
+    // Senin-Kamis) tidak ditandai Alpha di hari Jumat — konsisten dengan
+    // logika calcStat() di aplikasi utama yang juga mengecualikan mereka.
+    if (isJumat() && g.wajibJumat === false) return false;
     return !absensiData[`${id}_masuk`];
   });
 

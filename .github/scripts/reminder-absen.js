@@ -40,6 +40,9 @@ function isWeekend() {
   const day = nowJakarta().getDay();
   return day === 0 || day === 6;
 }
+function isJumat() {
+  return nowJakarta().getDay() === 5;
+}
 function toMin(t) {
   if (!t) return null;
   const [h, m] = String(t).split(':').map(Number);
@@ -72,6 +75,15 @@ async function main() {
   const db = getDatabase(app);
   const messaging = getMessaging(app);
 
+  // Cek hari libur khusus (hari besar/libur nasional) yang diisi Admin
+  // lewat Setting → Hari Libur Khusus.
+  const tglCek = todayStr();
+  const liburSnap = await db.ref(`setting/liburKhusus/${tglCek}`).once('value');
+  if (liburSnap.exists()) {
+    console.log(`[reminder-absen] Hari libur khusus: "${liburSnap.val()}". Selesai.`);
+    return;
+  }
+
   const jamSnap = await db.ref('setting/jam/maxmasuk').once('value');
   const maxmasuk = jamSnap.val();
   if (!maxmasuk) {
@@ -101,6 +113,7 @@ async function main() {
 
   const perluDiingatkan = Object.entries(guruData)
     .filter(([id, g]) => (g.status || 'aktif') === 'aktif')
+    .filter(([id, g]) => !(isJumat() && g.wajibJumat === false)) // lihat auto-alpha.js untuk penjelasan
     .filter(([id]) => !absensiData[`${id}_masuk`]) // sudah absen, tidak perlu diingatkan
     .filter(([id]) => !!tokenData[id])              // belum aktifkan notifikasi
     .map(([id, g]) => [id, { ...g, fcmToken: tokenData[id] }]);
